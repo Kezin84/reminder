@@ -1,0 +1,238 @@
+// ============================================================
+//  REPORT SHEET - APPSCRIPT BACKEND
+//  Columns: ID | PHAN_LOAI | THOI_GIAN | NOI_DUNG | GHI_CHU | TAG | TRANG_THAI
+//  Tối ưu tốc độ real-time: cache + batch write
+// ============================================================
+
+const SHEET_NAME = "REPORT";
+const CACHE_KEY  = "report_cache";
+const CACHE_TTL  = 25; // giây – dưới ngưỡng 30s của CacheService
+
+// ─────────────────────────────────────────────────────────────
+//  HELPER: lấy sheet
+// ─────────────────────────────────────────────────────────────
+function getSheet() {
+  return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  HELPER: format thời gian  →  "19:00 /4 /21/4/2026"
+//  (HH:MM /thứ /DD/MM/YYYY)
+// ─────────────────────────────────────────────────────────────
+function formatTime(date) {
+  const d = date || new Date();
+  const pad = n => String(n).padStart(2, "0");
+  const thu = d.getDay(); // 0=CN,1=T2,...
+  const thuLabel = thu === 0 ? 8 : thu + 1; // 2-8 (CN=8)
+  return `${pad(d.getHours())}:${pad(d.getMinutes())} /${thuLabel} /${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  HELPER: tạo ID tự động  →  RPT_YYYYMMDD_HHmmssSSS
+// ─────────────────────────────────────────────────────────────
+function genID() {
+  const d = new Date();
+  const pad = (n, l=2) => String(n).padStart(l, "0");
+  return `RPT_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}${pad(d.getMilliseconds(),3)}`;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  INVALIDATE CACHE
+// ─────────────────────────────────────────────────────────────
+function invalidateCache() {
+  CacheService.getScriptCache().remove(CACHE_KEY);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  GET: đọc toàn bộ data – ưu tiên cache
+// ─────────────────────────────────────────────────────────────
+function getData(params) {
+  const cache = CacheService.getScriptCache();
+
+  // --- filter params ---
+  const filterTag      = params.tag        || null;
+  const filterCategory = params.phan_loai  || null;
+  const filterDate     = params.date       || null; // "21/4/2026"
+  const filterStatus   = params.trang_thai || null;
+  const limit          = parseInt(params.limit) || 0;
+  const offset         = parseInt(params.offset) || 0;
+
+  // Nếu có filter → bỏ qua cache (cần fresh data hoặc cache riêng)
+  const useCache = !filterTag && !filterCategory && !filterDate && !filterStatus && !limit;
+
+  if (useCache) {
+    const cached = cache.get(CACHE_KEY);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+  }
+
+  // --- đọc sheet ---
+  const sheet = getSheet();
+  const lastRow = sheet.getLastRow();
+
+  if (lastRow < 2) {
+    const empty = { status: "success", total: 0, data: [] };
+    if (useCache) cache.put(CACHE_KEY, JSON.stringify(empty), CACHE_TTL);
+    return empty;
+  }
+
+  // Lấy tất cả dữ liệu 1 lần (tránh loop getRange từng row)
+  const range  = sheet.getRange(2, 1, lastRow - 1, 7);
+  const values = range.getValues();
+
+  let rows = values
+    .filter(r => r[0] !== "") // bỏ row rỗng
+    .map(r => ({
+      id          : r[0],
+      phan_loai   : r[1],
+      thoi_gian   : r[2],
+      noi_dung    : r[3],
+      ghi_chu     : r[4],
+      tag         : r[5],
+      trang_thai  : r[6]
+    }));
+
+  // --- apply filters ---
+  if (filterTag)      rows = rows.filter(r => String(r.tag).toLowerCase().includes(filterTag.toLowerCase()));
+  if (filterCategory) rows = rows.filter(r => String(r.phan_loai).toLowerCase() === filterCategory.toLowerCase());
+  if (filterDate)     rows = rows.filter(r => String(r.thoi_gian).includes(filterDate));
+  if (filterStatus)   rows = rows.filter(r => String(r.trang_thai).toLowerCase() === filterStatus.toLowerCase());
+
+  // --- sort mới nhất lên trên ---
+  rows.reverse();
+
+  const total = rows.length;
+
+  // --- pagination ---
+  if (limit > 0) rows = rows.slice(offset, offset + limit);
+
+  const result = { status: "success", total, offset, limit, data: rows };
+
+  if (useCache) cache.put(CACHE_KEY, JSON.stringify(result), CACHE_TTL);
+  return result;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  POST: thêm / sửa / xoá
+// ─────────────────────────────────────────────────────────────
+function postData(payload) {
+  const action = (payload.action || "add").toLowerCase();
+
+  if (action === "add")    return addRow(payload);
+  if (action === "update") return updateRow(payload);
+  if (action === "delete") return deleteRow(payload);
+
+  return { status: "error", message: "action không hợp lệ. Dùng: add | update | delete" };
+}
+
+// --- ADD ---
+function addRow(p) {
+  if (!p.noi_dung) return { status: "error", message: "noi_dung là bắt buộc" };
+
+  const sheet = getSheet();
+  const id    = p.id || genID();
+  const time  = p.thoi_gian || formatTime(new Date());
+
+  sheet.appendRow([
+    id,
+    p.phan_loai  || "",
+    time,
+    p.noi_dung,
+    p.ghi_chu    || "",
+    p.tag        || "",
+    p.trang_thai || ""
+  ]);
+
+  invalidateCache();
+  return { status: "success", action: "add", id, thoi_gian: time };
+}
+
+// --- UPDATE ---
+function updateRow(p) {
+  if (!p.id) return { status: "error", message: "id là bắt buộc để update" };
+
+  const sheet   = getSheet();
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return { status: "error", message: "Sheet rỗng" };
+
+  const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues().flat();
+  const idx = ids.indexOf(p.id);
+
+  if (idx === -1) return { status: "error", message: `Không tìm thấy ID: ${p.id}` };
+
+  const rowNum = idx + 2;
+  const row    = sheet.getRange(rowNum, 1, 1, 7).getValues()[0];
+
+  sheet.getRange(rowNum, 1, 1, 7).setValues([[
+    row[0],
+    p.phan_loai  !== undefined ? p.phan_loai  : row[1],
+    p.thoi_gian  !== undefined ? p.thoi_gian  : row[2],
+    p.noi_dung   !== undefined ? p.noi_dung   : row[3],
+    p.ghi_chu    !== undefined ? p.ghi_chu    : row[4],
+    p.tag        !== undefined ? p.tag        : row[5],
+    p.trang_thai !== undefined ? p.trang_thai : row[6]
+  ]]);
+
+  invalidateCache();
+  return { status: "success", action: "update", id: p.id };
+}
+
+// --- DELETE ---
+function deleteRow(p) {
+  if (!p.id) return { status: "error", message: "id là bắt buộc để delete" };
+
+  const sheet   = getSheet();
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return { status: "error", message: "Sheet rỗng" };
+
+  const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues().flat();
+  const idx = ids.indexOf(p.id);
+
+  if (idx === -1) return { status: "error", message: `Không tìm thấy ID: ${p.id}` };
+
+  sheet.deleteRow(idx + 2);
+  invalidateCache();
+  return { status: "success", action: "delete", id: p.id };
+}
+
+// ─────────────────────────────────────────────────────────────
+//  doGet  –  ?action=get&tag=xxx&limit=20&offset=0
+//  ?action=delete&id=RPT_xxx  (xoá qua GET nếu cần)
+// ─────────────────────────────────────────────────────────────
+function doGet(e) {
+  const params = e.parameter || {};
+  let result;
+
+  try {
+    if (params.action === "delete") {
+      result = deleteRow(params);
+    } else {
+      result = getData(params);
+    }
+  } catch (err) {
+    result = { status: "error", message: err.message };
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  doPost  –  body JSON: { action, ...fields }
+// ─────────────────────────────────────────────────────────────
+function doPost(e) {
+  let result;
+
+  try {
+    const payload = JSON.parse(e.postData.contents || "{}");
+    result = postData(payload);
+  } catch (err) {
+    result = { status: "error", message: err.message };
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
