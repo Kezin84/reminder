@@ -445,38 +445,39 @@
     </div>
 
     <!-- Modal Chọn Tháng/Năm Tải Excel -->
-    <div class="modal-overlay" v-if="isExportModalOpen" @click.self="isExportModalOpen = false">
-      <div class="modal" style="max-width: 400px;">
-        <div class="modal-header">
-          <h2>Tải Báo Cáo Excel</h2>
-          <button class="btn-close" @click="isExportModalOpen = false">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    <div class="elite-modal-overlay" v-if="isExportModalOpen" @click.self="isExportModalOpen = false">
+      <div class="elite-modal" style="max-width: 420px;">
+        <div class="elite-modal-header">
+          <div class="elite-modal-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <h2>Tải Báo Cáo Excel</h2>
+          </div>
+          <button class="elite-btn-close" @click="isExportModalOpen = false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
-        <div class="form-group row">
-          <div class="col">
-            <label>Tháng</label>
-            <div class="select-wrapper">
-              <select v-model="exportInputs.month">
+        <div class="elite-modal-body">
+          <div class="elite-form-row" style="gap: 1rem;">
+            <div class="elite-form-group" style="flex: 1;">
+              <label>Tháng</label>
+              <select v-model="exportInputs.month" class="elite-select">
                 <option v-for="m in 12" :key="m" :value="String(m).padStart(2, '0')">Tháng {{ m }}</option>
               </select>
             </div>
-          </div>
-          <div class="col">
-            <label>Năm</label>
-            <div class="select-wrapper">
-              <select v-model="exportInputs.year">
+            <div class="elite-form-group" style="flex: 1;">
+              <label>Năm</label>
+              <select v-model="exportInputs.year" class="elite-select">
                 <option v-for="y in 20" :key="y" :value="String(2023 + y)">{{ 2023 + y }}</option>
               </select>
             </div>
           </div>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn-cancel" @click="isExportModalOpen = false">Huỷ Bỏ</button>
-          <button type="button" class="btn-primary" @click="doExportExcel">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            Tải Xuống
-          </button>
+          <div class="elite-modal-actions">
+            <button type="button" class="elite-btn-cancel" @click="isExportModalOpen = false">Huỷ Bỏ</button>
+            <button type="button" class="elite-btn-primary" @click="doExportExcel">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Tải Xuống
+            </button>
+          </div>
         </div>
       </div>
     </div>
