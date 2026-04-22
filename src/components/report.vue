@@ -17,148 +17,218 @@
       </div>
     </header>
 
+    <!-- Elite Filters -->
+    <div class="elite-filter-panel">
+      <div class="elite-filter-accent"></div>
+      <div class="elite-filter-header">
+        <div class="elite-filter-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+          <span>Bộ lọc nâng cao</span>
+        </div>
+        <button class="elite-refresh-btn" @click="fetchReports">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2v6h6M21.5 22v-6h-6"/><path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.2"/></svg>
+          Làm mới
+        </button>
+      </div>
+
+      <div class="elite-filter-body">
+        <div class="elite-filter-row">
+          <div class="elite-date-group group-tabs" style="flex: 0 0 auto; min-width: auto; max-width: none;">
+            <label style="opacity: 0; user-select: none;" class="mobile-hidden-label">Chế độ</label>
+            <div class="elite-mode-tabs">
+              <button type="button" :class="{ active: filters.filterMode === 'day' }" @click="filters.filterMode = 'day'">Ngày</button>
+              <button type="button" :class="{ active: filters.filterMode === 'month' }" @click="filters.filterMode = 'month'">Tháng</button>
+              <button type="button" :class="{ active: filters.filterMode === 'year' }" @click="filters.filterMode = 'year'">Năm</button>
+            </div>
+          </div>
+
+          <div class="elite-date-group group-period" style="min-width: 90px; max-width: 120px;">
+            <label>Buổi</label>
+            <CustomSelect v-model="filters.period" :options="periodOptions" />
+          </div>
+
+          <template v-if="filters.filterMode === 'day'">
+            <div class="elite-date-group group-date">
+              <label>Từ ngày</label>
+              <input type="date" v-model="filters.dateFrom" :max="filters.dateTo" @change="fetchReports" @click="e => e.target.showPicker && e.target.showPicker()" class="elite-input" />
+            </div>
+            <span class="elite-range-sep">→</span>
+            <div class="elite-date-group group-date">
+              <label>Đến ngày</label>
+              <input type="date" v-model="filters.dateTo" :min="filters.dateFrom" @change="fetchReports" @click="e => e.target.showPicker && e.target.showPicker()" class="elite-input" />
+            </div>
+          </template>
+
+          <template v-if="filters.filterMode === 'month'">
+            <div class="elite-date-group group-date">
+              <label>Từ tháng</label>
+              <input type="month" v-model="filters.monthFrom" :max="filters.monthTo" @change="fetchReports" @click="e => e.target.showPicker && e.target.showPicker()" class="elite-input" />
+            </div>
+            <span class="elite-range-sep">→</span>
+            <div class="elite-date-group group-date">
+              <label>Đến tháng</label>
+              <input type="month" v-model="filters.monthTo" :min="filters.monthFrom" @change="fetchReports" @click="e => e.target.showPicker && e.target.showPicker()" class="elite-input" />
+            </div>
+          </template>
+
+          <template v-if="filters.filterMode === 'year'">
+            <div class="elite-date-group group-date">
+              <label>Từ năm</label>
+              <input type="number" v-model="filters.yearFrom" :max="filters.yearTo" @change="fetchReports" placeholder="2024" class="elite-input" />
+            </div>
+            <span class="elite-range-sep">→</span>
+            <div class="elite-date-group group-date">
+              <label>Đến năm</label>
+              <input type="number" v-model="filters.yearTo" :min="filters.yearFrom" @change="fetchReports" placeholder="2025" class="elite-input" />
+            </div>
+          </template>
+        </div>
+
+        <div class="elite-filter-divider"></div>
+
+        <div class="elite-filter-row">
+          <div class="elite-select-group">
+            <label>Sắp xếp</label>
+            <CustomSelect v-model="filters.sortOrder" :options="sortOptions" />
+          </div>
+          <div class="elite-select-group">
+            <label>Độ quan trọng</label>
+            <CustomSelect v-model="filters.tag" :options="priorityOptions" />
+          </div>
+          <div class="elite-select-group">
+            <label>Phân loại</label>
+            <CustomSelect v-model="filters.phan_loai" :options="typeOptions" />
+          </div>
+          <div class="elite-select-group">
+            <label>Trạng thái</label>
+            <CustomSelect v-model="filters.trang_thai" :options="statusOptions" />
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Thẻ thống kê -->
     <div class="stats-row">
-      <div class="stat-card">
+      <div class="stat-card card-total" 
+           :class="{ 'elite-active': filters.trang_thai === 'Tất cả' || !filters.trang_thai }"
+           @click="filters.trang_thai = 'Tất cả'">
         <div class="stat-icon total">
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
         </div>
         <div class="stat-info">
-          <span class="stat-value">{{ filteredReports.length }}</span>
           <span class="stat-label">Tổng cộng</span>
+          <span class="stat-value">{{ filteredReports.length }} <span class="unit-text">việc</span></span>
         </div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card card-pending" 
+           :class="{ 'elite-active': filters.trang_thai === 'Chưa xử lý' }"
+           @click="filters.trang_thai = 'Chưa xử lý'">
         <div class="stat-icon pending">
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
         </div>
         <div class="stat-info">
-          <span class="stat-value">{{ pendingCount }}</span>
           <span class="stat-label">Chưa hoàn thành</span>
+          <span class="stat-value">{{ pendingCount }} <span class="unit-text">việc</span></span>
         </div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card card-done" 
+           :class="{ 'elite-active': filters.trang_thai === 'Hoàn thành' }"
+           @click="filters.trang_thai = 'Hoàn thành'">
         <div class="stat-icon done">
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         </div>
         <div class="stat-info">
-          <span class="stat-value">{{ completedCount }}</span>
           <span class="stat-label">Đã hoàn thành</span>
+          <span class="stat-value">{{ completedCount }} <span class="unit-text">việc</span></span>
         </div>
       </div>
     </div>
 
-    <div class="filters">
-      <div class="filter-row top-row">
-        <div class="filter-group">
-          <label>Thứ Tự</label>
-          <select v-model="filters.sortOrder">
-            <option value="desc">Mới nhất trước</option>
-            <option value="asc">Cũ nhất trước</option>
-          </select>
-        </div>
-        <div class="date-filter">
-          <label>Từ</label>
-          <input type="date" v-model="filters.dateFrom" :max="filters.dateTo" @change="fetchReports" @click="$event.target.showPicker()" />
-          <label>Đến</label>
-          <input type="date" v-model="filters.dateTo" :min="filters.dateFrom" @change="fetchReports" @click="$event.target.showPicker()" />
-        </div>
-        <div class="filter-actions">
-          <button class="btn-secondary" @click="fetchReports">Refresh</button>
-        </div>
-      </div>
-
-      <div class="filter-row bottom-row">
-        <div class="filter-group">
-          <label>Độ Quan Trọng</label>
-          <select v-model="filters.tag">
-            <option value="">Tất cả</option>
-            <option value="ƯU TIÊN">ƯU TIÊN</option>
-            <option value="BÌNH THƯỜNG">BÌNH THƯỜNG</option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label>Phân Loại</label>
-          <select v-model="filters.phan_loai">
-            <option value="">Tất cả</option>
-            <option value="CÔNG VIỆC">Công việc</option>
-            <option value="ĐỜI SỐNG">Đời sống</option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label>Trạng Thái</label>
-          <select v-model="filters.trang_thai">
-            <option value="">Tất cả</option>
-            <option value="Chưa xử lý">Chưa xử lý</option>
-            <option value="Hoàn thành">Hoàn thành</option>
-          </select>
-        </div>
-      </div>
+    <!-- Action Buttons -->
+    <div class="action-bar">
+      <button class="mobile-action-btn excel" @click="exportExcel">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Xuất Excel
+      </button>
+      <button class="mobile-action-btn add" @click="openAddModal">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Thêm mới
+      </button>
     </div>
 
     <!-- Bảng Dữ Liệu (PC) -->
-    <div class="table-wrapper desktop-only">
+    <div class="elite-table-container desktop-only">
+      <div class="elite-table-toolbar">
+        <div class="toolbar-left">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+          <h3>DANH SÁCH BÁO CÁO</h3>
+        </div>
+        <div class="toolbar-right">
+          <span class="record-badge">{{ filteredReports.length }} việc</span>
+        </div>
+      </div>
       <div v-if="loading" class="loading-state">
         <div class="spinner"></div>
         <p>Đang tải dữ liệu báo cáo...</p>
       </div>
-      <table v-else class="report-table">
-        <thead>
-          <tr>
-            <th width="5%">STT</th>
-            <th width="15%">Thời Gian</th>
-            <th width="10%">Phân Loại</th>
-            <th width="30%">Nội Dung</th>
-            <th width="15%">Ghi Chú</th>
-            <th width="10%">Độ Quan Trọng</th>
-            <th width="10%">Trạng Thái</th>
-            <th width="5%" class="text-right">Hành Động</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="reports.length === 0">
-            <td colspan="8" class="empty-state">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
-              <p>Không có báo cáo nào khớp với tìm kiếm của bạn.</p>
-            </td>
-          </tr>
-          <tr v-for="(report, index) in filteredReports" :key="report.id" class="animate-row clickable-row" @click="openEditModal(report)">
-            <td class="col-index">{{ index + 1 }}</td>
-            <td class="col-time">
-              <div class="time-display">
-                <div class="time-row time-main">
-                  <span class="time-hm">{{ formatDisplayTime(report.thoi_gian).time }}</span>&nbsp;&nbsp;
-                  <span class="time-thu">{{ formatDisplayTime(report.thoi_gian).thu }}</span>
+      <div v-else class="elite-table-scroll">
+        <table class="elite-table">
+          <thead>
+            <tr>
+              <th width="5%">STT</th>
+              <th width="15%">Thời Gian</th>
+              <th width="10%">Phân Loại</th>
+              <th width="30%">Nội Dung</th>
+              <th width="15%">Ghi Chú</th>
+              <th width="10%">Độ Quan Trọng</th>
+              <th width="10%">Trạng Thái</th>
+              <th width="5%" class="text-right">Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="reports.length === 0">
+              <td colspan="8" class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+                <p>Không có báo cáo nào khớp với tìm kiếm của bạn.</p>
+              </td>
+            </tr>
+            <tr v-for="(report, index) in filteredReports" :key="report.id" class="elite-row" :class="{ 'highlight-row': report.id === highlightedReportId }" @click="openEditModal(report)">
+              <td><span class="row-index">{{ index + 1 }}</span></td>
+              <td>
+                <div class="elite-time-cell">
+                  <div class="elite-time-main">
+                    <span class="elite-time-hm">{{ formatDisplayTime(report.thoi_gian).time }}</span>
+                    <span class="elite-time-thu">{{ formatDisplayTime(report.thoi_gian).thu }}</span>
+                    <span class="elite-time-period" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'is-morning' : 'is-afternoon'">
+                      {{ formatDisplayTime(report.thoi_gian).period }}
+                    </span>
+                  </div>
+                  <div class="elite-time-date">{{ formatDisplayTime(report.thoi_gian).date }}</div>
                 </div>
-                <div class="time-row time-sub">{{ formatDisplayTime(report.thoi_gian).date }}</div>
-              </div>
-            </td>
-            <td><span class="badge" :class="getCategoryClass(report.phan_loai)">{{ report.phan_loai || 'Chưa phân loại' }}</span></td>
-            <td class="col-content">{{ report.noi_dung }}</td>
-            <td class="col-note">{{ report.ghi_chu }}</td>
-            <td>
-              <div class="tag-list" v-if="report.tag">
-                <span class="tag" v-for="t in splitTags(report.tag)" :key="t" :class="getTagClass(t)">{{ t }}</span>
-              </div>
-            </td>
-            <td>
-              <div class="status-pill-tag" :class="getStatusPillClass(report.trang_thai)">
-                {{ report.trang_thai || 'N/A' }}
-              </div>
-            </td>
-            <td class="col-actions text-right">
-              <button v-if="report.trang_thai !== 'Hoàn thành'" class="btn-icon success" @click.stop="markAsCompleted(report)" title="Đánh dấu Hoàn thành">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              </button>
-              <button class="btn-icon delete" @click.stop="confirmDelete(report.id)" title="Xoá">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              </td>
+              <td><span class="badge" :class="getCategoryClass(report.phan_loai)">{{ report.phan_loai || 'Chưa phân loại' }}</span></td>
+              <td class="col-content">{{ report.noi_dung }}</td>
+              <td class="col-note">{{ report.ghi_chu }}</td>
+              <td>
+                <div class="tag-list" v-if="report.tag">
+                  <span class="tag" v-for="t in splitTags(report.tag)" :key="t" :class="getTagClass(t)">{{ t }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="status-pill-tag" :class="getStatusPillClass(report.trang_thai)">{{ report.trang_thai || 'N/A' }}</div>
+              </td>
+              <td class="col-actions text-right">
+                <button v-if="report.trang_thai !== 'Hoàn thành'" class="elite-action-btn success" @click.stop="markAsCompleted(report)" title="Hoàn thành">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+                <button class="elite-action-btn delete" @click.stop="confirmDelete(report.id)" title="Xoá">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <div class="card-list mobile-only">
@@ -170,7 +240,7 @@
         <p>Không có báo cáo nào.</p>
       </div>
       <div v-else v-for="(report, index) in filteredReports" :key="'card-' + report.id" 
-           class="report-card" :class="getStatusBorderClass(report.trang_thai)" @click="openEditModal(report)">
+           class="report-card" :class="[getStatusBorderClass(report.trang_thai), { 'highlight-card': report.id === highlightedReportId }]" @click="openEditModal(report)">
         
         <!-- Hàng 1: STT & Thời gian -->
         <div class="card-row-header">
@@ -179,6 +249,9 @@
             <div class="time-primary">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
               <span>{{ formatDisplayTime(report.thoi_gian).time }}</span>
+              <span class="period-tag-mini" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'is-morning' : 'is-afternoon'">
+                {{ formatDisplayTime(report.thoi_gian).period }}
+              </span>
               <span class="sep">•</span>
               <span class="day-text">{{ formatDisplayTime(report.thoi_gian).thu }}</span>
             </div>
@@ -220,130 +293,133 @@
       </div>
     </div>
 
-    <!-- Modal Form -->
-    <div class="modal-overlay" v-if="isModalOpen" @click.self="closeModal">
-      <div class="modal">
-        <div class="modal-header">
-          <h2>{{ isEditing ? 'Chỉnh Sửa Báo Cáo' : 'Thêm Báo Cáo Mới' }}</h2>
-          <button class="btn-close" @click="closeModal">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    <!-- Elite Modal Form -->
+    <div class="elite-modal-overlay" v-if="isModalOpen" @click.self="closeModal">
+      <div class="elite-modal">
+        <div class="elite-modal-header">
+          <div class="elite-modal-title">
+            <svg v-if="!isEditing" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            <h2>{{ isEditing ? 'Chỉnh Sửa Báo Cáo' : 'Thêm Báo Cáo Mới' }}</h2>
+          </div>
+          <button class="elite-btn-close" @click="closeModal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
         
-        <form @submit.prevent="saveReport">
-          <div class="form-group row">
-            <div class="col">
-              <label>Phân Loại</label>
-              <div class="select-wrapper">
-                <select v-model="formData.phan_loai">
-                  <option value="CÔNG VIỆC">CÔNG VIỆC</option>
-                  <option value="ĐỜI SỐNG">ĐỜI SỐNG</option>
-                </select>
-              </div>
-            </div>
+        <form @submit.prevent="saveReport" class="elite-modal-body">
+          <div class="elite-form-group">
+            <label>Phân Loại</label>
+            <select v-model="formData.phan_loai" class="elite-select">
+              <option value="CÔNG VIỆC">CÔNG VIỆC</option>
+              <option value="ĐỜI SỐNG">ĐỜI SỐNG</option>
+            </select>
           </div>
 
-          <div class="form-group">
+          <div class="elite-form-group">
             <label>Thời Gian</label>
-            <div class="time-picker-row">
-              <div class="time-box">
+            <div class="elite-quick-times">
+              <button type="button" class="elite-quick-btn" :class="{ active: isMorning }" @click="setMorningTime">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                SÁNG
+              </button>
+              <button type="button" class="elite-quick-btn" :class="{ active: isAfternoon }" @click="setAfternoonTime">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                CHIỀU
+              </button>
+            </div>
+            
+            <div class="elite-time-picker">
+              <div class="time-part">
                 <div class="picker-item">
-                  <span class="item-label">Giờ</span>
-                  <div class="select-wrapper small-select">
-                    <select v-model="timeInputs.hour">
-                      <option v-for="h in 24" :key="h" :value="String(h-1).padStart(2, '0')">{{ String(h-1).padStart(2, '0') }}</option>
-                    </select>
-                  </div>
+                  <span>Giờ</span>
+                  <select v-model="timeInputs.hour" class="elite-select-mini">
+                    <option v-for="h in 24" :key="h" :value="String(h-1).padStart(2, '0')">{{ String(h-1).padStart(2, '0') }}</option>
+                  </select>
                 </div>
-                <span class="colon mt-label">:</span>
+                <span class="time-sep">:</span>
                 <div class="picker-item">
-                  <span class="item-label">Phút</span>
-                  <div class="select-wrapper small-select">
-                    <select v-model="timeInputs.minute">
-                      <option v-for="m in 60" :key="m" :value="String(m-1).padStart(2, '0')">{{ String(m-1).padStart(2, '0') }}</option>
-                    </select>
-                  </div>
+                  <span>Phút</span>
+                  <select v-model="timeInputs.minute" class="elite-select-mini">
+                    <option v-for="m in 60" :key="m" :value="String(m-1).padStart(2, '0')">{{ String(m-1).padStart(2, '0') }}</option>
+                  </select>
                 </div>
               </div>
-              <div class="date-box">
+              
+              <div class="date-part">
                 <div class="picker-item">
-                  <span class="item-label">Thứ</span>
-                  <div class="select-wrapper small-select">
-                    <select v-model="timeInputs.thu">
-                      <option value="2">Thứ 2</option>
-                      <option value="3">Thứ 3</option>
-                      <option value="4">Thứ 4</option>
-                      <option value="5">Thứ 5</option>
-                      <option value="6">Thứ 6</option>
-                      <option value="7">Thứ 7</option>
-                      <option value="8">CN</option>
-                    </select>
-                  </div>
+                  <span>Thứ</span>
+                  <select v-model="timeInputs.thu" class="elite-select-mini">
+                    <option value="2">Thứ 2</option>
+                    <option value="3">Thứ 3</option>
+                    <option value="4">Thứ 4</option>
+                    <option value="5">Thứ 5</option>
+                    <option value="6">Thứ 6</option>
+                    <option value="7">Thứ 7</option>
+                    <option value="8">CN</option>
+                  </select>
                 </div>
                 <div class="picker-item">
-                  <span class="item-label">Ngày</span>
-                  <div class="select-wrapper small-select">
-                    <select v-model="timeInputs.day">
-                      <option v-for="d in daysInMonth" :key="d" :value="String(d).padStart(2, '0')">{{ String(d).padStart(2, '0') }}</option>
-                    </select>
-                  </div>
+                  <span>Ngày</span>
+                  <select v-model="timeInputs.day" class="elite-select-mini">
+                    <option v-for="d in daysInMonth" :key="d" :value="String(d).padStart(2, '0')">{{ String(d).padStart(2, '0') }}</option>
+                  </select>
                 </div>
-                <span class="slash mt-label">/</span>
+                <span class="date-sep">/</span>
                 <div class="picker-item">
-                  <span class="item-label">Tháng</span>
-                  <div class="select-wrapper small-select">
-                    <select v-model="timeInputs.month">
-                      <option v-for="m in 12" :key="m" :value="String(m).padStart(2, '0')">{{ String(m).padStart(2, '0') }}</option>
-                    </select>
-                  </div>
+                  <span>Tháng</span>
+                  <select v-model="timeInputs.month" class="elite-select-mini">
+                    <option v-for="m in 12" :key="m" :value="String(m).padStart(2, '0')">{{ String(m).padStart(2, '0') }}</option>
+                  </select>
                 </div>
-                <span class="slash mt-label">/</span>
+                <span class="date-sep">/</span>
                 <div class="picker-item">
-                  <span class="item-label">Năm</span>
-                  <div class="select-wrapper small-select">
-                    <select v-model="timeInputs.year">
-                      <option v-for="y in 20" :key="y" :value="String(2023 + y)">{{ 2023 + y }}</option>
-                    </select>
-                  </div>
+                  <span>Năm</span>
+                  <select v-model="timeInputs.year" class="elite-select-mini">
+                    <option v-for="y in 20" :key="y" :value="String(2023 + y)">{{ 2023 + y }}</option>
+                  </select>
                 </div>
               </div>
             </div>
           </div>
           
-          <div class="form-group">
-            <label>Nội Dung <span class="required">*</span></label>
-            <textarea v-model="formData.noi_dung" required placeholder="Mô tả chi tiết nội dung báo cáo..." rows="3"></textarea>
-          </div>
-
-          <div class="form-group">
-            <label>Ghi Chú</label>
-            <textarea v-model="formData.ghi_chu" placeholder="Các ghi chú bổ sung nếu có..." rows="1"></textarea>
-          </div>
-
-          <div class="form-group row">
-            <div class="col">
-              <label>Độ quan trọng</label>
-              <div class="select-wrapper">
-                <select v-model="formData.tag">
-                    <option value="BÌNH THƯỜNG">BÌNH THƯỜNG</option>
-                  <option value="ƯU TIÊN">ƯU TIÊN</option>
-                  
-                </select>
-              </div>
+          <div class="elite-form-group">
+            <div class="form-group-header">
+              <label>Nội Dung <span class="required">*</span></label>
+              <button type="button" class="elite-quote-btn" @click="openCustomerModal">
+               
+                BÁO GIÁ
+              </button>
             </div>
-            <div class="col" v-if="isEditing">
+            <textarea v-model="formData.noi_dung" required placeholder="Mô tả chi tiết nội dung báo cáo..." rows="3" class="elite-input"></textarea>
+          </div>
+
+          <div class="elite-form-group">
+            <label>Ghi Chú</label>
+            <textarea v-model="formData.ghi_chu" placeholder="Các ghi chú bổ sung nếu có..." rows="1" class="elite-input"></textarea>
+          </div>
+
+          <div class="elite-form-row">
+            <div class="elite-form-group">
+              <label>Độ quan trọng</label>
+              <select v-model="formData.tag" class="elite-select">
+                <option value="BÌNH THƯỜNG">BÌNH THƯỜNG</option>
+                <option value="ƯU TIÊN">ƯU TIÊN</option>
+              </select>
+            </div>
+            <div class="elite-form-group" v-if="isEditing">
               <label>Trạng Thái</label>
-              <div class="status-toggle-btns">
+              <div class="elite-status-toggle">
                 <button 
                   type="button" 
-                  :class="['btn-toggle', formData.trang_thai === 'Hoàn thành' ? 'active-success' : '']"
+                  :class="['toggle-btn', formData.trang_thai === 'Hoàn thành' ? 'active-success' : '']"
                   @click="formData.trang_thai = 'Hoàn thành'"
                 >
                   Hoàn thành
                 </button>
                 <button 
                   type="button" 
-                  :class="['btn-toggle', formData.trang_thai === 'Chưa xử lý' ? 'active-warning' : '']"
+                  :class="['toggle-btn', formData.trang_thai === 'Chưa xử lý' ? 'active-warning' : '']"
                   @click="formData.trang_thai = 'Chưa xử lý'"
                 >
                   Chưa xử lý
@@ -352,9 +428,9 @@
             </div>
           </div>
 
-          <div class="modal-actions">
-            <button type="button" class="btn-cancel" @click="closeModal" :disabled="saving">Huỷ Bỏ</button>
-            <button type="submit" class="btn-primary" :disabled="saving">
+          <div class="elite-modal-actions">
+            <button type="button" class="elite-btn-cancel" @click="closeModal" :disabled="saving">Huỷ Bỏ</button>
+            <button type="submit" class="elite-btn-primary" :disabled="saving">
               <span v-if="saving" class="spinner-small"></span>
               <template v-if="saving">
                 {{ isEditing ? 'Đang Lưu...' : 'Đang Thêm...' }}
@@ -404,12 +480,84 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal Chọn Khách Hàng -->
+    <div class="elite-modal-overlay" v-if="showCustomerModal" @click.self="showCustomerModal = false">
+      <div class="elite-modal" style="max-width: 550px; display: flex; flex-direction: column; max-height: 85vh;">
+        <div class="elite-modal-header" style="flex-shrink: 0;">
+          <div class="elite-modal-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <h2>Chọn Khách Hàng</h2>
+          </div>
+          <button class="elite-btn-close" @click="showCustomerModal = false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div class="elite-modal-body" style="flex: 1; overflow-y: hidden; display: flex; flex-direction: column; gap: 1.2rem;">
+          <div class="elite-form-group" style="margin-bottom: 0; flex-shrink: 0;">
+            <input type="text" v-model="customerSearch" placeholder="Tìm tên khách hàng hoặc công ty..." class="elite-input" style="width: 100%; box-sizing: border-box; padding: 0.8rem 1.2rem; border-radius: 9999px;" />
+          </div>
+          
+          <div style="max-height: 240px; overflow-y: auto; border: 1.5px solid #e2e8f0; border-radius: 16px; background: rgba(248, 250, 252, 0.6); margin-bottom: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+            <div v-if="loadingCustomers" style="padding: 3rem 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;">
+              <span style="color: #10b981; font-weight: 600; font-size: 0.95rem; letter-spacing: 0.02em;">Đang tải dữ liệu khách hàng...</span>
+              <div style="width: 100%; max-width: 200px; height: 6px; background: #e2e8f0; border-radius: 999px; overflow: hidden; position: relative;">
+                <div style="position: absolute; top: 0; left: 0; height: 100%; background: #10b981; border-radius: 999px; animation: progress-indeterminate 1.5s infinite ease-in-out;"></div>
+              </div>
+            </div>
+            <ul v-else class="customer-list-modal" style="list-style: none; padding: 0; margin: 0;">
+              <li v-for="c in filteredCustomersList" :key="c.ma_khach_hang" @click="insertCustomerQuote(c)" class="customer-list-item">
+                <span class="c-name">{{ c.ten_khach_hang }}</span>
+                <span v-if="c.ten_cong_ty" class="c-company">{{ c.ten_cong_ty }}</span>
+                <span v-if="c.so_dien_thoai_ca_nhan" class="c-phone">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                  {{ c.so_dien_thoai_ca_nhan }}
+                </span>
+              </li>
+              <li v-if="filteredCustomersList.length === 0 && !loadingCustomers" style="padding: 3rem; text-align: center; color: #94a3b8; font-style: italic; font-weight: 500;">
+                Không tìm thấy khách hàng nào.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import * as XLSX from 'xlsx-js-style'
+import CustomSelect from './CustomSelect.vue'
+
+const sortOptions = [
+  { value: 'desc', label: 'Mới nhất' },
+  { value: 'asc', label: 'Cũ nhất' }
+]
+
+const periodOptions = [
+  { value: '', label: 'Tất cả' },
+  { value: 'Sáng', label: 'Sáng' },
+  { value: 'Chiều', label: 'Chiều' }
+]
+
+const priorityOptions = [
+  { value: '', label: 'Tất cả' },
+  { value: 'ƯU TIÊN', label: 'Ưu tiên' },
+  { value: 'BÌNH THƯỜNG', label: 'Bình thường' }
+]
+
+const typeOptions = [
+  { value: '', label: 'Tất cả' },
+  { value: 'CÔNG VIỆC', label: 'Công việc' },
+  { value: 'ĐỜI SỐNG', label: 'Đời sống' }
+]
+
+const statusOptions = [
+  { value: '', label: 'Tất cả' },
+  { value: 'Chưa xử lý', label: 'Chưa xử lý' },
+  { value: 'Hoàn thành', label: 'Hoàn thành' }
+]
 
 // ==========================================
 // THAY THẾ URL WEB APP CỦA BẠN VÀO ĐÂY
@@ -425,13 +573,28 @@ const getTodayStr = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+const getThisMonthStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+const getThisYearStr = () => {
+  return new Date().getFullYear().toString();
+}
+
 const filters = ref({
   tag: '',
   phan_loai: '',
   trang_thai: '',
+  filterMode: 'day',
   dateFrom: getTodayStr(),
   dateTo: getTodayStr(),
-  sortOrder: 'desc'
+  monthFrom: getThisMonthStr(),
+  monthTo: getThisMonthStr(),
+  yearFrom: getThisYearStr(),
+  yearTo: getThisYearStr(),
+  sortOrder: 'desc',
+  period: ''
 })
 
 // Parse ngày từ chuỗi thời gian backend: "HH:MM /thu /DD/MM/YYYY"
@@ -460,23 +623,30 @@ const formatDisplayTime = (thoi_gian) => {
     
     const [h, m] = timePart.split(':');
     const thuText = thuPart === '8' ? 'Chủ Nhật' : `Thứ ${thuPart}`;
+    const hourNum = parseInt(h);
+    const periodText = hourNum < 12 ? 'Sáng' : 'Chiều';
     
     return {
       time: `${h} : ${m}`,
       thu: thuText,
-      date: datePart.split('/').join(' / ')
+      date: datePart.split('/').join(' / '),
+      period: periodText
     };
   }
-  return { time: thoi_gian, thu: '', date: '' };
+  return { time: thoi_gian, thu: '', date: '', period: '' };
 }
 
 const filteredReports = computed(() => {
   let result = reports.value.filter(r => {
     if (filters.value.tag && r.tag !== filters.value.tag) return false;
     if (filters.value.phan_loai && r.phan_loai !== filters.value.phan_loai) return false;
-    if (filters.value.trang_thai && r.trang_thai !== filters.value.trang_thai) return false;
+    if (filters.value.trang_thai && filters.value.trang_thai !== 'Tất cả' && r.trang_thai !== filters.value.trang_thai) return false;
+    if (filters.value.period) {
+      const displayTime = formatDisplayTime(r.thoi_gian);
+      if (displayTime.period !== filters.value.period) return false;
+    }
     
-    if (filters.value.dateFrom || filters.value.dateTo) {
+    if (filters.value.filterMode === 'day' && (filters.value.dateFrom || filters.value.dateTo)) {
       const reportDate = parseDateFromReport(r.thoi_gian);
       if (!reportDate) return false;
       if (filters.value.dateFrom) {
@@ -487,6 +657,30 @@ const filteredReports = computed(() => {
       if (filters.value.dateTo) {
         const to = new Date(filters.value.dateTo);
         to.setHours(23, 59, 59, 999);
+        if (reportDate > to) return false;
+      }
+    } else if (filters.value.filterMode === 'month' && (filters.value.monthFrom || filters.value.monthTo)) {
+      const reportDate = parseDateFromReport(r.thoi_gian);
+      if (!reportDate) return false;
+      if (filters.value.monthFrom) {
+        const [y, m] = filters.value.monthFrom.split('-');
+        const from = new Date(Number(y), Number(m) - 1, 1, 0, 0, 0, 0);
+        if (reportDate < from) return false;
+      }
+      if (filters.value.monthTo) {
+        const [y, m] = filters.value.monthTo.split('-');
+        const to = new Date(Number(y), Number(m), 0, 23, 59, 59, 999);
+        if (reportDate > to) return false;
+      }
+    } else if (filters.value.filterMode === 'year' && (filters.value.yearFrom || filters.value.yearTo)) {
+      const reportDate = parseDateFromReport(r.thoi_gian);
+      if (!reportDate) return false;
+      if (filters.value.yearFrom) {
+        const from = new Date(Number(filters.value.yearFrom), 0, 1, 0, 0, 0, 0);
+        if (reportDate < from) return false;
+      }
+      if (filters.value.yearTo) {
+        const to = new Date(Number(filters.value.yearTo), 11, 31, 23, 59, 59, 999);
         if (reportDate > to) return false;
       }
     }
@@ -510,7 +704,6 @@ const filteredReports = computed(() => {
 const pendingCount = computed(() => filteredReports.value.filter(r => r.trang_thai === 'Chưa xử lý').length)
 const completedCount = computed(() => filteredReports.value.filter(r => r.trang_thai === 'Hoàn thành').length)
 
-// Watchers để đảm bảo dateFrom <= dateTo
 watch(() => filters.value.dateFrom, (newVal) => {
   if (newVal && filters.value.dateTo && newVal > filters.value.dateTo) {
     filters.value.dateTo = newVal;
@@ -521,6 +714,22 @@ watch(() => filters.value.dateTo, (newVal) => {
   if (newVal && filters.value.dateFrom && newVal < filters.value.dateFrom) {
     filters.value.dateFrom = newVal;
   }
+})
+
+watch(() => filters.value.monthFrom, (newVal) => {
+  if (newVal && filters.value.monthTo && newVal > filters.value.monthTo) filters.value.monthTo = newVal;
+})
+
+watch(() => filters.value.monthTo, (newVal) => {
+  if (newVal && filters.value.monthFrom && newVal < filters.value.monthFrom) filters.value.monthFrom = newVal;
+})
+
+watch(() => filters.value.yearFrom, (newVal) => {
+  if (newVal && filters.value.yearTo && Number(newVal) > Number(filters.value.yearTo)) filters.value.yearTo = newVal;
+})
+
+watch(() => filters.value.yearTo, (newVal) => {
+  if (newVal && filters.value.yearFrom && Number(newVal) < Number(filters.value.yearFrom)) filters.value.yearFrom = newVal;
 })
 
 const applyFilters = () => {
@@ -601,6 +810,26 @@ watch([() => timeInputs.value.day, () => timeInputs.value.month, () => timeInput
   }
 
   setTimeout(() => { isUpdatingThuFromDate = false; }, 10);
+})
+
+const setMorningTime = () => {
+  timeInputs.value.hour = '08';
+  timeInputs.value.minute = '00';
+}
+
+const setAfternoonTime = () => {
+  timeInputs.value.hour = '13';
+  timeInputs.value.minute = '00';
+}
+
+const isMorning = computed(() => {
+  const h = Number(timeInputs.value.hour);
+  return h >= 0 && h < 12;
+})
+
+const isAfternoon = computed(() => {
+  const h = Number(timeInputs.value.hour);
+  return h >= 12 && h < 24;
 })
 
 const getNowTimeInputs = () => {
@@ -719,7 +948,57 @@ const closeModal = () => {
   isModalOpen.value = false
 }
 
+// --- BÁO GIÁ KHÁCH HÀNG ---
+const customersList = ref([])
+const showCustomerModal = ref(false)
+const customerSearch = ref('')
+const loadingCustomers = ref(false)
+
+const fetchCustomersForQuote = async () => {
+  loadingCustomers.value = true;
+  try {
+    const url = new URL(API_URL)
+    url.searchParams.append('sheet', 'khach_hang')
+    url.searchParams.append('action', 'get')
+    const response = await fetch(url.toString())
+    const result = await response.json()
+    if (result.status === 'success') {
+      customersList.value = result.data || []
+    }
+  } catch(e) {
+    console.error(e)
+  } finally {
+    loadingCustomers.value = false;
+  }
+}
+
+const openCustomerModal = () => {
+  showCustomerModal.value = true;
+  if (customersList.value.length === 0) {
+    fetchCustomersForQuote();
+  }
+}
+
+const filteredCustomersList = computed(() => {
+  if (!customerSearch.value) return customersList.value;
+  const q = customerSearch.value.toLowerCase();
+  return customersList.value.filter(c => 
+    (c.ten_khach_hang && c.ten_khach_hang.toLowerCase().includes(q)) ||
+    (c.ten_cong_ty && c.ten_cong_ty.toLowerCase().includes(q))
+  );
+})
+
+const insertCustomerQuote = (customer) => {
+  const nameToUse = customer.ten_cong_ty || customer.ten_khach_hang;
+  const quoteText = `Báo giá ${nameToUse}`;
+  formData.value.noi_dung = quoteText;
+  showCustomerModal.value = false;
+  customerSearch.value = '';
+}
+
 // Lưu (Thêm/Sửa)
+const highlightedReportId = ref(null)
+
 const saveReport = async () => {
   if (API_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
      alert("Vui lòng cập nhật API_URL của Google Apps Script để lưu thực tế.");
@@ -730,32 +1009,67 @@ const saveReport = async () => {
   formData.value.thoi_gian = formatTimeString();
 
   saving.value = true
-  try {
-    const action = isEditing.value ? 'update' : 'add'
-    const payload = {
-      action: action,
-      ...formData.value
-    }
+  
+  // Tạo độ trễ giả 500ms để hiển thị trạng thái "Đang lưu..." (UX)
+  await new Promise(r => setTimeout(r, 500));
 
+  const action = isEditing.value ? 'update' : 'add'
+  const payload = {
+    action: action,
+    ...formData.value
+  }
+
+  // Cập nhật UI ngay lập tức
+  const tempId = action === 'add' ? `temp_${Date.now()}` : formData.value.id;
+  const newReport = {
+    ...formData.value,
+    id: tempId
+  };
+
+  if (action === 'add') {
+    reports.value.unshift(newReport);
+  } else {
+    const index = reports.value.findIndex(r => r.id === tempId);
+    if (index !== -1) {
+      reports.value[index] = newReport;
+    }
+  }
+
+  // Tắt loading và Đóng modal
+  isModalOpen.value = false;
+  saving.value = false;
+
+  // Highlight dòng vừa tác động
+  highlightedReportId.value = tempId;
+  setTimeout(() => {
+    if (highlightedReportId.value === tempId) {
+      highlightedReportId.value = null;
+    }
+  }, 3000);
+
+  // Xử lý gửi dữ liệu ngầm
+  try {
     const response = await fetch(API_URL, {
       method: 'POST',
       body: JSON.stringify(payload),
     })
     
     const result = await response.json()
-    
     if (result.status === 'success') {
-      isModalOpen.value = false
-      saving.value = false
-      fetchReports() 
+      if (action === 'add' && result.id) {
+        const idx = reports.value.findIndex(r => r.id === tempId);
+        if (idx !== -1) {
+          reports.value[idx].id = result.id;
+        }
+        if (highlightedReportId.value === tempId) {
+          highlightedReportId.value = result.id;
+        }
+      }
     } else {
-      alert('Lỗi lưu dữ liệu: ' + result.message)
+      console.error('Lưu ngầm thất bại:', result.message)
     }
   } catch (error) {
-    console.error('Lỗi khi lưu:', error)
-    alert('Có lỗi xảy ra trong quá trình lưu dữ liệu.')
-  } finally {
-    saving.value = false
+    console.error('Lỗi khi lưu ngầm:', error)
   }
 }
 
@@ -805,7 +1119,7 @@ const confirmDelete = async (id) => {
       const response = await fetch(`${API_URL}?action=delete&id=${id}`)
       const result = await response.json()
       if (result.status === 'success') {
-        fetchReports()
+        reports.value = reports.value.filter(r => r.id !== id);
       } else {
         alert('Lỗi khi xoá: ' + result.message)
       }
@@ -902,11 +1216,14 @@ const doExportExcel = () => {
       const parts = r.thoi_gian.split(' /');
       if (parts.length > 0) {
         const timePart = parts[0];
-        const hour = parseInt(timePart.split(':')[0], 10);
+        const [h, m] = timePart.split(':');
+        const hour = parseInt(h, 10) || 0;
+        const minute = parseInt(m, 10) || 0;
+        const timeVal = hour + minute / 60;
         
-        if (hour >= 6 && hour <= 12) {
+        if (timeVal >= 6 && timeVal <= 12) {
           morningTasks.push(r.noi_dung);
-        } else if (hour > 12) {
+        } else if (timeVal > 12 && timeVal <= 19) {
           afternoonTasks.push(r.noi_dung);
         }
       }
@@ -1327,147 +1644,333 @@ button {
 .shadow-slate-400\/50 { box-shadow: 0 0 6px rgba(148, 163, 184, 0.5); }
 
 
-/* --- MODAL --- */
-.modal-overlay {
+/* ============================================
+   ELITE MODAL — Add/Edit Report
+   ============================================ */
+.elite-modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   background-color: rgba(15, 23, 42, 0.4);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 99999;
   animation: fadeIn 0.2s ease forwards;
 }
 
-.modal {
+.elite-modal {
   background: white;
   width: calc(100% - 2rem);
-  max-width: 600px;
+  max-width: 550px;
   max-height: 95vh;
   overflow-y: auto;
-  border-radius: 20px;
-  padding: 1.75rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border-radius: 24px;
+  padding: 0;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.05);
   animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  display: flex;
+  flex-direction: column;
 }
 
-.modal-header {
+.elite-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.25rem;
+  padding: 1.5rem 1.75rem 1.25rem;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  background: linear-gradient(180deg, rgba(248,250,252,0.6) 0%, white 100%);
 }
 
-.modal-header h2 {
+.elite-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.elite-modal-title svg {
+  color: #4f46e5;
+}
+
+.elite-modal-title h2 {
   margin: 0;
   color: #0f172a;
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
-.btn-close {
-  background: transparent;
-  color: #94a3b8;
+.elite-btn-close {
+  background: #f1f5f9;
+  color: #64748b;
   padding: 0.5rem;
   border-radius: 50%;
-}
-
-.btn-close:hover {
-  background: #f1f5f9;
-  color: #0f172a;
-}
-
-.form-group {
-  margin-bottom: 0.75rem;
-}
-
-.form-group.row {
+  border: none;
   display: flex;
-  gap: 1rem;
-}
-
-.form-group.row .col {
-  flex: 1;
-}
-
-label {
-  display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #475569;
-  margin-bottom: 0.5rem;
-}
-
-.required { color: #ef4444; }
-.hint { color: #94a3b8; font-weight: 400; font-size: 0.75rem; }
-
-input[type="text"], textarea, select {
-  width: 100%;
-  padding: 0.65rem 0.85rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  font-family: inherit;
-  font-size: 0.95rem;
-  color: #1e293b;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s;
-  box-sizing: border-box;
-  background-color: #f8fafc;
-}
-
-textarea {
-  resize: vertical;
-  line-height: 1.5;
-}
-
-.select-wrapper {
-  position: relative;
-}
-
-.select-wrapper select {
-  appearance: none;
   cursor: pointer;
 }
 
-.select-wrapper::after {
-  content: '';
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 12px;
-  height: 12px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-size: contain;
-  background-repeat: no-repeat;
-  pointer-events: none;
+.elite-btn-close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  transform: rotate(90deg);
 }
 
-input:focus, textarea:focus, select:focus {
-  border-color: #6366f1;
-  background-color: white;
+.elite-modal-body {
+  padding: 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.elite-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.elite-form-row {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.elite-form-row .elite-form-group {
+  flex: 1;
+}
+
+.elite-form-group label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.form-group-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.elite-quote-btn {
+  background: #10b981;
+  color: white;
+  border: 1px solid #059669;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s;
+  cursor: pointer;
+  box-shadow: 0 2px 6px -1px rgba(16, 185, 129, 0.2);
+}
+
+.elite-quote-btn:hover {
+  background: #059669;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.4);
+}
+
+/* Time Picker inside Modal */
+.elite-quick-times {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.elite-quick-btn {
+  flex: 1;
+  background: #f8fafc;
+  color: #475569;
+  border: 1.5px solid #e2e8f0;
+  padding: 0.6rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.elite-quick-btn:hover {
+  background: white;
+  border-color: #34d399;
+  color: #059669;
+  box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.15);
+}
+
+.elite-quick-btn.active {
+  background: #0f172a;
+  color: #10b981;
+  border-color: #0f172a;
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.3);
+}
+
+.elite-quick-btn.active svg {
+  color: #10b981;
+}
+
+.elite-time-picker {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #f8fafc;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.time-part, .date-part {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.date-part {
+  flex: 1;
+  justify-content: space-between;
+}
+
+.time-sep, .date-sep {
+  font-weight: 700;
+  color: #94a3b8;
+  padding-top: 1.2rem;
+}
+
+.picker-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.picker-item span {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.elite-select-mini {
+  appearance: none;
+  background: transparent;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+  padding: 0.2rem 0.5rem;
+  text-align: center;
+  cursor: pointer;
   outline: none;
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+  border-radius: 6px;
+  min-width: 50px;
 }
 
-.modal-actions {
+.elite-select-mini:hover, .elite-select-mini:focus {
+  background: white;
+  box-shadow: 0 0 0 2px rgba(99,102,241,0.2);
+}
+
+/* Status Toggle inside Modal */
+.elite-status-toggle {
+  display: flex;
+  gap: 0.4rem;
+  background: #f1f5f9;
+  padding: 0.35rem;
+  border-radius: 12px;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.toggle-btn:hover:not(.active-success):not(.active-warning) {
+  background: rgba(255,255,255,0.5);
+  color: #334155;
+}
+
+.toggle-btn.active-success {
+  background: white;
+  color: #10b981;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+}
+
+.toggle-btn.active-warning {
+  background: white;
+  color: #f59e0b;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+}
+
+/* Modal Actions */
+.elite-modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  margin-top: 1.5rem;
-  padding-top: 1rem;
+  margin-top: 1rem;
+  padding-top: 1.25rem;
   border-top: 1px solid #f1f5f9;
 }
 
-.btn-cancel {
-  background: transparent;
+.elite-btn-cancel {
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
   color: #64748b;
-  padding: 0.8rem 1.5rem;
+  background: transparent;
+  border: none;
+  transition: all 0.2s;
+  cursor: pointer;
 }
 
-.btn-cancel:hover {
+.elite-btn-cancel:hover {
   background: #f1f5f9;
   color: #0f172a;
+}
+
+.elite-btn-primary {
+  padding: 0.75rem 1.75rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: white;
+  background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+  border: none;
+  box-shadow: 0 4px 12px -2px rgba(79, 70, 229, 0.3);
+  transition: all 0.2s;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.elite-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -2px rgba(79, 70, 229, 0.4);
 }
 
 /* --- STATES (Loading, Empty) --- */
@@ -1689,8 +2192,48 @@ input:focus, textarea:focus, select:focus {
   text-align: center;
 }
 .header-actions {
+  display: none;
+}
+
+/* Action Bar (below stat cards) */
+.action-bar {
   display: flex;
   gap: 1rem;
+  margin-bottom: 1.5rem;
+  justify-content: flex-end;
+}
+.mobile-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 2rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mobile-action-btn.excel {
+  background: #10b981;
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+.mobile-action-btn.excel:hover {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+.mobile-action-btn.add {
+  background: #3b82f6;
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+.mobile-action-btn.add:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 .btn-secondary {
   display: inline-flex;
@@ -1714,16 +2257,34 @@ input:focus, textarea:focus, select:focus {
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: white;
+  background: #1e293b;
   border-radius: 16px;
   padding: 1.25rem 1.5rem;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 2px 8px -2px rgba(0,0,0,0.04);
-  transition: all 0.2s;
+  border: 1px solid #334155;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: all 0.3s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card.elite-active {
+  border-color: #10b981;
+  background: #0f172a;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+.stat-card.elite-active::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 0; height: 0;
+  border-style: solid;
+  border-width: 0 16px 16px 0;
+  border-color: transparent #10b981 transparent transparent;
 }
 .stat-card:hover {
-  box-shadow: 0 4px 16px -4px rgba(0,0,0,0.08);
-  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  transform: translateY(-3px);
+  border-color: #475569;
 }
 .stat-icon {
   width: 48px;
@@ -1735,16 +2296,16 @@ input:focus, textarea:focus, select:focus {
   flex-shrink: 0;
 }
 .stat-icon.total {
-  background: #eff6ff;
-  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
 }
 .stat-icon.pending {
-  background: #fef3c7;
-  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
 }
 .stat-icon.done {
-  background: #d1fae5;
-  color: #10b981;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
 }
 .stat-info {
   display: flex;
@@ -1753,14 +2314,33 @@ input:focus, textarea:focus, select:focus {
 .stat-value {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #0f172a;
   line-height: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+.unit-text {
+  font-size: 0.95rem;
+  font-weight: 500;
+  opacity: 0.8;
 }
 .stat-label {
-  font-size: 0.85rem;
-  color: #94a3b8;
-  margin-top: 0.2rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
+
+/* Colors by Card Type */
+.card-total .stat-value { color: #60a5fa; }
+.card-total .stat-label { color: #93c5fd; }
+
+.card-pending .stat-value { color: #fbbf24; }
+.card-pending .stat-label { color: #fcd34d; }
+
+.card-done .stat-value { color: #34d399; }
+.card-done .stat-label { color: #6ee7b7; }
 
 /* Date filter */
 .date-filter {
@@ -1807,21 +2387,38 @@ input:focus, textarea:focus, select:focus {
   }
 
   .header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+    display: none !important;
   }
 
-  .header-actions {
-    width: 100%;
+  .action-bar {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 0.5rem !important;
+    margin-bottom: 0.75rem;
   }
-
-  .header-actions button {
+  .mobile-action-btn {
     flex: 1;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.8rem;
   }
-
-  .title-section h1 {
-    font-size: 1.5rem;
+  .mobile-action-btn.excel {
+    background: #10b981;
+    color: white;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  }
+  .mobile-action-btn.excel:hover {
+    background: #059669;
+  }
+  .mobile-action-btn.add {
+    background: #3b82f6;
+    color: white;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  }
+  .mobile-action-btn.add:hover {
+    background: #2563eb;
+  }
+  .report-container {
+    padding-bottom: 80px;
   }
 
   .filters {
@@ -1833,8 +2430,32 @@ input:focus, textarea:focus, select:focus {
   }
 
   .stats-row {
-    flex-direction: column;
-    gap: 0.75rem;
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+  .stat-card {
+    padding: 0.7rem 0.6rem;
+    gap: 0.5rem;
+    border-radius: 12px;
+  }
+  .stat-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+  }
+  .stat-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+  .stat-value {
+    font-size: 1.15rem;
+  }
+  .unit-text {
+    font-size: 0.7rem;
+  }
+  .stat-label {
+    font-size: 0.65rem;
+    margin-bottom: 0.15rem;
   }
 
   .date-filter {
@@ -1917,12 +2538,12 @@ input:focus, textarea:focus, select:focus {
   font-size: 0.95rem;
 }
 
-.time-primary svg { color: #6366f1; }
+.time-primary svg { color: #10b981; }
 
 .time-secondary {
   font-size: 0.8rem;
-  color: #94a3b8;
-  font-weight: 500;
+  color: #047857;
+  font-weight: 600;
   margin-top: 0.1rem;
 }
 
@@ -2067,6 +2688,56 @@ input:focus, textarea:focus, select:focus {
   color: #64748b;
 }
 
+@keyframes progress-indeterminate {
+  0% { left: -50%; width: 50%; }
+  50% { left: 25%; width: 80%; }
+  100% { left: 100%; width: 50%; }
+}
+
+/* CUSTOMER MODAL LIST STYLES */
+.customer-list-item {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  border-left: 3px solid transparent;
+}
+.customer-list-item:last-child {
+  border-bottom: none;
+}
+.customer-list-item:hover {
+  background: white;
+  border-left-color: #10b981;
+  box-shadow: 0 4px 12px -4px rgba(0,0,0,0.05);
+}
+.customer-list-item .c-name {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 1.05rem;
+  transition: color 0.2s;
+}
+.customer-list-item:hover .c-name {
+  color: #059669;
+}
+.customer-list-item .c-company {
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-top: 0.3rem;
+  font-weight: 500;
+}
+.customer-list-item .c-phone {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  margin-top: 0.2rem;
+  font-family: 'JetBrains Mono', monospace;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
 .filter-group select {
   min-width: 160px;
 }
@@ -2109,6 +2780,540 @@ input:focus, textarea:focus, select:focus {
   }
   .modal-header {
     margin-bottom: 0.75rem;
+  }
+}
+
+.highlight-row {
+  background-color: rgba(34, 197, 94, 0.15) !important;
+  transition: background-color 0.5s ease;
+}
+
+.highlight-card {
+  border-color: #22c55e !important;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3) !important;
+  transition: all 0.5s ease;
+}
+
+/* ============================================
+   ELITE FILTER PANEL — Glassmorphism + Accent
+   ============================================ */
+.elite-filter-panel {
+  position: relative;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 8px 32px -4px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(0, 0, 0, 0.02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  margin-bottom: 1.5rem;
+  z-index: 10;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+.elite-filter-panel:hover {
+  box-shadow:
+    0 16px 48px -8px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+.elite-filter-accent {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #10b981 0%, #34d399 40%, #6ee7b7 70%, #a7f3d0 100%);
+  border-radius: 20px 20px 0 0;
+}
+.elite-filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.75rem 0;
+}
+.elite-filter-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.01em;
+}
+.elite-filter-title svg { color: #10b981; }
+.elite-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.1rem;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(52, 211, 153, 0.08) 100%);
+  color: #10b981;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid rgba(16, 185, 129, 0.12);
+  transition: all 0.25s ease;
+}
+.elite-refresh-btn:hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(52, 211, 153, 0.15) 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.2);
+}
+.elite-filter-body {
+  padding: 1.25rem 1.75rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.elite-filter-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+/* Mode Tabs */
+.elite-mode-tabs {
+  display: flex;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-radius: 12px;
+  padding: 4px;
+  gap: 3px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+.elite-mode-tabs button {
+  padding: 0.5rem 1.4rem;
+  border-radius: 9px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  background: transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-shadow: none;
+}
+.elite-mode-tabs button.active {
+  background: #0f172a;
+  color: #34d399;
+  box-shadow: 0 2px 8px -1px rgba(15, 23, 42, 0.4), 0 1px 2px rgba(15, 23, 42, 0.2);
+}
+.elite-mode-tabs button:hover:not(.active) {
+  color: #334155;
+  background: rgba(255, 255, 255, 0.5);
+}
+/* Date groups */
+.elite-date-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 140px;
+  max-width: 250px;
+  flex: 1;
+}
+.group-period {
+  order: -1;
+}
+.elite-date-group label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0;
+}
+.elite-input {
+  width: 100%;
+  padding: 0.6rem 1.2rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 9999px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: #1e293b;
+  background: rgba(248, 250, 252, 0.8);
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+  font-weight: 500;
+}
+.elite-input:focus {
+  border-color: #34d399;
+  background: white;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.08), 0 2px 8px -2px rgba(16, 185, 129, 0.12);
+}
+.elite-range-sep {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  color: #10b981;
+  font-size: 1.1rem;
+  font-weight: 600;
+  opacity: 0.6;
+}
+/* Select groups */
+.elite-select-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 150px;
+  flex: 1;
+}
+.elite-select-group label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0;
+}
+.elite-select {
+  width: 100%;
+  padding: 0.6rem 2.5rem 0.6rem 1.2rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 9999px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: #1e293b;
+  background: rgba(248, 250, 252, 0.8);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 14px;
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+  font-weight: 500;
+}
+.elite-select:focus {
+  border-color: #34d399;
+  background-color: white;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.08), 0 2px 8px -2px rgba(16, 185, 129, 0.12);
+}
+.elite-filter-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #e2e8f0 30%, #e2e8f0 70%, transparent 100%);
+}
+
+/* ============================================
+   ELITE TABLE — Dark Header + Premium Rows
+   ============================================ */
+.elite-table-container {
+  background: white;
+  border-radius: 20px;
+  box-shadow:
+    0 8px 32px -4px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+.elite-table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid #d1fae5;
+  background: linear-gradient(180deg, #ecfdf5 0%, #f0fdf4 50%, white 100%);
+  position: relative;
+}
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.toolbar-left svg { color: #10b981; }
+.toolbar-left h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #065f46;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: absolute;
+  right: 1.75rem;
+}
+.record-badge {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  letter-spacing: 0.02em;
+}
+.elite-table-scroll { overflow-x: auto; }
+.elite-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.elite-table thead tr {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #334155 100%);
+}
+.elite-table th {
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  position: relative;
+}
+.elite-table th:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 28%; height: 44%;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+.elite-table .elite-row {
+  animation: fadeIn 0.4s ease forwards;
+  opacity: 0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+}
+.elite-table .elite-row:nth-child(1) { animation-delay: 0.03s; }
+.elite-table .elite-row:nth-child(2) { animation-delay: 0.06s; }
+.elite-table .elite-row:nth-child(3) { animation-delay: 0.09s; }
+.elite-table .elite-row:nth-child(4) { animation-delay: 0.12s; }
+.elite-table .elite-row:nth-child(5) { animation-delay: 0.15s; }
+.elite-table .elite-row:nth-child(6) { animation-delay: 0.18s; }
+.elite-table .elite-row:nth-child(7) { animation-delay: 0.21s; }
+.elite-table .elite-row:nth-child(8) { animation-delay: 0.24s; }
+.elite-table .elite-row:nth-child(odd) {
+  background: rgba(16, 185, 129, 0.04);
+}
+.elite-table .elite-row:hover {
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.03) 50%, transparent 100%);
+  box-shadow: inset 4px 0 0 #10b981;
+}
+.elite-table .elite-row:hover td:first-child {
+  padding-left: calc(1.5rem + 4px);
+}
+.elite-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  font-size: 0.9rem;
+  color: #334155;
+  transition: padding 0.2s ease;
+}
+.elite-table .elite-row:last-child td { border-bottom: none; }
+/* Row Index Badge */
+.row-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: #475569;
+  transition: all 0.2s;
+}
+.elite-row:hover .row-index {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  color: #10b981;
+}
+/* Time Cell */
+.elite-time-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.elite-time-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.elite-time-hm {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1e293b;
+  font-feature-settings: 'tnum';
+  letter-spacing: 0.02em;
+}
+.elite-time-thu {
+  color: #10b981;
+  font-weight: 600;
+  font-size: 0.7rem;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+.elite-time-period {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.elite-time-period.is-morning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+.elite-time-period.is-afternoon {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.period-tag-mini {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-left: 0.4rem;
+  text-transform: uppercase;
+}
+.period-tag-mini.is-morning {
+  background: #fef3c7;
+  color: #d97706;
+}
+.period-tag-mini.is-afternoon {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.elite-time-date {
+  font-size: 0.78rem;
+  color: #047857;
+  font-weight: 600;
+  font-feature-settings: 'tnum';
+}
+/* Elite Action Buttons */
+.elite-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  margin-left: 0.35rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  cursor: pointer;
+}
+.elite-action-btn.success {
+  background: #10b981;
+  color: white;
+  box-shadow: 0 2px 6px -1px rgba(16, 185, 129, 0.3);
+}
+.elite-action-btn.success:hover {
+  background: #059669;
+  transform: scale(1.08);
+  box-shadow: 0 4px 10px -2px rgba(16, 185, 129, 0.5);
+}
+.elite-action-btn.delete {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 2px 6px -1px rgba(239, 68, 68, 0.3);
+}
+.elite-action-btn.delete:hover {
+  background: #dc2626;
+  transform: scale(1.08);
+  box-shadow: 0 4px 10px -2px rgba(239, 68, 68, 0.5);
+}
+
+/* Filter mobile responsive */
+@media (max-width: 768px) {
+  .mobile-action-btn {
+    padding: 0.7rem 1.5rem;
+    font-size: 0.9rem;
+    border-radius: 10px;
+  }
+  .elite-filter-panel {
+    border-radius: 12px;
+  }
+  .elite-filter-header {
+    padding: 0.75rem 1rem 0;
+  }
+  .elite-filter-header .elite-filter-title span {
+    font-size: 0.85rem;
+  }
+  .elite-filter-body {
+    padding: 0.75rem 1rem 1rem;
+    gap: 0.6rem;
+  }
+  .elite-filter-divider {
+    margin: 0.25rem 0;
+  }
+
+  /* Row 1: Mode tabs stay horizontal */
+  .elite-filter-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.5rem;
+  }
+  .elite-mode-tabs {
+    width: 100%;
+  }
+  .elite-mode-tabs button {
+    flex: 1;
+    justify-content: center;
+    padding: 0.45rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .elite-date-group {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+  }
+  .elite-date-group.group-tabs {
+    flex: 1 1 65% !important;
+  }
+  .elite-date-group.group-period {
+    order: 0;
+    flex: 1 1 25% !important;
+    max-width: none !important;
+  }
+  .elite-date-group.group-date {
+    flex: 1 1 40% !important;
+  }
+  
+  .elite-date-group label {
+    font-size: 0.7rem;
+    margin-bottom: 0.15rem;
+  }
+  .elite-date-group .elite-input {
+    padding: 0.45rem 0.6rem;
+    font-size: 0.8rem;
+  }
+  .elite-range-sep {
+    display: flex;
+    font-size: 0.85rem;
+    padding: 0 0.15rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Row 3: Selects in 2x2 grid */
+  .elite-filter-row:last-child {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .elite-select-group {
+    min-width: 0;
+  }
+  .elite-select-group label {
+    font-size: 0.7rem;
+    margin-bottom: 0.15rem;
   }
 }
 </style>

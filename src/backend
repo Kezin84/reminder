@@ -9,6 +9,15 @@ const CACHE_KEY  = "report_cache";
 const CACHE_TTL  = 25; // giây – dưới ngưỡng 30s của CacheService
 
 // ─────────────────────────────────────────────────────────────
+//  TELEGRAM CONFIG
+//  ⚠️  CHAT_IDS: chạy getChatIds() sau khi user nhắn bot ít nhất 1 lần
+//      để lấy chat_id, rồi điền vào mảng CHAT_IDS bên dưới
+// ─────────────────────────────────────────────────────────────
+const TG_TOKEN = "8611304071:AAHomVoR-atODyXz7j_ffxrYw6ugwlZ5aRI";
+const TG_API   = `https://api.telegram.org/bot${TG_TOKEN}`;
+const CHAT_IDS = []; // ví dụ: [123456789, 987654321]
+
+// ─────────────────────────────────────────────────────────────
 //  HELPER: lấy sheet
 // ─────────────────────────────────────────────────────────────
 function getSheet() {
@@ -197,18 +206,166 @@ function deleteRow(p) {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  doGet  –  ?action=get&tag=xxx&limit=20&offset=0
-//  ?action=delete&id=RPT_xxx  (xoá qua GET nếu cần)
+//  TELEGRAM: lấy danh sách chat_id từ getUpdates
+//  Chạy hàm này 1 lần trong Apps Script Editor để tìm chat_id
+// ─────────────────────────────────────────────────────────────
+function getChatIds() {
+  const url  = `${TG_API}/getUpdates`;
+  const res  = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+  const json = JSON.parse(res.getContentText());
+
+  if (!json.ok || !json.result.length) {
+    Logger.log("Chưa có tin nhắn nào. Hãy nhắn bot trước rồi chạy lại.");
+    return;
+  }
+
+  const ids = [...new Set(json.result.map(u => u.message?.chat?.id).filter(Boolean))];
+  Logger.log("Danh sách chat_id: " + JSON.stringify(ids));
+  Logger.log("➡️  Copy vào CHAT_IDS = " + JSON.stringify(ids));
+}
+
+// ─────────────────────────────────────────────────────────────
+//  TELEGRAM: gửi message đến tất cả CHAT_IDS
+// ─────────────────────────────────────────────────────────────
+function sendTelegram(text) {
+  if (!CHAT_IDS.length) {
+    Logger.log("⚠️  CHAT_IDS rỗng. Chạy getChatIds() để lấy chat_id.");
+    return;
+  }
+
+  const options = {
+    method    : "post",
+    contentType: "application/json",
+    muteHttpExceptions: true
+  };
+
+  CHAT_IDS.forEach(chatId => {
+    options.payload = JSON.stringify({
+      chat_id    : chatId,
+      text       : text,
+      parse_mode : "HTML"
+    });
+    UrlFetchApp.fetch(`${TG_API}/sendMessage`, options);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+//  BUILD báo cáo công việc hôm nay
+// ─────────────────────────────────────────────────────────────
+function buildReportMessage(label) {
+  const sheet   = getSheet();
+  const lastRow = sheet.getLastRow();
+
+  // Lấy ngày hôm nay dạng DD/M/YYYY hoặc DD/MM/YYYY để so khớp THOI_GIAN
+  const now  = new Date();
+  const pad  = n => String(n).padStart(2, "0");
+  const today = `${pad(now.getDate())}/${now.getMonth()+1}/${now.getFullYear()}`;
+
+  if (lastRow < 2) {
+    return `${label}\n\n📭 Không có dữ liệu trong sheet.`;
+  }
+
+  const values = sheet.getRange(2, 1, lastRow - 1, 7).getValues();
+
+  const all = values.filter(r => r[0] !== "" && String(r[2]).includes(today));
+
+  const done    = all.filter(r => String(r[6]).trim().toLowerCase() === "hoàn thành");
+  const pending = all.filter(r => String(r[6]).trim().toLowerCase() !== "hoàn thành");
+
+  const fmt = rows =>
+    rows.length === 0
+      ? "  <i>(không có)</i>"
+      : rows.map((r, i) =>
+          `  ${i+1}. <b>${r[3]}</b>${r[1] ? " ["+r[1]+"]" : ""}${r[5] ? " #"+r[5] : ""}`
+        ).join("\n");
+
+  return [
+    `${label}`,
+    `📅 Ngày: <b>${today}</b>`,
+    ``,
+    `✅ <b>Hoàn thành (${done.length})</b>`,
+    fmt(done),
+    ``,
+    `🔄 <b>Chưa hoàn thành (${pending.length})</b>`,
+    fmt(pending),
+    ``,
+    `📊 Tổng: ${all.length} công việc`
+  ].join("\n");
+}
+
+// ─────────────────────────────────────────────────────────────
+//  TRIGGER: gửi lúc 12:00 trưa
+// ─────────────────────────────────────────────────────────────
+function sendReport_12h() {
+  const msg = buildReportMessage("🕛 <b>BÁO CÁO BUỔI TRƯA (12:00)</b>");
+  sendTelegram(msg);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  TRIGGER: gửi lúc 17:00 chiều
+// ─────────────────────────────────────────────────────────────
+function sendReport_17h() {
+  const msg = buildReportMessage("🕔 <b>BÁO CÁO CUỐI NGÀY (17:00)</b>");
+  sendTelegram(msg);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  SETUP TRIGGER: chạy 1 lần để đăng ký lịch tự động
+//  Sau khi chạy → vào Extensions > Apps Script > Triggers để kiểm tra
+// ─────────────────────────────────────────────────────────────
+function setupDailyTriggers() {
+  // Xoá trigger cũ tránh trùng
+  ScriptApp.getProjectTriggers().forEach(t => {
+    if (["sendReport_12h","sendReport_17h"].includes(t.getHandlerFunction())) {
+      ScriptApp.deleteTrigger(t);
+    }
+  });
+
+  // 12:00 trưa (múi giờ của Spreadsheet – set Vietnam UTC+7 trong Settings)
+  ScriptApp.newTrigger("sendReport_12h")
+    .timeBased()
+    .everyDays(1)
+    .atHour(12)
+    .nearMinute(0)
+    .create();
+
+  // 17:00 chiều
+  ScriptApp.newTrigger("sendReport_17h")
+    .timeBased()
+    .everyDays(1)
+    .atHour(17)
+    .nearMinute(0)
+    .create();
+
+  Logger.log("✅ Đã tạo 2 trigger: 12:00 và 17:00 mỗi ngày.");
+}
+
+// ─────────────────────────────────────────────────────────────
+//  TEST: gửi tin nhắn thử ngay lập tức
+// ─────────────────────────────────────────────────────────────
+function testSendNow() {
+  const msg = buildReportMessage("🧪 <b>TEST BÁO CÁO</b>");
+  sendTelegram(msg);
+  Logger.log("Đã gửi test:\n" + msg);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  doGet  –  ?sheet=report|khach_hang  &action=get|delete  &...filters
 // ─────────────────────────────────────────────────────────────
 function doGet(e) {
   const params = e.parameter || {};
+  const sheet  = (params.sheet || "report").toLowerCase();
   let result;
 
   try {
-    if (params.action === "delete") {
-      result = deleteRow(params);
+    if (sheet === "khach_hang") {
+      result = params.action === "delete"
+        ? kh_deleteRow(params)
+        : kh_getData(params);
     } else {
-      result = getData(params);
+      result = params.action === "delete"
+        ? deleteRow(params)
+        : getData(params);
     }
   } catch (err) {
     result = { status: "error", message: err.message };
@@ -220,14 +377,20 @@ function doGet(e) {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  doPost  –  body JSON: { action, ...fields }
+//  doPost  –  body JSON: { sheet, action, ...fields }
 // ─────────────────────────────────────────────────────────────
 function doPost(e) {
   let result;
 
   try {
     const payload = JSON.parse(e.postData.contents || "{}");
-    result = postData(payload);
+    const sheet   = (payload.sheet || "report").toLowerCase();
+
+    if (sheet === "khach_hang") {
+      result = kh_postData(payload);
+    } else {
+      result = postData(payload);
+    }
   } catch (err) {
     result = { status: "error", message: err.message };
   }
@@ -235,4 +398,204 @@ function doPost(e) {
   return ContentService
     .createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+
+// ╔═══════════════════════════════════════════════════════════╗
+// ║              KHACH_HANG MODULE                            ║
+// ║  Columns (16):                                            ║
+// ║  Ma_khach_hang | Ten_khach_hang | Email_ca_nhan          ║
+// ║  So_dien_thoai_ca_nhan | Ma_cong_ty | Ten_cong_ty        ║
+// ║  So_dien_thoai_cong_ty | So_fax_cong_ty | Dia_chi_cong_ty║
+// ║  Email_cong_ty | Website_cong_ty | Hoa_hong              ║
+// ║  Tong_chi_tieu | Cong_no_chua_thanh_toan                 ║
+// ║  Trang_thai | Ghi_chu                                     ║
+// ╚═══════════════════════════════════════════════════════════╝
+
+const KH_SHEET_NAME = "KHACH_HANG";
+const KH_CACHE_KEY  = "kh_cache";
+const KH_COLS       = 16;
+
+// Mapping index → field name
+const KH_FIELDS = [
+  "ma_khach_hang",          // 0
+  "ten_khach_hang",         // 1
+  "email_ca_nhan",          // 2
+  "so_dien_thoai_ca_nhan",  // 3
+  "ma_cong_ty",             // 4
+  "ten_cong_ty",            // 5
+  "so_dien_thoai_cong_ty",  // 6
+  "so_fax_cong_ty",         // 7
+  "dia_chi_cong_ty",        // 8
+  "email_cong_ty",          // 9
+  "website_cong_ty",        // 10
+  "hoa_hong",               // 11
+  "tong_chi_tieu",          // 12
+  "cong_no_chua_thanh_toan",// 13
+  "trang_thai",             // 14
+  "ghi_chu"                 // 15
+];
+
+// ─────────────────────────────────────────────────────────────
+//  HELPER: lấy sheet KHACH_HANG
+// ─────────────────────────────────────────────────────────────
+function kh_getSheet() {
+  return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(KH_SHEET_NAME);
+}
+
+function kh_invalidateCache() {
+  CacheService.getScriptCache().remove(KH_CACHE_KEY);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  HELPER: tạo mã khách hàng tự động  →  KH_YYYYMMDD_xxxxx
+// ─────────────────────────────────────────────────────────────
+function kh_genID() {
+  const d   = new Date();
+  const pad = (n, l=2) => String(n).padStart(l, "0");
+  return `KH_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  HELPER: convert array row → object
+// ─────────────────────────────────────────────────────────────
+function kh_rowToObj(r) {
+  const obj = {};
+  KH_FIELDS.forEach((f, i) => { obj[f] = r[i] !== undefined ? r[i] : ""; });
+  return obj;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  HELPER: convert object → array (đúng thứ tự cột)
+// ─────────────────────────────────────────────────────────────
+function kh_objToRow(p, existing) {
+  return KH_FIELDS.map((f, i) =>
+    p[f] !== undefined ? p[f] : (existing ? existing[i] : "")
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+//  GET khách hàng
+//  Params: ten, trang_thai, cong_ty, search, limit, offset
+// ─────────────────────────────────────────────────────────────
+function kh_getData(params) {
+  const cache = CacheService.getScriptCache();
+
+  const filterTen     = params.ten        || null; // tìm theo tên
+  const filterStatus  = params.trang_thai || null;
+  const filterCongTy  = params.cong_ty    || null;
+  const filterSearch  = params.search     || null; // tìm toàn text
+  const filterMa      = params.ma         || null; // lấy 1 KH theo mã
+  const limit         = parseInt(params.limit)  || 0;
+  const offset        = parseInt(params.offset) || 0;
+
+  const useCache = !filterTen && !filterStatus && !filterCongTy
+                && !filterSearch && !filterMa && !limit;
+
+  if (useCache) {
+    const cached = cache.get(KH_CACHE_KEY);
+    if (cached) return JSON.parse(cached);
+  }
+
+  const sheet   = kh_getSheet();
+  const lastRow = sheet.getLastRow();
+
+  if (lastRow < 2) {
+    const empty = { status: "success", total: 0, data: [] };
+    if (useCache) cache.put(KH_CACHE_KEY, JSON.stringify(empty), CACHE_TTL);
+    return empty;
+  }
+
+  const values = sheet.getRange(2, 1, lastRow - 1, KH_COLS).getValues();
+
+  let rows = values
+    .filter(r => r[0] !== "")
+    .map(r => kh_rowToObj(r));
+
+  // --- filters ---
+  if (filterMa)     rows = rows.filter(r => r.ma_khach_hang === filterMa);
+  if (filterTen)    rows = rows.filter(r => r.ten_khach_hang.toLowerCase().includes(filterTen.toLowerCase()));
+  if (filterStatus) rows = rows.filter(r => r.trang_thai.toLowerCase() === filterStatus.toLowerCase());
+  if (filterCongTy) rows = rows.filter(r => r.ten_cong_ty.toLowerCase().includes(filterCongTy.toLowerCase()));
+  if (filterSearch) {
+    const q = filterSearch.toLowerCase();
+    rows = rows.filter(r =>
+      Object.values(r).some(v => String(v).toLowerCase().includes(q))
+    );
+  }
+
+  const total = rows.length;
+  if (limit > 0) rows = rows.slice(offset, offset + limit);
+
+  const result = { status: "success", total, offset, limit, data: rows };
+  if (useCache) cache.put(KH_CACHE_KEY, JSON.stringify(result), CACHE_TTL);
+  return result;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  POST router
+// ─────────────────────────────────────────────────────────────
+function kh_postData(payload) {
+  const action = (payload.action || "add").toLowerCase();
+  if (action === "add")    return kh_addRow(payload);
+  if (action === "update") return kh_updateRow(payload);
+  if (action === "delete") return kh_deleteRow(payload);
+  return { status: "error", message: "action không hợp lệ. Dùng: add | update | delete" };
+}
+
+// ─────────────────────────────────────────────────────────────
+//  ADD
+// ─────────────────────────────────────────────────────────────
+function kh_addRow(p) {
+  if (!p.ten_khach_hang) return { status: "error", message: "ten_khach_hang là bắt buộc" };
+
+  const sheet = kh_getSheet();
+  const id    = p.ma_khach_hang || kh_genID();
+  p.ma_khach_hang = id;
+
+  sheet.appendRow(kh_objToRow(p, null));
+  kh_invalidateCache();
+  return { status: "success", action: "add", ma_khach_hang: id };
+}
+
+// ─────────────────────────────────────────────────────────────
+//  UPDATE (partial – chỉ cần truyền field muốn đổi)
+// ─────────────────────────────────────────────────────────────
+function kh_updateRow(p) {
+  if (!p.ma_khach_hang) return { status: "error", message: "ma_khach_hang là bắt buộc để update" };
+
+  const sheet   = kh_getSheet();
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return { status: "error", message: "Sheet rỗng" };
+
+  const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues().flat();
+  const idx = ids.indexOf(p.ma_khach_hang);
+  if (idx === -1) return { status: "error", message: `Không tìm thấy: ${p.ma_khach_hang}` };
+
+  const rowNum  = idx + 2;
+  const existing = sheet.getRange(rowNum, 1, 1, KH_COLS).getValues()[0];
+  sheet.getRange(rowNum, 1, 1, KH_COLS).setValues([kh_objToRow(p, existing)]);
+
+  kh_invalidateCache();
+  return { status: "success", action: "update", ma_khach_hang: p.ma_khach_hang };
+}
+
+// ─────────────────────────────────────────────────────────────
+//  DELETE
+// ─────────────────────────────────────────────────────────────
+function kh_deleteRow(p) {
+  const id = p.ma_khach_hang || p.id;
+  if (!id) return { status: "error", message: "ma_khach_hang là bắt buộc để delete" };
+
+  const sheet   = kh_getSheet();
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return { status: "error", message: "Sheet rỗng" };
+
+  const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues().flat();
+  const idx = ids.indexOf(id);
+  if (idx === -1) return { status: "error", message: `Không tìm thấy: ${id}` };
+
+  sheet.deleteRow(idx + 2);
+  kh_invalidateCache();
+  return { status: "success", action: "delete", ma_khach_hang: id };
 }
