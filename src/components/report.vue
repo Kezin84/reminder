@@ -146,6 +146,10 @@
 
     <!-- Action Buttons -->
     <div class="action-bar">
+      <button class="mobile-action-btn empty-days" @click="showEmptyDays">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        Báo lịch trống
+      </button>
       <button class="mobile-action-btn excel" @click="exportExcel">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         Xuất Excel
@@ -430,6 +434,9 @@
 
           <div class="elite-modal-actions">
             <button type="button" class="elite-btn-cancel" @click="closeModal" :disabled="saving">Huỷ Bỏ</button>
+            <button v-if="!isEditing" type="button" class="elite-btn-secondary" @click="saveReport({ openEmpty: true })" :disabled="saving" style="background: rgba(99, 102, 241, 0.1); color: #4f46e5; border-color: rgba(99, 102, 241, 0.2);">
+              Thêm & làm tiếp mục trống
+            </button>
             <button v-if="!isEditing" type="button" class="elite-btn-secondary" @click="saveReport({ continue: true })" :disabled="saving">
               <span v-if="saving" class="spinner-small"></span>
               Thêm & làm tiếp
@@ -486,6 +493,8 @@
       </div>
     </div>
 
+
+
     <!-- Modal Chọn Khách Hàng -->
     <div class="elite-modal-overlay" v-if="showCustomerModal" @click.self="showCustomerModal = false">
       <div class="elite-modal" style="max-width: 550px; display: flex; flex-direction: column; max-height: 85vh;">
@@ -523,6 +532,38 @@
                 Không tìm thấy khách hàng nào.
               </li>
             </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Báo Lịch Trống -->
+    <div class="elite-modal-overlay" v-if="isEmptyDaysModalOpen" @click.self="isEmptyDaysModalOpen = false" style="z-index: 999999;">
+      <div class="elite-modal" style="max-width: 500px;">
+        <div class="elite-modal-header">
+          <div class="elite-modal-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <h2>Danh SÁCH NGÀY TRỐNG</h2>
+          </div>
+          <button class="elite-btn-close" @click="isEmptyDaysModalOpen = false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div class="elite-modal-body">
+          <div v-if="emptyDays.length === 0" class="empty-state" style="padding: 2rem;">
+            <p>Không có buổi nào trống trong khoảng thời gian này.</p>
+          </div>
+          <div v-else class="empty-days-list" style="max-height: 400px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.8rem; padding: 0.5rem;">
+            <div v-for="(slot, idx) in emptyDays" :key="idx" class="empty-day-item" @click="openAddModalWithSlot(slot)" style="padding: 0.8rem; background: #f8fafc; border-radius: 16px; border: 1.5px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; transition: all 0.2s; cursor: pointer;">
+              <span style="font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">{{ getThuText(slot.date) }}</span>
+              <span style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">{{ formatDateDMY(slot.date) }}</span>
+              <span :class="slot.period === 'Sáng' ? 'empty-badge-morning' : 'empty-badge-afternoon'" style="margin-top: 0.4rem;">
+                {{ slot.period === 'Sáng' ? 'Trống Sáng' : 'Trống Chiều' }}
+              </span>
+            </div>
+          </div>
+          <div class="elite-modal-actions" style="margin-top: 1.5rem;">
+            <button type="button" class="elite-btn-primary" @click="isEmptyDaysModalOpen = false" style="width: 100%; justify-content: center;">Đóng</button>
           </div>
         </div>
       </div>
@@ -941,6 +982,31 @@ const openAddModal = () => {
   isModalOpen.value = true
 }
 
+const openAddModalWithSlot = (slot) => {
+  isEmptyDaysModalOpen.value = false;
+  isEditing.value = false;
+  formData.value = {
+    id: '',
+    phan_loai: 'CÔNG VIỆC',
+    noi_dung: '',
+    ghi_chu: '',
+    tag: 'BÌNH THƯỜNG',
+    trang_thai: 'Chưa xử lý'
+  };
+  
+  const d = slot.date;
+  const thu = d.getDay();
+  timeInputs.value = {
+    hour: slot.period === 'Sáng' ? '08' : '14',
+    minute: '00',
+    thu: String(thu === 0 ? 8 : thu + 1),
+    day: String(d.getDate()).padStart(2, '0'),
+    month: String(d.getMonth() + 1).padStart(2, '0'),
+    year: String(d.getFullYear())
+  };
+  isModalOpen.value = true;
+}
+
 const openEditModal = (report) => {
   isEditing.value = true
   formData.value = { ...report }
@@ -1006,9 +1072,10 @@ const highlightedReportId = ref(null)
 
 const saveReport = async (options = {}) => {
   const isContinue = !!options.continue;
+  const isOpenEmpty = !!options.openEmpty;
   
-  if (isContinue && !formData.value.noi_dung) {
-    return; // Form validation will handle focus for submit button, but for manual button we check here
+  if ((isContinue || isOpenEmpty) && !formData.value.noi_dung) {
+    return;
   }
 
   if (API_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
@@ -1047,8 +1114,11 @@ const saveReport = async (options = {}) => {
   }
 
   // Tắt loading và xử lý đóng modal/reset
-  if (!isContinue) {
+  if (!isContinue && !isOpenEmpty) {
     isModalOpen.value = false;
+  } else if (isOpenEmpty) {
+    isModalOpen.value = false;
+    showEmptyDays();
   } else {
     formData.value.noi_dung = '';
   }
@@ -1191,6 +1261,90 @@ const exportInputs = ref({
   year: String(new Date().getFullYear())
 })
 
+const isEmptyDaysModalOpen = ref(false)
+const emptyDays = ref([])
+
+const getThuText = (date) => {
+  const day = date.getDay();
+  return day === 0 ? 'Chủ Nhật' : `Thứ ${day + 1}`;
+}
+
+const formatDateDMY = (date) => {
+  return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+}
+
+const showEmptyDays = () => {
+  try {
+    const slots = [];
+    const currentReports = reports.value || [];
+    const workReports = currentReports.filter(r => r.phan_loai === 'CÔNG VIỆC');
+    
+    let startDate, endDate;
+    
+    if (filters.value.filterMode === 'day') {
+      startDate = new Date(filters.value.dateFrom);
+      endDate = new Date(filters.value.dateTo);
+    } else if (filters.value.filterMode === 'month') {
+      const [y, m] = filters.value.monthFrom.split('-');
+      startDate = new Date(Number(y), Number(m) - 1, 1);
+      const [ye, me] = filters.value.monthTo.split('-');
+      endDate = new Date(Number(ye), Number(me), 0);
+    } else {
+      startDate = new Date(Number(filters.value.yearFrom), 0, 1);
+      endDate = new Date(Number(filters.value.yearTo), 11, 31);
+    }
+    
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      alert("Vui lòng chọn khoảng thời gian hợp lệ.");
+      return;
+    }
+
+    const reportSlots = new Set();
+    workReports.forEach(r => {
+      const d = parseDateFromReport(r.thoi_gian);
+      if (d) {
+        const displayTime = formatDisplayTime(r.thoi_gian);
+        const dateStr = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+        reportSlots.add(`${dateStr}|${displayTime.period}`);
+      }
+    });
+    
+    const tempDate = new Date(startDate);
+    tempDate.setHours(0,0,0,0);
+    const finalDate = new Date(endDate);
+    finalDate.setHours(23,59,59,999);
+
+    while (tempDate <= finalDate) {
+      const dateStr = `${tempDate.getDate()}/${tempDate.getMonth()+1}/${tempDate.getFullYear()}`;
+      const dayOfWeek = tempDate.getDay(); // 0: CN, 6: T7
+      
+      // Bỏ qua Sáng/Chiều Chủ Nhật (dayOfWeek === 0)
+      if (dayOfWeek !== 0) {
+        // Check morning
+        if (!reportSlots.has(`${dateStr}|Sáng`)) {
+          slots.push({ date: new Date(tempDate), period: 'Sáng' });
+        }
+        
+        // Check afternoon (Bỏ qua Chiều Thứ 7)
+        if (dayOfWeek !== 6) {
+          if (!reportSlots.has(`${dateStr}|Chiều`)) {
+            slots.push({ date: new Date(tempDate), period: 'Chiều' });
+          }
+        }
+      }
+      
+      tempDate.setDate(tempDate.getDate() + 1);
+      if (slots.length > 1000) break;
+    }
+    
+    emptyDays.value = slots;
+    isEmptyDaysModalOpen.value = true;
+  } catch (error) {
+    console.error("Lỗi showEmptyDays:", error);
+    alert("Có lỗi xảy ra khi tính toán lịch trống.");
+  }
+}
+
 const exportExcel = () => {
   exportInputs.value.month = String(new Date().getMonth() + 1).padStart(2, '0');
   exportInputs.value.year = String(new Date().getFullYear());
@@ -1269,15 +1423,15 @@ const doExportExcel = () => {
     right: { style: "thin" }
   };
 
-  const titleStyle = { font: { bold: true, sz: 14, name: "Times New Roman" }, alignment: { horizontal: "center", vertical: "center" } };
-  const subtitleStyle = { font: { bold: true, sz: 12, name: "Times New Roman" }, alignment: { horizontal: "center", vertical: "center" } };
-  const infoStyle = { font: { bold: true, sz: 12, name: "Times New Roman" }, alignment: { horizontal: "left", vertical: "center" } };
-  const headerStyle = { font: { bold: true, sz: 12, name: "Times New Roman" }, alignment: { horizontal: "center", vertical: "center", wrapText: true }, border: borderAll };
-  const dateStyle = { font: { sz: 12, name: "Times New Roman" }, alignment: { horizontal: "center", vertical: "center", wrapText: true }, border: borderAll };
-  const contentStyle = { font: { sz: 12, name: "Times New Roman" }, alignment: { horizontal: "left", vertical: "center", wrapText: true }, border: borderAll };
-  const contentEmptyStyle = { font: { sz: 12, name: "Times New Roman" }, alignment: { horizontal: "left", vertical: "center", wrapText: true }, border: borderAll, fill: { fgColor: { rgb: "B8CCE4" } } };
-  const footerLabelStyle = { font: { bold: true, sz: 12, name: "Times New Roman" }, alignment: { horizontal: "left", vertical: "center" }, border: borderAll };
-  const footerEmptyStyle = { font: { sz: 12, name: "Times New Roman" }, border: borderAll };
+  const titleStyle = { font: { bold: true, sz: 14, name: "Arial" }, alignment: { horizontal: "center", vertical: "center" } };
+  const subtitleStyle = { font: { bold: true, sz: 12, name: "Arial" }, alignment: { horizontal: "center", vertical: "center" } };
+  const infoStyle = { font: { bold: true, sz: 12, name: "Arial" }, alignment: { horizontal: "left", vertical: "center" } };
+  const headerStyle = { font: { bold: true, sz: 12, name: "Arial" }, alignment: { horizontal: "center", vertical: "center", wrapText: true }, border: borderAll };
+  const dateStyle = { font: { sz: 12, name: "Arial" }, alignment: { horizontal: "center", vertical: "center", wrapText: true }, border: borderAll };
+  const contentStyle = { font: { sz: 12, name: "Arial" }, alignment: { horizontal: "left", vertical: "center", wrapText: true }, border: borderAll };
+  const contentEmptyStyle = { font: { sz: 12, name: "Arial" }, alignment: { horizontal: "left", vertical: "center", wrapText: true }, border: borderAll, fill: { fgColor: { rgb: "B8CCE4" } } };
+  const footerLabelStyle = { font: { bold: true, sz: 12, name: "Arial" }, alignment: { horizontal: "left", vertical: "center" }, border: borderAll };
+  const footerEmptyStyle = { font: { sz: 12, name: "Arial" }, border: borderAll };
 
   const range = XLSX.utils.decode_range(ws['!ref']);
   for (let R = range.s.r; R <= range.e.r; ++R) {
@@ -2003,6 +2157,33 @@ button {
   gap: 0.5rem;
 }
 
+.empty-day-item:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.empty-badge-morning {
+  background: #fff7ed;
+  color: #c2410c;
+  padding: 0.25rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  border: 1px solid #ffedd5;
+}
+
+.empty-badge-afternoon {
+  background: #f0f9ff;
+  color: #0369a1;
+  padding: 0.25rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  border: 1px solid #e0f2fe;
+}
+
+
 .elite-btn-secondary:hover:not(:disabled) {
   background: rgba(79, 70, 229, 0.15);
   border-color: rgba(79, 70, 229, 0.3);
@@ -2266,6 +2447,16 @@ button {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
+.mobile-action-btn.empty-days {
+  background: #6366f1;
+  color: white;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+.mobile-action-btn.empty-days:hover {
+  background: #4f46e5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
 .mobile-action-btn.add {
   background: #3b82f6;
   color: white;
@@ -2449,6 +2640,11 @@ button {
   }
   .mobile-action-btn.excel:hover {
     background: #059669;
+  }
+  .mobile-action-btn.empty-days {
+    background: #6366f1;
+    color: white;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
   }
   .mobile-action-btn.add {
     background: #3b82f6;
