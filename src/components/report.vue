@@ -430,6 +430,10 @@
 
           <div class="elite-modal-actions">
             <button type="button" class="elite-btn-cancel" @click="closeModal" :disabled="saving">Huỷ Bỏ</button>
+            <button v-if="!isEditing" type="button" class="elite-btn-secondary" @click="saveReport({ continue: true })" :disabled="saving">
+              <span v-if="saving" class="spinner-small"></span>
+              Thêm & làm tiếp
+            </button>
             <button type="submit" class="elite-btn-primary" :disabled="saving">
               <span v-if="saving" class="spinner-small"></span>
               <template v-if="saving">
@@ -1000,10 +1004,16 @@ const insertCustomerQuote = (customer) => {
 // Lưu (Thêm/Sửa)
 const highlightedReportId = ref(null)
 
-const saveReport = async () => {
+const saveReport = async (options = {}) => {
+  const isContinue = !!options.continue;
+  
+  if (isContinue && !formData.value.noi_dung) {
+    return; // Form validation will handle focus for submit button, but for manual button we check here
+  }
+
   if (API_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
      alert("Vui lòng cập nhật API_URL của Google Apps Script để lưu thực tế.");
-     closeModal();
+     if (!isContinue) closeModal();
      return;
   }
 
@@ -1036,8 +1046,12 @@ const saveReport = async () => {
     }
   }
 
-  // Tắt loading và Đóng modal
-  isModalOpen.value = false;
+  // Tắt loading và xử lý đóng modal/reset
+  if (!isContinue) {
+    isModalOpen.value = false;
+  } else {
+    formData.value.noi_dung = '';
+  }
   saving.value = false;
 
   // Highlight dòng vừa tác động
@@ -1972,6 +1986,32 @@ button {
 .elite-btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 16px -2px rgba(79, 70, 229, 0.4);
+}
+
+.elite-btn-secondary {
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #4f46e5;
+  background: rgba(79, 70, 229, 0.1);
+  border: 1.5px solid rgba(79, 70, 229, 0.2);
+  transition: all 0.2s;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.elite-btn-secondary:hover:not(:disabled) {
+  background: rgba(79, 70, 229, 0.15);
+  border-color: rgba(79, 70, 229, 0.3);
+  transform: translateY(-1px);
+}
+
+.elite-btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* --- STATES (Loading, Empty) --- */
