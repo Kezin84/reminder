@@ -760,6 +760,12 @@ const isListening = ref(false);
 let recognition = null;
 
 const startVoiceRecognition = (field) => {
+  const ua = navigator.userAgent || navigator.vendor || window.opera;
+  if (ua.indexOf("Zalo") > -1) {
+    alert("Trình duyệt nội bộ của Zalo bị chặn quyền Micro nên không thể ghi âm. Vui lòng bấm vào biểu tượng dấu 3 chấm '...' ở góc màn hình và chọn 'Mở bằng trình duyệt' (Safari/Chrome) để dùng tính năng này.");
+    return;
+  }
+
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
     alert("Trình duyệt của bạn không hỗ trợ nhận diện giọng nói. Vui lòng sử dụng Chrome, Edge hoặc Safari.");
