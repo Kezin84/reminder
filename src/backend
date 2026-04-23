@@ -15,7 +15,7 @@ const CACHE_TTL  = 25; // giây – dưới ngưỡng 30s của CacheService
 // ─────────────────────────────────────────────────────────────
 const TG_TOKEN = "8611304071:AAHomVoR-atODyXz7j_ffxrYw6ugwlZ5aRI";
 const TG_API   = `https://api.telegram.org/bot${TG_TOKEN}`;
-const CHAT_IDS = []; // ví dụ: [123456789, 987654321]
+const CHAT_IDS = [5588587730]; // ví dụ: [123456789, 987654321]
 
 // ─────────────────────────────────────────────────────────────
 //  HELPER: lấy sheet
@@ -87,7 +87,7 @@ function getData(params) {
   }
 
   // Lấy tất cả dữ liệu 1 lần (tránh loop getRange từng row)
-  const range  = sheet.getRange(2, 1, lastRow - 1, 7);
+  const range  = sheet.getRange(2, 1, lastRow - 1, 8);
   const values = range.getValues();
 
   let rows = values
@@ -99,7 +99,8 @@ function getData(params) {
       noi_dung    : r[3],
       ghi_chu     : r[4],
       tag         : r[5],
-      trang_thai  : r[6]
+      trang_thai  : r[6],
+      created_time: r[7] || ""
     }));
 
   // --- apply filters ---
@@ -143,6 +144,10 @@ function addRow(p) {
   const id    = p.id || genID();
   const time  = p.thoi_gian || formatTime(new Date());
 
+  const now = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  const createdTimeStr = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+
   sheet.appendRow([
     id,
     p.phan_loai  || "",
@@ -150,7 +155,8 @@ function addRow(p) {
     p.noi_dung,
     p.ghi_chu    || "",
     p.tag        || "",
-    p.trang_thai || ""
+    p.trang_thai || "",
+    createdTimeStr
   ]);
 
   invalidateCache();
@@ -171,16 +177,17 @@ function updateRow(p) {
   if (idx === -1) return { status: "error", message: `Không tìm thấy ID: ${p.id}` };
 
   const rowNum = idx + 2;
-  const row    = sheet.getRange(rowNum, 1, 1, 7).getValues()[0];
+  const row    = sheet.getRange(rowNum, 1, 1, 8).getValues()[0];
 
-  sheet.getRange(rowNum, 1, 1, 7).setValues([[
+  sheet.getRange(rowNum, 1, 1, 8).setValues([[
     row[0],
     p.phan_loai  !== undefined ? p.phan_loai  : row[1],
     p.thoi_gian  !== undefined ? p.thoi_gian  : row[2],
     p.noi_dung   !== undefined ? p.noi_dung   : row[3],
     p.ghi_chu    !== undefined ? p.ghi_chu    : row[4],
     p.tag        !== undefined ? p.tag        : row[5],
-    p.trang_thai !== undefined ? p.trang_thai : row[6]
+    p.trang_thai !== undefined ? p.trang_thai : row[6],
+    row[7]
   ]]);
 
   invalidateCache();
@@ -259,7 +266,7 @@ function buildReportMessage(label) {
   // Lấy ngày hôm nay dạng DD/M/YYYY hoặc DD/MM/YYYY để so khớp THOI_GIAN
   const now  = new Date();
   const pad  = n => String(n).padStart(2, "0");
-  const today = `${pad(now.getDate())}/${now.getMonth()+1}/${now.getFullYear()}`;
+  const today = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
 
   if (lastRow < 2) {
     return `${label}\n\n📭 Không có dữ liệu trong sheet.`;
@@ -272,12 +279,28 @@ function buildReportMessage(label) {
   const done    = all.filter(r => String(r[6]).trim().toLowerCase() === "hoàn thành");
   const pending = all.filter(r => String(r[6]).trim().toLowerCase() !== "hoàn thành");
 
-  const fmt = rows =>
-    rows.length === 0
-      ? "  <i>(không có)</i>"
-      : rows.map((r, i) =>
-          `  ${i+1}. <b>${r[3]}</b>${r[1] ? " ["+r[1]+"]" : ""}${r[5] ? " #"+r[5] : ""}`
-        ).join("\n");
+  const fmt = rows => {
+    if (rows.length === 0) return "  <i>(không có)</i>";
+
+    const grouped = {};
+    rows.forEach(r => {
+      const pl = String(r[1]).trim() || "KHÔNG PHÂN LOẠI";
+      if (!grouped[pl]) grouped[pl] = [];
+      grouped[pl].push(r);
+    });
+
+    const lines = [];
+    for (const pl in grouped) {
+      lines.push(`🔸 <b>${pl}</b>`);
+      grouped[pl].forEach((r, idx) => {
+        const noiDung = r[3] || "";
+        const ghiChu = r[4] ? ` (${r[4]})` : "";
+        const uuTien = r[5] ? ` [${r[5]}]` : "";
+        lines.push(`    ${idx + 1}. ${noiDung}${ghiChu}`);
+      });
+    }
+    return lines.join("\n");
+  };
 
   return [
     `${label}`,

@@ -184,21 +184,22 @@
                 <th width="5%">STT</th>
                 <th width="15%">Thời Gian</th>
                 <th width="10%">Phân Loại</th>
-                <th width="30%">Nội Dung</th>
+                <th width="20%">Nội Dung</th>
                 <th width="15%">Ghi Chú</th>
                 <th width="10%">Độ Quan Trọng</th>
                 <th width="10%">Trạng Thái</th>
+                <th width="10%">  Created_time</th>
                 <th width="5%" class="text-right">Thao Tác</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="filteredReports.length === 0">
-                <td colspan="8" class="empty-state">
+                <td colspan="9" class="empty-state">
                   <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
                   <p>Không có báo cáo nào khớp với tìm kiếm của bạn.</p>
                 </td>
               </tr>
-              <tr v-for="(report, index) in filteredReports" :key="report.id" class="elite-row" :class="{ 'highlight-row': report.id === highlightedReportId }" @click="openEditModal(report)">
+              <tr v-for="(report, index) in filteredReports" :key="report.id" class="elite-row" :class="{ 'highlight-row': report.id === highlightedReportId, 'deleting-row': deletingIds.includes(report.id) }" @click="openEditModal(report)">
                 <td><span class="row-index">{{ index + 1 }}</span></td>
                 <td>
                   <div class="elite-time-cell">
@@ -223,6 +224,9 @@
                 <td>
                   <div class="status-pill-tag" :class="getStatusPillClass(report.trang_thai)">{{ report.trang_thai || 'N/A' }}</div>
                 </td>
+                <td style="font-size: 0.8rem; color: #64748b;">
+                  {{ report.created_time || '' }}
+                </td>
                 <td class="col-actions text-right">
                   <button v-if="report.trang_thai !== 'Hoàn thành'" class="elite-action-btn success" @click.stop="markAsCompleted(report)" title="Hoàn thành">
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -246,7 +250,7 @@
           <p>Không có báo cáo nào.</p>
         </div>
         <div v-else v-for="(report, index) in filteredReports" :key="'card-' + report.id" 
-             class="report-card" :class="[getStatusBorderClass(report.trang_thai), { 'highlight-card': report.id === highlightedReportId }]" @click="openEditModal(report)">
+             class="report-card" :class="[getStatusBorderClass(report.trang_thai), { 'highlight-card': report.id === highlightedReportId, 'deleting-row': deletingIds.includes(report.id) }]" @click="openEditModal(report)">
           
           <!-- Hàng 1: STT & Thời gian -->
           <div class="card-row-header">
@@ -287,15 +291,16 @@
 
           <!-- Hàng 5: Hoàn thành, Xoá -->
           <div class="card-row-actions">
-            <button v-if="report.trang_thai !== 'Hoàn thành'" class="btn-action-full success" @click.stop="markAsCompleted(report)">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <span>Hoàn thành</span>
-            </button>
             <button class="btn-action-full delete" @click.stop="confirmDelete(report.id)">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
               <span>Xoá</span>
             </button>
+            <button v-if="report.trang_thai !== 'Hoàn thành'" class="btn-action-full success" @click.stop="markAsCompleted(report)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Hoàn thành</span>
+            </button>
           </div>
+
         </div>
       </div>
     </div>
@@ -304,10 +309,15 @@
     <div class="elite-modal-overlay" v-if="isModalOpen" @click.self="closeModal">
       <div class="elite-modal">
         <div class="elite-modal-header">
-          <div class="elite-modal-title">
-            <svg v-if="!isEditing" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-            <h2>{{ isEditing ? 'Chỉnh Sửa Báo Cáo' : 'Thêm Báo Cáo Mới' }}</h2>
+          <div class="elite-modal-title-wrapper" style="display: flex; flex-direction: column; gap: 0.25rem;">
+            <div class="elite-modal-title">
+              <svg v-if="!isEditing" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              <h2>{{ isEditing ? 'Chỉnh Sửa Báo Cáo' : 'Thêm Báo Cáo Mới' }}</h2>
+            </div>
+            <div v-if="isEditing && formData.created_time" class="mobile-only" style="font-size: 0.75rem; color: #64748b; font-style: italic; margin-left: 1.8rem;">
+              Được tạo lúc: {{ formData.created_time }}
+            </div>
           </div>
           <button class="elite-btn-close" @click="closeModal">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -449,19 +459,19 @@
           <div class="elite-modal-actions form-actions-grid">
             <button type="button" class="elite-btn-cancel" @click="closeModal" :disabled="saving">Huỷ Bỏ</button>
             <button v-if="!isEditing" type="button" class="btn-add-empty" @click="saveReport({ openEmpty: true })" :disabled="saving">
-              Thêm & làm tiếp mục trống
+              THÊM & LÀM TIẾP MỤC TRỐNG
             </button>
             <button v-if="!isEditing" type="button" class="btn-add-continue" @click="saveReport({ continue: true })" :disabled="saving">
               <span v-if="saving" class="spinner-small"></span>
-              Thêm & làm tiếp
+              THÊM & LÀM TIẾP
             </button>
-            <button type="submit" class="elite-btn-primary btn-add-primary" :disabled="saving">
+            <button v-if="!isEditing || hasChanges" type="submit" class="elite-btn-primary btn-add-primary" :disabled="saving">
               <span v-if="saving" class="spinner-small"></span>
               <template v-if="saving">
                 {{ isEditing ? 'Đang Lưu...' : 'Đang Thêm...' }}
               </template>
               <template v-else>
-                {{ isEditing ? 'Lưu Báo Cáo' : 'Thêm Báo Cáo' }}
+                {{ isEditing ? 'Lưu Báo Cáo' : 'THÊM & XONG' }}
               </template>
             </button>
           </div>
@@ -559,9 +569,15 @@
             <div style="margin-top: 0.15rem; color: #4f46e5;">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
             </div>
-            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.4rem;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.4rem; flex: 1;">
               <h2 style="margin: 0; line-height: 1.3;">DANH SÁCH NGÀY TRỐNG</h2>
-              <span v-if="emptyDays.length > 0" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(239, 68, 68, 0.2); white-space: nowrap;">Có {{ emptyDays.length }} buổi</span>
+              <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                <span v-if="emptyDays.length > 0" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(239, 68, 68, 0.2); white-space: nowrap;">Có {{ emptyDays.length }} buổi</span>
+                <div style="display: flex; background: #f1f5f9; padding: 2px; border-radius: 8px;">
+                  <button @click="emptyDaysViewMode = 'list'" :style="emptyDaysViewMode === 'list' ? 'background: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1);' : 'background: transparent; color: #64748b;'" style="padding: 4px 12px; border: none; font-size: 0.8rem; font-weight: 600; border-radius: 6px; cursor: pointer;">Danh Sách</button>
+                  <button @click="emptyDaysViewMode = 'calendar'" :style="emptyDaysViewMode === 'calendar' ? 'background: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1);' : 'background: transparent; color: #64748b;'" style="padding: 4px 12px; border: none; font-size: 0.8rem; font-weight: 600; border-radius: 6px; cursor: pointer;">Tổng Quan</button>
+                </div>
+              </div>
             </div>
           </div>
           <button class="elite-btn-close" @click="isEmptyDaysModalOpen = false">
@@ -569,16 +585,37 @@
           </button>
         </div>
         <div class="elite-modal-body">
-          <div v-if="emptyDays.length === 0" class="empty-state" style="padding: 2rem;">
-            <p>Không có buổi nào trống trong khoảng thời gian này.</p>
+          <div v-if="emptyDaysViewMode === 'list'">
+            <div v-if="emptyDays.length === 0" class="empty-state" style="padding: 2rem;">
+              <p>Không có buổi nào trống trong khoảng thời gian này.</p>
+            </div>
+            <div v-else class="empty-days-list" style="max-height: 400px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.8rem; padding: 0.5rem;">
+              <div v-for="(slot, idx) in emptyDays" :key="idx" class="empty-day-item" @click="openAddModalWithSlot(slot)" style="padding: 0.8rem; background: #f8fafc; border-radius: 16px; border: 1.5px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; transition: all 0.2s; cursor: pointer;">
+                <span style="font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">{{ getThuText(slot.date) }}</span>
+                <span style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">{{ formatDateDMY(slot.date) }}</span>
+                <span :class="slot.period === 'Sáng' ? 'empty-badge-morning' : 'empty-badge-afternoon'" style="margin-top: 0.4rem;">
+                  {{ slot.period === 'Sáng' ? 'Trống Sáng' : 'Trống Chiều' }}
+                </span>
+              </div>
+            </div>
           </div>
-          <div v-else class="empty-days-list" style="max-height: 400px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.8rem; padding: 0.5rem;">
-            <div v-for="(slot, idx) in emptyDays" :key="idx" class="empty-day-item" @click="openAddModalWithSlot(slot)" style="padding: 0.8rem; background: #f8fafc; border-radius: 16px; border: 1.5px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; transition: all 0.2s; cursor: pointer;">
-              <span style="font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">{{ getThuText(slot.date) }}</span>
-              <span style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">{{ formatDateDMY(slot.date) }}</span>
-              <span :class="slot.period === 'Sáng' ? 'empty-badge-morning' : 'empty-badge-afternoon'" style="margin-top: 0.4rem;">
-                {{ slot.period === 'Sáng' ? 'Trống Sáng' : 'Trống Chiều' }}
-              </span>
+          <div v-else class="empty-calendar-view" style="max-height: 450px; overflow-y: auto; padding: 0.5rem;">
+            <div v-for="month in emptyDaysCalendar" :key="month.year + '-' + month.month" style="margin-bottom: 1.5rem;">
+              <h3 style="font-size: 1rem; color: #1e293b; margin-bottom: 0.8rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.4rem;">Tháng {{ month.month }} / {{ month.year }}</h3>
+              <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-bottom: 0.5rem;">
+                <div v-for="day in ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']" :key="day" style="font-size: 0.75rem; font-weight: 700; color: #64748b;">{{ day }}</div>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;">
+                <div v-for="(day, idx) in month.days" :key="idx" 
+                     style="min-height: 65px; border-radius: 6px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 4px; position: relative;"
+                     :style="day ? (day.inRange ? 'background: #f8fafc; border: 1px solid #e2e8f0;' : 'background: #f1f5f9; opacity: 0.5;') : 'background: transparent;'">
+                  <span v-if="day" style="font-size: 0.8rem; font-weight: 600;" :style="day.isSunday ? 'color: #ef4444;' : 'color: #334155;'">{{ day.dayNum }}</span>
+                  <div v-if="day && day.inRange" style="display: flex; flex-direction: column; gap: 2px; margin-top: auto; width: 100%;">
+                    <div v-if="!day.isSunday && day.emptyMorning" @click="openAddModalWithSlot({ date: day.date, period: 'Sáng' })" style="background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; font-size: 0.6rem; font-weight: 700; border-radius: 4px; width: 100%; cursor: pointer; text-align: center;">Sáng</div>
+                    <div v-if="!day.isSunday && !day.isSaturday && day.emptyAfternoon" @click="openAddModalWithSlot({ date: day.date, period: 'Chiều' })" style="background: #fdf4ff; color: #a21caf; border: 1px solid #fbcfe8; font-size: 0.6rem; font-weight: 700; border-radius: 4px; width: 100%; cursor: pointer; text-align: center;">Chiều</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="elite-modal-actions" style="margin-top: 1.5rem;">
@@ -587,6 +624,34 @@
         </div>
       </div>
     </div>
+    
+    <!-- Modal Xác Nhận Xóa -->
+    <div class="elite-modal-overlay" v-if="isDeleteModalOpen" @click.self="isDeleteModalOpen = false" style="z-index: 999999;">
+      <div class="elite-modal" style="max-width: 400px;">
+        <div class="elite-modal-header">
+          <div class="elite-modal-title" style="display: flex; align-items: flex-start; gap: 0.6rem;">
+            <div style="margin-top: 0.15rem; color: #ef4444;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
+            <h2 style="margin: 0; line-height: 1.3;">Xóa báo cáo?</h2>
+          </div>
+          <button class="elite-btn-close" @click="isDeleteModalOpen = false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div class="elite-modal-body">
+          <p style="color: #475569; font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">Bạn có chắc chắn muốn xóa báo cáo này không? Hành động này không thể hoàn tác.</p>
+          <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+            <button class="btn-secondary" @click="isDeleteModalOpen = false" style="padding: 0.6rem 1.25rem;">Hủy</button>
+            <button class="btn-primary" @click="executeDelete" style="background: #ef4444; padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 0.5rem; border: none; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              Xóa ngay
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal Ghi Âm Giọng Nói -->
     <div class="elite-modal-overlay" v-if="isVoiceModalOpen" @click.self="cancelVoiceRecording" style="z-index: 999999;">
       <div class="elite-modal" style="max-width: 420px;">
@@ -1157,10 +1222,32 @@ const openAddModalWithSlot = (slot) => {
   isModalOpen.value = true;
 }
 
+const originalData = ref(null);
+const originalTimeInputs = ref(null);
+
+const hasChanges = computed(() => {
+  if (!isEditing.value) return true;
+  if (!originalData.value || !originalTimeInputs.value) return false;
+  
+  const formKeys = ['phan_loai', 'noi_dung', 'ghi_chu', 'tag', 'trang_thai'];
+  for (const k of formKeys) {
+    if (formData.value[k] !== originalData.value[k]) return true;
+  }
+  
+  const timeKeys = ['hour', 'minute', 'thu', 'day', 'month', 'year'];
+  for (const k of timeKeys) {
+    if (timeInputs.value[k] !== originalTimeInputs.value[k]) return true;
+  }
+  
+  return false;
+});
+
 const openEditModal = (report) => {
   isEditing.value = true
   formData.value = { ...report }
+  originalData.value = { ...report }
   timeInputs.value = parseTimeString(report.thoi_gian);
+  originalTimeInputs.value = { ...timeInputs.value }
   isModalOpen.value = true
 }
 
@@ -1249,9 +1336,18 @@ const saveReport = async (options = {}) => {
 
   // Cập nhật UI ngay lập tức
   const tempId = action === 'add' ? `temp_${Date.now()}` : formData.value.id;
+  
+  let newCreatedTime = formData.value.created_time;
+  if (action === 'add') {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, "0");
+    newCreatedTime = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+  }
+
   const newReport = {
     ...formData.value,
-    id: tempId
+    id: tempId,
+    created_time: newCreatedTime
   };
 
   if (action === 'add') {
@@ -1308,6 +1404,63 @@ const saveReport = async (options = {}) => {
   }
 }
 
+// Chọn hàng loạt
+const selectedReports = ref([])
+
+const toggleSelectAll = (event) => {
+  if (event.target.checked) {
+    selectedReports.value = filteredReports.value.map(r => r.id);
+  } else {
+    selectedReports.value = [];
+  }
+}
+
+const isAllSelected = computed(() => {
+  return filteredReports.value.length > 0 && selectedReports.value.length === filteredReports.value.length;
+})
+
+const bulkMarkCompleted = async () => {
+  if (selectedReports.value.length === 0) return;
+  if (!confirm(`Xác nhận đánh dấu hoàn thành ${selectedReports.value.length} công việc đã chọn?`)) return;
+  
+  saving.value = true;
+  try {
+    const promises = selectedReports.value.map(async id => {
+      const report = reports.value.find(r => r.id === id);
+      if (report && report.trang_thai !== 'Hoàn thành') {
+        report.trang_thai = 'Hoàn thành';
+        await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'update', ...report })
+        });
+      }
+    });
+    await Promise.all(promises);
+    selectedReports.value = [];
+  } catch (error) {
+    console.error('Lỗi bulk update', error);
+    alert('Có lỗi xảy ra khi cập nhật hàng loạt.');
+  }
+  saving.value = false;
+}
+
+const bulkDelete = async () => {
+  if (selectedReports.value.length === 0) return;
+  if (!confirm(`Bạn có chắc chắn muốn xóa ${selectedReports.value.length} công việc đã chọn? Hành động này không thể hoàn tác.`)) return;
+  
+  saving.value = true;
+  try {
+    const promises = selectedReports.value.map(id => fetch(`${API_URL}?action=delete&id=${id}`));
+    await Promise.all(promises);
+    reports.value = reports.value.filter(r => !selectedReports.value.includes(r.id));
+    selectedReports.value = [];
+  } catch (error) {
+    console.error('Lỗi bulk delete', error);
+    alert('Có lỗi xảy ra khi xóa hàng loạt.');
+  }
+  saving.value = false;
+}
+
 // Đánh dấu hoàn thành nhanh từ List
 const markAsCompleted = async (report) => {
   if (API_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
@@ -1343,25 +1496,47 @@ const markAsCompleted = async (report) => {
 }
 
 // Xoá
-const confirmDelete = async (id) => {
+const isDeleteModalOpen = ref(false)
+const deleteTarget = ref(null)
+const isDeleting = ref(false)
+const deletingIds = ref([])
+
+const confirmDelete = (id) => {
   if (API_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
       alert("Tính năng xoá cần cấu hình API_URL");
       return;
   }
+  deleteTarget.value = id;
+  isDeleteModalOpen.value = true;
+}
+
+const executeDelete = async () => {
+  if (!deleteTarget.value) return;
+  const id = deleteTarget.value;
   
-  if (confirm('Bạn có chắc chắn muốn xoá báo cáo này không? Hành động này không thể hoàn tác.')) {
-    try {
-      const response = await fetch(`${API_URL}?action=delete&id=${id}`)
-      const result = await response.json()
-      if (result.status === 'success') {
-        reports.value = reports.value.filter(r => r.id !== id);
-      } else {
-        alert('Lỗi khi xoá: ' + result.message)
-      }
-    } catch (error) {
-      console.error('Lỗi delete:', error)
+  isDeleting.value = true;
+  deletingIds.value = [id];
+  isDeleteModalOpen.value = false;
+  
+  try {
+    // Gọi API xoá
+    const response = await fetch(`${API_URL}?action=delete&id=${id}`)
+    const result = await response.json()
+    
+    if (result.status === 'success') {
+      // Đợi hiệu ứng animation chạy xong (400ms)
+      await new Promise(r => setTimeout(r, 400));
+      reports.value = reports.value.filter(r => r.id !== id);
+    } else {
+      alert('Lỗi khi xoá: ' + result.message)
     }
+  } catch (error) {
+    console.error('Lỗi delete:', error)
   }
+  
+  deletingIds.value = [];
+  isDeleting.value = false;
+  deleteTarget.value = null;
 }
 
 // Helpers giao diện
@@ -1413,6 +1588,64 @@ const exportInputs = ref({
 
 const isEmptyDaysModalOpen = ref(false)
 const emptyDays = ref([])
+const emptyDaysViewMode = ref('list'); // 'list' or 'calendar'
+const emptyDaysStartDate = ref(null);
+const emptyDaysEndDate = ref(null);
+
+const emptyDaysCalendar = computed(() => {
+  if (!emptyDaysStartDate.value || !emptyDaysEndDate.value) return [];
+  const result = [];
+  
+  let currMonth = new Date(emptyDaysStartDate.value.getFullYear(), emptyDaysStartDate.value.getMonth(), 1);
+  const endMonth = new Date(emptyDaysEndDate.value.getFullYear(), emptyDaysEndDate.value.getMonth(), 1);
+  
+  while (currMonth <= endMonth) {
+    const year = currMonth.getFullYear();
+    const month = currMonth.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDayOfWeek = new Date(year, month, 1).getDay(); // 0 is Sunday
+    
+    // Adjust firstDayOfWeek if we want Monday to be first (0 = Monday, 6 = Sunday)
+    const startOffset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+    
+    const days = [];
+    for (let i = 0; i < startOffset; i++) {
+      days.push(null); // empty padding
+    }
+    
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateObj = new Date(year, month, d);
+      // Only include if dateObj is within search range
+      const inRange = dateObj >= emptyDaysStartDate.value && dateObj <= emptyDaysEndDate.value;
+      
+      const dayOfWeek = dateObj.getDay();
+      const isSunday = dayOfWeek === 0;
+      const isSaturday = dayOfWeek === 6;
+      
+      const emptyMorning = emptyDays.value.find(e => e.date.getTime() === dateObj.getTime() && e.period === 'Sáng');
+      const emptyAfternoon = emptyDays.value.find(e => e.date.getTime() === dateObj.getTime() && e.period === 'Chiều');
+      
+      days.push({
+        date: dateObj,
+        dayNum: d,
+        inRange,
+        isSunday,
+        isSaturday,
+        emptyMorning: !!emptyMorning,
+        emptyAfternoon: !!emptyAfternoon
+      });
+    }
+    
+    result.push({
+      year,
+      month: month + 1,
+      days
+    });
+    
+    currMonth.setMonth(currMonth.getMonth() + 1);
+  }
+  return result;
+});
 
 const getThuText = (date) => {
   const day = date.getDay();
@@ -1463,6 +1696,10 @@ const showEmptyDays = () => {
     tempDate.setHours(0,0,0,0);
     const finalDate = new Date(endDate);
     finalDate.setHours(23,59,59,999);
+    
+    emptyDaysStartDate.value = new Date(tempDate);
+    emptyDaysEndDate.value = new Date(finalDate);
+    emptyDaysViewMode.value = 'list';
 
     while (tempDate <= finalDate) {
       const dateStr = `${tempDate.getDate()}/${tempDate.getMonth()+1}/${tempDate.getFullYear()}`;
@@ -2465,16 +2702,27 @@ button {
   line-height: 1.3;
   min-height: 48px;
   height: 100%;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   display: flex;
+}
+.form-actions-grid > button:only-child {
+  grid-column: 1 / -1;
 }
 
 /* Swap "Thêm & làm tiếp" with "Hủy bỏ" globally */
-.form-actions-grid .elite-btn-cancel { order: 3; }
+.form-actions-grid .elite-btn-cancel { order: 3; color: #ef4444; }
+.form-actions-grid .elite-btn-cancel:hover { background: #fee2e2; color: #dc2626; }
 .form-actions-grid .btn-add-empty { order: 2; }
 .form-actions-grid .btn-add-continue { order: 1; }
-.form-actions-grid .btn-add-primary { order: 4; }
+.form-actions-grid .btn-add-primary { 
+  order: 4; 
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.3);
+}
+.form-actions-grid .btn-add-primary:hover {
+  box-shadow: 0 8px 16px -2px rgba(16, 185, 129, 0.4);
+}
 
 .empty-day-item:hover {
   transform: translateY(-2px);
@@ -3124,16 +3372,16 @@ button {
 }
 
 .card-row-note {
-  background: #f8fafc;
+  background: #fff1f2;
   padding: 0.75rem;
   border-radius: 10px;
   margin-bottom: 1rem;
-  border-left: 3px solid #e2e8f0;
+  border-left: 3px solid #fecdd3;
 }
 
 .content-note {
   font-size: 0.85rem;
-  color: #64748b;
+  color: #9f1239;
   margin: 0;
   display: flex;
   align-items: flex-start;
@@ -3661,6 +3909,17 @@ button {
   font-size: 0.9rem;
   color: #334155;
   transition: padding 0.2s ease;
+}
+
+.deleting-row {
+  animation: fadeOutDelete 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+  pointer-events: none;
+}
+
+@keyframes fadeOutDelete {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.98); opacity: 0.5; background-color: #fef2f2; }
+  100% { transform: scale(0.95); opacity: 0; background-color: #fef2f2; }
 }
 .elite-table .elite-row:last-child td { border-bottom: none; }
 /* Row Index Badge */
