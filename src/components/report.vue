@@ -315,12 +315,21 @@
         </div>
         
         <form @submit.prevent="saveReport" class="elite-modal-body">
-          <div class="elite-form-group">
-            <label>Phân Loại</label>
-            <select v-model="formData.phan_loai" class="elite-select">
-              <option value="CÔNG VIỆC">CÔNG VIỆC</option>
-              <option value="ĐỜI SỐNG">ĐỜI SỐNG</option>
-            </select>
+          <div class="elite-form-row">
+            <div class="elite-form-group">
+              <label>Phân Loại</label>
+              <select v-model="formData.phan_loai" class="elite-select">
+                <option value="CÔNG VIỆC">CÔNG VIỆC</option>
+                <option value="ĐỜI SỐNG">ĐỜI SỐNG</option>
+              </select>
+            </div>
+            <div class="elite-form-group">
+              <label>Độ quan trọng</label>
+              <select v-model="formData.tag" class="elite-select">
+                <option value="BÌNH THƯỜNG">BÌNH THƯỜNG</option>
+                <option value="ƯU TIÊN">ƯU TIÊN</option>
+              </select>
+            </div>
           </div>
 
           <div class="elite-form-group">
@@ -417,45 +426,36 @@
             <textarea v-model="formData.ghi_chu" placeholder="Các ghi chú bổ sung nếu có..." rows="1" class="elite-input"></textarea>
           </div>
 
-          <div class="elite-form-row">
-            <div class="elite-form-group">
-              <label>Độ quan trọng</label>
-              <select v-model="formData.tag" class="elite-select">
-                <option value="BÌNH THƯỜNG">BÌNH THƯỜNG</option>
-                <option value="ƯU TIÊN">ƯU TIÊN</option>
-              </select>
-            </div>
-            <div class="elite-form-group" v-if="isEditing">
-              <label>Trạng Thái</label>
-              <div class="elite-status-toggle">
-                <button 
-                  type="button" 
-                  :class="['toggle-btn', formData.trang_thai === 'Hoàn thành' ? 'active-success' : '']"
-                  @click="formData.trang_thai = 'Hoàn thành'"
-                >
-                  Hoàn thành
-                </button>
-                <button 
-                  type="button" 
-                  :class="['toggle-btn', formData.trang_thai === 'Chưa xử lý' ? 'active-warning' : '']"
-                  @click="formData.trang_thai = 'Chưa xử lý'"
-                >
-                  Chưa xử lý
-                </button>
-              </div>
+          <div class="elite-form-group" v-if="isEditing">
+            <label>Trạng Thái</label>
+            <div class="elite-status-toggle">
+              <button 
+                type="button" 
+                :class="['toggle-btn', formData.trang_thai === 'Hoàn thành' ? 'active-success' : '']"
+                @click="formData.trang_thai = 'Hoàn thành'"
+              >
+                Hoàn thành
+              </button>
+              <button 
+                type="button" 
+                :class="['toggle-btn', formData.trang_thai === 'Chưa xử lý' ? 'active-warning' : '']"
+                @click="formData.trang_thai = 'Chưa xử lý'"
+              >
+                Chưa xử lý
+              </button>
             </div>
           </div>
 
-          <div class="elite-modal-actions">
+          <div class="elite-modal-actions form-actions-grid">
             <button type="button" class="elite-btn-cancel" @click="closeModal" :disabled="saving">Huỷ Bỏ</button>
-            <button v-if="!isEditing" type="button" class="elite-btn-secondary" @click="saveReport({ openEmpty: true })" :disabled="saving" style="background: rgba(99, 102, 241, 0.1); color: #4f46e5; border-color: rgba(99, 102, 241, 0.2);">
+            <button v-if="!isEditing" type="button" class="btn-add-empty" @click="saveReport({ openEmpty: true })" :disabled="saving">
               Thêm & làm tiếp mục trống
             </button>
-            <button v-if="!isEditing" type="button" class="elite-btn-secondary" @click="saveReport({ continue: true })" :disabled="saving">
+            <button v-if="!isEditing" type="button" class="btn-add-continue" @click="saveReport({ continue: true })" :disabled="saving">
               <span v-if="saving" class="spinner-small"></span>
               Thêm & làm tiếp
             </button>
-            <button type="submit" class="elite-btn-primary" :disabled="saving">
+            <button type="submit" class="elite-btn-primary btn-add-primary" :disabled="saving">
               <span v-if="saving" class="spinner-small"></span>
               <template v-if="saving">
                 {{ isEditing ? 'Đang Lưu...' : 'Đang Thêm...' }}
@@ -555,9 +555,14 @@
     <div class="elite-modal-overlay" v-if="isEmptyDaysModalOpen" @click.self="isEmptyDaysModalOpen = false" style="z-index: 999999;">
       <div class="elite-modal" style="max-width: 500px;">
         <div class="elite-modal-header">
-          <div class="elite-modal-title">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            <h2>Danh SÁCH NGÀY TRỐNG</h2>
+          <div class="elite-modal-title" style="display: flex; align-items: flex-start; gap: 0.6rem;">
+            <div style="margin-top: 0.15rem; color: #4f46e5;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.4rem;">
+              <h2 style="margin: 0; line-height: 1.3;">DANH SÁCH NGÀY TRỐNG</h2>
+              <span v-if="emptyDays.length > 0" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(239, 68, 68, 0.2); white-space: nowrap;">Có {{ emptyDays.length }} buổi</span>
+            </div>
           </div>
           <button class="elite-btn-close" @click="isEmptyDaysModalOpen = false">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -1528,7 +1533,7 @@ const doExportExcel = () => {
         const minute = parseInt(m, 10) || 0;
         const timeVal = hour + minute / 60;
         
-        if (timeVal >= 6 && timeVal <= 12) {
+        if (timeVal >= 4 && timeVal <= 12) {
           morningTasks.push(r.noi_dung);
         } else if (timeVal > 12 && timeVal <= 19) {
           afternoonTasks.push(r.noi_dung);
@@ -2330,16 +2335,19 @@ button {
   border-radius: 10px;
   font-weight: 600;
   font-size: 0.95rem;
-  color: #64748b;
-  background: transparent;
-  border: none;
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
   transition: all 0.2s;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .elite-btn-cancel:hover {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: #e2e8f0;
+  color: #1e293b;
 }
 
 .elite-btn-primary {
@@ -2377,6 +2385,89 @@ button {
   align-items: center;
   gap: 0.5rem;
 }
+
+.elite-btn-secondary:hover {
+  background: rgba(79, 70, 229, 0.15);
+}
+
+.btn-add-continue {
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: white;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.3);
+  transition: all 0.2s;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-add-continue:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -2px rgba(16, 185, 129, 0.4);
+}
+
+.btn-add-empty {
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: white;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: none;
+  box-shadow: 0 4px 12px -2px rgba(59, 130, 246, 0.3);
+  transition: all 0.2s;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-add-empty:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -2px rgba(59, 130, 246, 0.4);
+}
+
+.btn-add-primary {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  box-shadow: 0 4px 12px -2px rgba(239, 68, 68, 0.3) !important;
+}
+
+.btn-add-primary:hover {
+  box-shadow: 0 8px 16px -2px rgba(239, 68, 68, 0.4) !important;
+}
+
+/* Modal Form Actions 2x2 Grid (Global for PC & Mobile) */
+.form-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  width: 100%;
+}
+.form-actions-grid > button {
+  width: 100%;
+  margin: 0;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.3;
+  min-height: 48px;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+/* Swap "Thêm & làm tiếp" with "Hủy bỏ" globally */
+.form-actions-grid .elite-btn-cancel { order: 3; }
+.form-actions-grid .btn-add-empty { order: 2; }
+.form-actions-grid .btn-add-continue { order: 1; }
+.form-actions-grid .btn-add-primary { order: 4; }
 
 .empty-day-item:hover {
   transform: translateY(-2px);
@@ -3772,6 +3863,55 @@ button {
   .elite-select-group label {
     font-size: 0.7rem;
     margin-bottom: 0.15rem;
+  }
+
+  /* Mobile overrides for Modal Form Actions Grid */
+  .form-actions-grid {
+    gap: 0.6rem;
+  }
+  .form-actions-grid > button {
+    padding: 0.6rem 0.4rem !important;
+    font-size: 0.85rem !important;
+    min-height: 44px;
+  }
+
+  /* Compact Modal Layout for Mobile */
+  .elite-modal-header {
+    padding: 1rem 1.25rem 0.75rem;
+  }
+  .elite-modal-body {
+    padding: 0.8rem 1.25rem 1.25rem;
+    gap: 0.8rem;
+  }
+  .elite-form-row {
+    gap: 0.8rem;
+  }
+  .elite-form-group {
+    gap: 0.35rem;
+  }
+  .elite-form-group label {
+    font-size: 0.75rem;
+    margin-bottom: 0;
+  }
+  .elite-time-picker {
+    padding: 0.6rem 0.75rem;
+    gap: 0.6rem;
+  }
+  .elite-quick-times {
+    margin-bottom: 0.25rem;
+    gap: 0.5rem;
+  }
+  .elite-quick-btn {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  .elite-modal-actions {
+    margin-top: 0.25rem;
+    padding-top: 0.75rem;
+  }
+  .elite-input, .elite-select {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
   }
 }
 </style>
