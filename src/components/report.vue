@@ -111,7 +111,7 @@
     <div class="stats-row">
       <div class="stat-card card-total" 
            :class="{ 'elite-active': filters.trang_thai === 'Tất cả' || !filters.trang_thai }"
-           @click="filters.trang_thai = 'Tất cả'">
+           @click="onCardClick('Tất cả')">
         <div class="stat-icon total">
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
         </div>
@@ -122,7 +122,7 @@
       </div>
       <div class="stat-card card-pending" 
            :class="{ 'elite-active': filters.trang_thai === 'Chưa xử lý' }"
-           @click="filters.trang_thai = 'Chưa xử lý'">
+           @click="onCardClick('Chưa xử lý')">
         <div class="stat-icon pending">
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
         </div>
@@ -133,7 +133,7 @@
       </div>
       <div class="stat-card card-done" 
            :class="{ 'elite-active': filters.trang_thai === 'Hoàn thành' }"
-           @click="filters.trang_thai = 'Hoàn thành'">
+           @click="onCardClick('Hoàn thành')">
         <div class="stat-icon done">
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         </div>
@@ -161,138 +161,141 @@
     </div>
 
     <!-- Bảng Dữ Liệu (PC) -->
-    <div class="elite-table-container desktop-only">
-      <div class="elite-table-toolbar">
-        <div class="toolbar-left">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line></svg>
-          <h3>DANH SÁCH BÁO CÁO</h3>
+    <div ref="tableSection">
+      <!-- Bảng Dữ Liệu (PC) -->
+      <div class="elite-table-container desktop-only">
+        <div class="elite-table-toolbar">
+          <div class="toolbar-left">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+            <h3>DANH SÁCH BÁO CÁO</h3>
+          </div>
+          <div class="toolbar-right">
+            <span class="record-badge">{{ filteredReports.length }} việc</span>
+          </div>
         </div>
-        <div class="toolbar-right">
-          <span class="record-badge">{{ filteredReports.length }} việc</span>
+        <div v-if="loading" class="loading-state">
+          <div class="spinner"></div>
+          <p>Đang tải dữ liệu báo cáo...</p>
         </div>
-      </div>
-      <div v-if="loading" class="loading-state">
-        <div class="spinner"></div>
-        <p>Đang tải dữ liệu báo cáo...</p>
-      </div>
-      <div v-else class="elite-table-scroll">
-        <table class="elite-table">
-          <thead>
-            <tr>
-              <th width="5%">STT</th>
-              <th width="15%">Thời Gian</th>
-              <th width="10%">Phân Loại</th>
-              <th width="30%">Nội Dung</th>
-              <th width="15%">Ghi Chú</th>
-              <th width="10%">Độ Quan Trọng</th>
-              <th width="10%">Trạng Thái</th>
-              <th width="5%" class="text-right">Thao Tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="reports.length === 0">
-              <td colspan="8" class="empty-state">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
-                <p>Không có báo cáo nào khớp với tìm kiếm của bạn.</p>
-              </td>
-            </tr>
-            <tr v-for="(report, index) in filteredReports" :key="report.id" class="elite-row" :class="{ 'highlight-row': report.id === highlightedReportId }" @click="openEditModal(report)">
-              <td><span class="row-index">{{ index + 1 }}</span></td>
-              <td>
-                <div class="elite-time-cell">
-                  <div class="elite-time-main">
-                    <span class="elite-time-hm">{{ formatDisplayTime(report.thoi_gian).time }}</span>
-                    <span class="elite-time-thu">{{ formatDisplayTime(report.thoi_gian).thu }}</span>
-                    <span class="elite-time-period" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'is-morning' : 'is-afternoon'">
-                      {{ formatDisplayTime(report.thoi_gian).period }}
-                    </span>
+        <div v-else class="elite-table-scroll">
+          <table class="elite-table">
+            <thead>
+              <tr>
+                <th width="5%">STT</th>
+                <th width="15%">Thời Gian</th>
+                <th width="10%">Phân Loại</th>
+                <th width="30%">Nội Dung</th>
+                <th width="15%">Ghi Chú</th>
+                <th width="10%">Độ Quan Trọng</th>
+                <th width="10%">Trạng Thái</th>
+                <th width="5%" class="text-right">Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="reports.length === 0">
+                <td colspan="8" class="empty-state">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+                  <p>Không có báo cáo nào khớp với tìm kiếm của bạn.</p>
+                </td>
+              </tr>
+              <tr v-for="(report, index) in filteredReports" :key="report.id" class="elite-row" :class="{ 'highlight-row': report.id === highlightedReportId }" @click="openEditModal(report)">
+                <td><span class="row-index">{{ index + 1 }}</span></td>
+                <td>
+                  <div class="elite-time-cell">
+                    <div class="elite-time-main">
+                      <span class="elite-time-hm">{{ formatDisplayTime(report.thoi_gian).time }}</span>
+                      <span class="elite-time-thu">{{ formatDisplayTime(report.thoi_gian).thu }}</span>
+                      <span class="elite-time-period" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'is-morning' : 'is-afternoon'">
+                        {{ formatDisplayTime(report.thoi_gian).period }}
+                      </span>
+                    </div>
+                    <div class="elite-time-date">{{ formatDisplayTime(report.thoi_gian).date }}</div>
                   </div>
-                  <div class="elite-time-date">{{ formatDisplayTime(report.thoi_gian).date }}</div>
-                </div>
-              </td>
-              <td><span class="badge" :class="getCategoryClass(report.phan_loai)">{{ report.phan_loai || 'Chưa phân loại' }}</span></td>
-              <td class="col-content">{{ report.noi_dung }}</td>
-              <td class="col-note">{{ report.ghi_chu }}</td>
-              <td>
-                <div class="tag-list" v-if="report.tag">
-                  <span class="tag" v-for="t in splitTags(report.tag)" :key="t" :class="getTagClass(t)">{{ t }}</span>
-                </div>
-              </td>
-              <td>
-                <div class="status-pill-tag" :class="getStatusPillClass(report.trang_thai)">{{ report.trang_thai || 'N/A' }}</div>
-              </td>
-              <td class="col-actions text-right">
-                <button v-if="report.trang_thai !== 'Hoàn thành'" class="elite-action-btn success" @click.stop="markAsCompleted(report)" title="Hoàn thành">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                </button>
-                <button class="elite-action-btn delete" @click.stop="confirmDelete(report.id)" title="Xoá">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </td>
+                <td><span class="badge" :class="getCategoryClass(report.phan_loai)">{{ report.phan_loai || 'Chưa phân loại' }}</span></td>
+                <td class="col-content">{{ report.noi_dung }}</td>
+                <td class="col-note">{{ report.ghi_chu }}</td>
+                <td>
+                  <div class="tag-list" v-if="report.tag">
+                    <span class="tag" v-for="t in splitTags(report.tag)" :key="t" :class="getTagClass(t)">{{ t }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="status-pill-tag" :class="getStatusPillClass(report.trang_thai)">{{ report.trang_thai || 'N/A' }}</div>
+                </td>
+                <td class="col-actions text-right">
+                  <button v-if="report.trang_thai !== 'Hoàn thành'" class="elite-action-btn success" @click.stop="markAsCompleted(report)" title="Hoàn thành">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  </button>
+                  <button class="elite-action-btn delete" @click.stop="confirmDelete(report.id)" title="Xoá">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
 
-    <div class="card-list mobile-only">
-      <div v-if="loading" class="loading-state">
-        <div class="spinner"></div>
-        <p>Đang tải dữ liệu báo cáo...</p>
-      </div>
-      <div v-else-if="reports.length === 0" class="empty-state" style="padding: 3rem;">
-        <p>Không có báo cáo nào.</p>
-      </div>
-      <div v-else v-for="(report, index) in filteredReports" :key="'card-' + report.id" 
-           class="report-card" :class="[getStatusBorderClass(report.trang_thai), { 'highlight-card': report.id === highlightedReportId }]" @click="openEditModal(report)">
-        
-        <!-- Hàng 1: STT & Thời gian -->
-        <div class="card-row-header">
-          <span class="card-id">#{{ index + 1 }}</span>
-          <div class="card-time-group">
-            <div class="time-primary">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-              <span>{{ formatDisplayTime(report.thoi_gian).time }}</span>
-              <span class="period-tag-mini" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'is-morning' : 'is-afternoon'">
-                {{ formatDisplayTime(report.thoi_gian).period }}
-              </span>
-              <span class="sep">•</span>
-              <span class="day-text">{{ formatDisplayTime(report.thoi_gian).thu }}</span>
+      <div class="card-list mobile-only">
+        <div v-if="loading" class="loading-state">
+          <div class="spinner"></div>
+          <p>Đang tải dữ liệu báo cáo...</p>
+        </div>
+        <div v-else-if="reports.length === 0" class="empty-state" style="padding: 3rem;">
+          <p>Không có báo cáo nào.</p>
+        </div>
+        <div v-else v-for="(report, index) in filteredReports" :key="'card-' + report.id" 
+             class="report-card" :class="[getStatusBorderClass(report.trang_thai), { 'highlight-card': report.id === highlightedReportId }]" @click="openEditModal(report)">
+          
+          <!-- Hàng 1: STT & Thời gian -->
+          <div class="card-row-header">
+            <span class="card-id">#{{ index + 1 }}</span>
+            <div class="card-time-group">
+              <div class="time-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <span>{{ formatDisplayTime(report.thoi_gian).time }}</span>
+                <span class="period-tag-mini" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'is-morning' : 'is-afternoon'">
+                  {{ formatDisplayTime(report.thoi_gian).period }}
+                </span>
+                <span class="sep">•</span>
+                <span class="day-text">{{ formatDisplayTime(report.thoi_gian).thu }}</span>
+              </div>
+              <div class="time-secondary">{{ formatDisplayTime(report.thoi_gian).date }}</div>
             </div>
-            <div class="time-secondary">{{ formatDisplayTime(report.thoi_gian).date }}</div>
+            <div class="status-pill-mini" :class="getStatusPillClass(report.trang_thai)">{{ report.trang_thai }}</div>
           </div>
-          <div class="status-pill-mini" :class="getStatusPillClass(report.trang_thai)">{{ report.trang_thai }}</div>
-        </div>
 
-        <!-- Hàng 2: Tag -->
-        <div class="card-row-tags">
-          <span class="category-badge" :class="getCategoryClass(report.phan_loai)">{{ report.phan_loai }}</span>
-          <span v-if="report.tag" v-for="t in splitTags(report.tag)" :key="t" class="tag-mini" :class="getTagClass(t)">{{ t }}</span>
-        </div>
-
-        <!-- Hàng 3: Nội dung -->
-        <div class="card-row-content">
-          <div class="content-title">{{ report.noi_dung }}</div>
-        </div>
-
-        <!-- Hàng 4: Ghi chú -->
-        <div class="card-row-note" v-if="report.ghi_chu">
-          <div class="content-note">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-            <span>{{ report.ghi_chu }}</span>
+          <!-- Hàng 2: Tag -->
+          <div class="card-row-tags">
+            <span class="category-badge" :class="getCategoryClass(report.phan_loai)">{{ report.phan_loai }}</span>
+            <span v-if="report.tag" v-for="t in splitTags(report.tag)" :key="t" class="tag-mini" :class="getTagClass(t)">{{ t }}</span>
           </div>
-        </div>
 
-        <!-- Hàng 5: Hoàn thành, Xoá -->
-        <div class="card-row-actions">
-          <button v-if="report.trang_thai !== 'Hoàn thành'" class="btn-action-full success" @click.stop="markAsCompleted(report)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            <span>Hoàn thành</span>
-          </button>
-          <button class="btn-action-full delete" @click.stop="confirmDelete(report.id)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            <span>Xoá</span>
-          </button>
+          <!-- Hàng 3: Nội dung -->
+          <div class="card-row-content">
+            <div class="content-title">{{ report.noi_dung }}</div>
+          </div>
+
+          <!-- Hàng 4: Ghi chú -->
+          <div class="card-row-note" v-if="report.ghi_chu">
+            <div class="content-note">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <span>{{ report.ghi_chu }}</span>
+            </div>
+          </div>
+
+          <!-- Hàng 5: Hoàn thành, Xoá -->
+          <div class="card-row-actions">
+            <button v-if="report.trang_thai !== 'Hoàn thành'" class="btn-action-full success" @click.stop="markAsCompleted(report)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Hoàn thành</span>
+            </button>
+            <button class="btn-action-full delete" @click.stop="confirmDelete(report.id)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span>Xoá</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -390,16 +393,27 @@
           <div class="elite-form-group">
             <div class="form-group-header">
               <label>Nội Dung <span class="required">*</span></label>
-              <button type="button" class="elite-quote-btn" @click="openCustomerModal">
-               
-                BÁO GIÁ
-              </button>
+              <div class="header-actions-group">
+                <button type="button" class="elite-voice-btn" @click="startVoiceRecognition('noi_dung')" :class="{ 'is-recording': isRecordingVoice === 'noi_dung' }" title="Nhập liệu bằng giọng nói">
+                  <svg v-if="isRecordingVoice !== 'noi_dung'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12"></rect></svg>
+                </button>
+                <button type="button" class="elite-quote-btn" @click="openCustomerModal">
+                  BÁO GIÁ
+                </button>
+              </div>
             </div>
             <textarea v-model="formData.noi_dung" required placeholder="Mô tả chi tiết nội dung báo cáo..." rows="3" class="elite-input"></textarea>
           </div>
 
           <div class="elite-form-group">
-            <label>Ghi Chú</label>
+            <div class="form-group-header">
+              <label>Ghi Chú</label>
+              <button type="button" class="elite-voice-btn" @click="startVoiceRecognition('ghi_chu')" :class="{ 'is-recording': isRecordingVoice === 'ghi_chu' }" title="Nhập liệu bằng giọng nói">
+                <svg v-if="isRecordingVoice !== 'ghi_chu'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12"></rect></svg>
+              </button>
+            </div>
             <textarea v-model="formData.ghi_chu" placeholder="Các ghi chú bổ sung nếu có..." rows="1" class="elite-input"></textarea>
           </div>
 
@@ -568,11 +582,36 @@
         </div>
       </div>
     </div>
+    <!-- Modal Ghi Âm Giọng Nói -->
+    <div class="elite-modal-overlay" v-if="isVoiceModalOpen" @click.self="cancelVoiceRecording" style="z-index: 999999;">
+      <div class="elite-modal" style="max-width: 420px;">
+        <div class="elite-modal-header" style="justify-content: center; padding-bottom: 0; border-bottom: none;">
+          <div class="elite-modal-title" style="flex-direction: column; align-items: center; gap: 0.8rem; margin: 0 auto;">
+            <div class="voice-recording-indicator" :class="{ 'is-listening': isListening }">
+              <svg v-if="isListening" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect></svg>
+            </div>
+            <h2 style="font-size: 1.25rem;">{{ isListening ? 'Đang nghe...' : 'Đã tạm dừng' }}</h2>
+          </div>
+        </div>
+        <div class="elite-modal-body" style="padding-top: 1rem;">
+          <div class="voice-transcript-box">
+            <span v-if="voiceTranscript">{{ voiceTranscript }}</span>
+            <span v-else class="voice-placeholder">Hãy nói nội dung bạn muốn nhập...</span>
+          </div>
+          <div class="elite-modal-actions" style="justify-content: center; gap: 0.8rem; margin-top: 1.5rem;">
+            <button type="button" class="elite-btn-cancel" @click="cancelVoiceRecording">Huỷ</button>
+            <button type="button" class="elite-btn-secondary" @click="retryVoiceRecording" style="background: rgba(245, 158, 11, 0.1); color: #d97706; border-color: rgba(245, 158, 11, 0.2);">Nói lại</button>
+            <button type="button" class="elite-btn-primary" @click="confirmVoiceRecording">Xong</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import * as XLSX from 'xlsx-js-style'
 import CustomSelect from './CustomSelect.vue'
 
@@ -642,6 +681,105 @@ const filters = ref({
   sortOrder: 'desc',
   period: ''
 })
+
+const isRecordingVoice = ref(null);
+const isVoiceModalOpen = ref(false);
+const voiceTargetField = ref('');
+const voiceTranscript = ref('');
+const isListening = ref(false);
+let recognition = null;
+
+const startVoiceRecognition = (field) => {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert("Trình duyệt của bạn không hỗ trợ nhận diện giọng nói. Vui lòng sử dụng Chrome, Edge hoặc Safari.");
+    return;
+  }
+
+  voiceTargetField.value = field;
+  voiceTranscript.value = '';
+  isVoiceModalOpen.value = true;
+  
+  startListening();
+}
+
+const startListening = () => {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (recognition) recognition.stop();
+
+  recognition = new SpeechRecognition();
+  recognition.lang = 'vi-VN';
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = () => {
+    isListening.value = true;
+    isRecordingVoice.value = voiceTargetField.value;
+  };
+
+  recognition.onresult = (event) => {
+    let fullTranscript = '';
+    for (let i = 0; i < event.results.length; ++i) {
+      fullTranscript += event.results[i][0].transcript;
+    }
+    voiceTranscript.value = fullTranscript;
+  };
+
+  recognition.onerror = (event) => {
+    console.error('Lỗi nhận diện giọng nói:', event.error);
+    isListening.value = false;
+  };
+
+  recognition.onend = () => {
+    isListening.value = false;
+    isRecordingVoice.value = null;
+  };
+
+  recognition.start();
+}
+
+const cancelVoiceRecording = () => {
+  if (recognition) recognition.stop();
+  isVoiceModalOpen.value = false;
+  isListening.value = false;
+  isRecordingVoice.value = null;
+  voiceTranscript.value = '';
+}
+
+const retryVoiceRecording = () => {
+  voiceTranscript.value = '';
+  startListening();
+}
+
+const confirmVoiceRecording = () => {
+  if (recognition) recognition.stop();
+  if (voiceTranscript.value) {
+    if (formData.value[voiceTargetField.value]) {
+      formData.value[voiceTargetField.value] += ' ' + voiceTranscript.value;
+    } else {
+      formData.value[voiceTargetField.value] = voiceTranscript.value;
+    }
+  }
+  isVoiceModalOpen.value = false;
+  isListening.value = false;
+  isRecordingVoice.value = null;
+  voiceTranscript.value = '';
+}
+
+const tableSection = ref(null)
+
+const scrollToTable = () => {
+  nextTick(() => {
+    if (tableSection.value) {
+      tableSection.value.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  })
+}
+
+const onCardClick = (status) => {
+  filters.value.trang_thai = status;
+  scrollToTable();
+}
 
 // Parse ngày từ chuỗi thời gian backend: "HH:MM /thu /DD/MM/YYYY"
 const parseDateFromReport = (thoi_gian) => {
@@ -1498,6 +1636,89 @@ onMounted(() => {
    Dựa trên CSS thuần, với Micro-animations
 ========================================= */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+/* Voice Recording Button */
+.header-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.elite-voice-btn {
+  background: rgba(99, 102, 241, 0.08);
+  color: #4f46e5;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.elite-voice-btn:hover {
+  background: rgba(99, 102, 241, 0.15);
+  transform: translateY(-1px);
+}
+
+.elite-voice-btn.is-recording {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+  animation: pulse-recording 1.5s infinite;
+}
+
+@keyframes pulse-recording {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.voice-recording-indicator {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.voice-recording-indicator.is-listening {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  animation: voice-pulse-indicator 1.5s infinite;
+}
+
+@keyframes voice-pulse-indicator {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.voice-transcript-box {
+  min-height: 120px;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1.25rem;
+  border: 1px solid #e2e8f0;
+  text-align: left;
+  font-size: 1.05rem;
+  color: #1e293b;
+  line-height: 1.6;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.voice-placeholder {
+  color: #94a3b8;
+  font-style: italic;
+}
 
 .report-container {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
