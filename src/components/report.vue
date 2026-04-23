@@ -117,7 +117,7 @@
         </div>
         <div class="stat-info">
           <span class="stat-label">Tổng cộng</span>
-          <span class="stat-value">{{ filteredReports.length }} <span class="unit-text">việc</span></span>
+          <span class="stat-value">{{ totalCount }} <span class="unit-text">việc</span></span>
         </div>
       </div>
       <div class="stat-card card-pending" 
@@ -192,7 +192,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-if="reports.length === 0">
+              <tr v-if="filteredReports.length === 0">
                 <td colspan="8" class="empty-state">
                   <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
                   <p>Không có báo cáo nào khớp với tìm kiếm của bạn.</p>
@@ -242,7 +242,7 @@
           <div class="spinner"></div>
           <p>Đang tải dữ liệu báo cáo...</p>
         </div>
-        <div v-else-if="reports.length === 0" class="empty-state" style="padding: 3rem;">
+        <div v-else-if="filteredReports.length === 0" class="empty-state" style="padding: 3rem;">
           <p>Không có báo cáo nào.</p>
         </div>
         <div v-else v-for="(report, index) in filteredReports" :key="'card-' + report.id" 
@@ -825,11 +825,10 @@ const formatDisplayTime = (thoi_gian) => {
   return { time: thoi_gian, thu: '', date: '', period: '' };
 }
 
-const filteredReports = computed(() => {
+const baseFilteredReports = computed(() => {
   let result = reports.value.filter(r => {
     if (filters.value.tag && r.tag !== filters.value.tag) return false;
     if (filters.value.phan_loai && r.phan_loai !== filters.value.phan_loai) return false;
-    if (filters.value.trang_thai && filters.value.trang_thai !== 'Tất cả' && r.trang_thai !== filters.value.trang_thai) return false;
     if (filters.value.period) {
       const displayTime = formatDisplayTime(r.thoi_gian);
       if (displayTime.period !== filters.value.period) return false;
@@ -890,8 +889,16 @@ const filteredReports = computed(() => {
   return result;
 })
 
-const pendingCount = computed(() => filteredReports.value.filter(r => r.trang_thai === 'Chưa xử lý').length)
-const completedCount = computed(() => filteredReports.value.filter(r => r.trang_thai === 'Hoàn thành').length)
+const filteredReports = computed(() => {
+  return baseFilteredReports.value.filter(r => {
+    if (filters.value.trang_thai && filters.value.trang_thai !== 'Tất cả' && r.trang_thai !== filters.value.trang_thai) return false;
+    return true;
+  });
+});
+
+const totalCount = computed(() => baseFilteredReports.value.length)
+const pendingCount = computed(() => baseFilteredReports.value.filter(r => r.trang_thai === 'Chưa xử lý').length)
+const completedCount = computed(() => baseFilteredReports.value.filter(r => r.trang_thai === 'Hoàn thành').length)
 
 watch(() => filters.value.dateFrom, (newVal) => {
   if (newVal && filters.value.dateTo && newVal > filters.value.dateTo) {
