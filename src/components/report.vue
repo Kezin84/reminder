@@ -3482,8 +3482,8 @@ button {
 .tl-rect {
   flex: 1; min-width: 0;
   border-radius: 20px;
-  padding: 0 0.9rem 0.7rem 0.9rem;
-  display: flex; flex-direction: column; gap: 0.4rem;
+  padding: 0 1.1rem 0.9rem 1.1rem;
+  display: flex; flex-direction: column; gap: 0.55rem;
   position: relative; overflow: hidden;
   transition: all 0.35s ease;
   backdrop-filter: blur(16px);
@@ -3550,10 +3550,10 @@ button {
 .tl-status-chip.pill-default { background: linear-gradient(135deg, #374151, #9ca3af) !important; }
 
 /* Body */
-.tl-rect-body { padding: 0 0.1rem; }
+.tl-rect-body { padding: 0.15rem 0.2rem; }
 .tl-body-text {
-  font-size: 0.85rem; font-weight: 600; color: #0f172a;
-  line-height: 1.5; word-break: break-word;
+  font-size: 0.92rem; font-weight: 600; color: #0f172a;
+  line-height: 1.55; word-break: break-word;
   letter-spacing: -0.01em;
 }
 
@@ -3570,10 +3570,10 @@ button {
   border-radius: 3px 0 0 3px;
 }
 .tl-note-content {
-  display: flex; align-items: flex-start; gap: 0.3rem;
-  padding: 0.35rem 0.5rem;
-  font-size: 0.7rem; color: #881337;
-  font-style: italic; line-height: 1.45;
+  display: flex; align-items: flex-start; gap: 0.35rem;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.78rem; color: #881337;
+  font-style: italic; line-height: 1.5;
 }
 .tl-note-content span { flex: 1; }
 .tl-note-icon {
@@ -3591,8 +3591,8 @@ button {
 }
 .tl-action-btn {
   flex: 1; display: flex; align-items: center; justify-content: center;
-  gap: 0.25rem; padding: 0.35rem 0.4rem;
-  border-radius: 10px; font-size: 0.68rem; font-weight: 700;
+  gap: 0.3rem; padding: 0.5rem 0.6rem;
+  border-radius: 10px; font-size: 0.75rem; font-weight: 700;
   letter-spacing: 0.03em; border: none; cursor: pointer;
   transition: all 0.2s ease; position: relative; overflow: hidden;
 }
