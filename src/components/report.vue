@@ -273,10 +273,16 @@
           <!-- Connector -->
           <div class="tl-connector" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-conn--morning' : 'tl-conn--afternoon'">
             <div class="tl-conn-dot"></div>
+            <!-- Tia sáng chạy dọc connector -->
+            <div class="tl-beam-particle" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-beam--morning' : 'tl-beam--afternoon'"></div>
           </div>
 
           <!-- Hình chữ nhật: Nội dung còn lại -->
           <div class="tl-rect" :class="[report.trang_thai === 'Hoàn thành' ? 'tl-rect--done' : 'tl-rect--pending', formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-border--morning' : 'tl-border--afternoon']">
+            <!-- Tia sáng tỏa ra 2 bên viền hình chữ nhật -->
+            <div class="tl-rect-beam-spread" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-spread--morning' : 'tl-spread--afternoon'"></div>
+            <!-- Glow tại điểm chạm -->
+            <div class="tl-impact-glow" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-glow--morning' : 'tl-glow--afternoon'"></div>
             <!-- Top accent stripe -->
             <div class="tl-accent-stripe" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-stripe--morning' : 'tl-stripe--afternoon'"></div>
             
@@ -284,12 +290,12 @@
             <div class="tl-rect-header">
               <div class="tl-rect-tags">
                 <span class="tl-badge-cat" :class="getCategoryClass(report.phan_loai)">{{ report.phan_loai }}</span>
-                <span v-if="report.tag" v-for="t in splitTags(report.tag)" :key="t" class="tl-badge-tag" :class="getTagClass(t)">{{ t }}</span>
-              </div>
-              <div class="tl-status-chip" :class="getStatusPillClass(report.trang_thai)">
-                <svg v-if="report.trang_thai === 'Hoàn thành'" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                {{ report.trang_thai }}
+                <div class="tl-status-chip" :class="getStatusPillClass(report.trang_thai)">
+                  <svg v-if="report.trang_thai === 'Hoàn thành'" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  {{ report.trang_thai }}
+                </div>
+                <span v-if="report.tag" v-for="t in splitTags(report.tag)" :key="t" v-show="t !== 'BÌNH THƯỜNG'" class="tl-badge-tag" :class="getTagClass(t)">{{ t }}</span>
               </div>
             </div>
 
@@ -903,7 +909,7 @@ const formatDisplayTime = (thoi_gian) => {
     const datePart = parts[2];
     
     const [h, m] = timePart.split(':');
-    const thuText = thuPart === '8' ? 'Chủ Nhật' : `Thứ ${thuPart}`;
+    const thuText = thuPart === '8' ? 'CN' : `Thứ ${thuPart}`;
     const hourNum = parseInt(h);
     const periodText = hourNum < 12 ? 'Sáng' : 'Chiều';
     
@@ -3302,7 +3308,7 @@ button {
 .card-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1.1rem;
 }
 
 .report-card {
@@ -3467,8 +3473,9 @@ button {
 .tl-connector {
   width: 16px; min-width: 16px; height: 2px;
   align-self: center; flex-shrink: 0;
-  z-index: 0; position: relative;
+  z-index: 3; position: relative;
   margin-left: -2px; margin-right: -2px;
+  overflow: visible;
 }
 .tl-conn--morning { background: linear-gradient(90deg, #3b82f6, rgba(59,130,246,0.15)); }
 .tl-conn--afternoon { background: linear-gradient(90deg, #10b981, rgba(16,185,129,0.15)); }
@@ -3476,6 +3483,164 @@ button {
   position: absolute; right: -2px; top: 50%; transform: translateY(-50%);
   width: 5px; height: 5px; border-radius: 50%;
   background: inherit; opacity: 0.6;
+}
+
+/* ===== LIGHT BEAM — Synced with orbit trail (2.5s) ===== */
+.tl-beam-particle {
+  position: absolute;
+  top: 50%; left: 0;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  transform: translate(-20px, -50%);
+  opacity: 0; z-index: 5;
+  will-change: transform, opacity;
+  animation: tl-beamTravel 2.5s linear infinite;
+}
+.tl-beam-particle::after {
+  content: '';
+  position: absolute; top: 50%; right: 50%;
+  width: 24px; height: 2px;
+  transform: translateY(-50%);
+  border-radius: 1px 0 0 1px;
+}
+.tl-beam--morning {
+  background: radial-gradient(circle, #fff 0%, #60a5fa 50%, transparent 100%);
+  box-shadow: 0 0 3px 1px rgba(255,255,255,0.8), 0 0 8px 3px rgba(96,165,250,0.7), 0 0 16px 5px rgba(59,130,246,0.3);
+}
+.tl-beam--morning::after {
+  background: linear-gradient(90deg, transparent, rgba(59,130,246,0.15) 25%, rgba(96,165,250,0.45) 70%, rgba(255,255,255,0.7));
+}
+.tl-beam--afternoon {
+  background: radial-gradient(circle, #fff 0%, #34d399 50%, transparent 100%);
+  box-shadow: 0 0 3px 1px rgba(255,255,255,0.8), 0 0 8px 3px rgba(52,211,153,0.7), 0 0 16px 5px rgba(16,185,129,0.3);
+}
+.tl-beam--afternoon::after {
+  background: linear-gradient(90deg, transparent, rgba(16,185,129,0.15) 25%, rgba(52,211,153,0.45) 70%, rgba(255,255,255,0.7));
+}
+/* Orbit trail bright spot tại 345° đi qua connector (90°) ở ~29% của 2.5s */
+@keyframes tl-beamTravel {
+  0%   { transform: translate(-20px, -50%); opacity: 0; }
+  27%  { transform: translate(-20px, -50%); opacity: 0; }
+  30%  { transform: translate(-14px, -50%); opacity: 1; }
+  48%  { transform: translate(8px, -50%);   opacity: 1; }
+  52%  { transform: translate(8px, -50%);   opacity: 0; }
+  100% { transform: translate(8px, -50%);   opacity: 0; }
+}
+
+/* ===== IMPACT — Nhẹ nhàng, vừa đủ ===== */
+.tl-impact-glow {
+  position: absolute; top: 50%; left: -1px;
+  width: 10px; height: 35px;
+  transform: translate(-50%, -50%) scaleX(0);
+  border-radius: 50%;
+  pointer-events: none; z-index: 11;
+  will-change: transform, opacity;
+  animation: tl-impactPulse 2.5s ease infinite;
+}
+.tl-glow--morning {
+  background: radial-gradient(ellipse, rgba(255,255,255,0.9) 0%, rgba(96,165,250,0.4) 40%, transparent 75%);
+}
+.tl-glow--afternoon {
+  background: radial-gradient(ellipse, rgba(255,255,255,0.9) 0%, rgba(52,211,153,0.4) 40%, transparent 75%);
+}
+@keyframes tl-impactPulse {
+  0%   { transform: translate(-50%, -50%) scaleX(0) scaleY(0.3); opacity: 0; }
+  46%  { transform: translate(-50%, -50%) scaleX(0) scaleY(0.3); opacity: 0; }
+  50%  { transform: translate(-50%, -50%) scaleX(1.2) scaleY(1); opacity: 0.9; }
+  60%  { transform: translate(-50%, -50%) scaleX(0.2) scaleY(1.3); opacity: 0; }
+  100% { transform: translate(-50%, -50%) scaleX(0.2) scaleY(1.3); opacity: 0; }
+}
+
+/* ===== BORDER TRACE — 2 bên: lên + xuống từ cạnh trái ===== */
+.tl-rect-beam-spread {
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  pointer-events: none; z-index: 10;
+  padding: 2px;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  overflow: hidden;
+  opacity: 0.3;
+  will-change: opacity;
+  animation: tl-traceGlow 2.5s linear infinite;
+}
+
+/* ::before đi lên (clockwise: left → top → right) */
+.tl-spread--morning::before,
+.tl-spread--afternoon::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 200%; height: 200%;
+  transform-origin: center;
+  transform: translate(-50%, -50%) rotate(0deg);
+  will-change: transform;
+  animation: tl-chaseUp 2.5s linear infinite;
+}
+/* ::after đi xuống (counter-clockwise: left → bottom → right) */
+.tl-spread--morning::after,
+.tl-spread--afternoon::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 200%; height: 200%;
+  transform-origin: center;
+  transform: translate(-50%, -50%) rotate(0deg);
+  will-change: transform;
+  animation: tl-chaseDown 2.5s linear infinite;
+}
+
+.tl-spread--morning::before,
+.tl-spread--morning::after {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg, transparent 210deg,
+    rgba(59,130,246,0.05) 235deg,
+    rgba(96,165,250,0.2) 253deg,
+    rgba(147,197,253,0.5) 264deg,
+    rgba(255,255,255,0.9) 270deg,
+    rgba(147,197,253,0.5) 276deg,
+    rgba(96,165,250,0.2) 287deg,
+    rgba(59,130,246,0.05) 305deg,
+    transparent 330deg, transparent 360deg
+  );
+}
+.tl-spread--afternoon::before,
+.tl-spread--afternoon::after {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg, transparent 210deg,
+    rgba(16,185,129,0.05) 235deg,
+    rgba(52,211,153,0.2) 253deg,
+    rgba(110,231,183,0.5) 264deg,
+    rgba(255,255,255,0.9) 270deg,
+    rgba(110,231,183,0.5) 276deg,
+    rgba(52,211,153,0.2) 287deg,
+    rgba(16,185,129,0.05) 305deg,
+    transparent 340deg, transparent 360deg
+  );
+}
+
+/* Trace luôn hiện, pulse sáng khi beam chạm */
+@keyframes tl-traceGlow {
+  0%   { opacity: 0.3; }
+  48%  { opacity: 0.3; }
+  52%  { opacity: 1; }
+  75%  { opacity: 0.8; }
+  100% { opacity: 0.3; }
+}
+/* Đi lên liên tục: clockwise 180° mỗi chu kỳ */
+@keyframes tl-chaseUp {
+  0%   { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(180deg); }
+}
+/* Đi xuống liên tục: counter-clockwise 180° mỗi chu kỳ */
+@keyframes tl-chaseDown {
+  0%   { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(-180deg); }
 }
 
 /* ===== RECTANGLE — Frosted Glass Premium ===== */
@@ -3491,19 +3656,23 @@ button {
 }
 .tl-rect--done {
   background: linear-gradient(160deg, rgba(16,185,129,0.06), rgba(5,150,105,0.1), rgba(52,211,153,0.03));
-  box-shadow: 0 6px 24px -8px rgba(16,185,129,0.2), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.7);
 }
 .tl-rect--pending {
   background: linear-gradient(160deg, rgba(245,158,11,0.04), rgba(217,119,6,0.08), rgba(251,191,36,0.02));
-  box-shadow: 0 6px 24px -8px rgba(245,158,11,0.2), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.7);
 }
-.tl-border--morning { border: 1px solid rgba(59,130,246,0.45); }
-.tl-border--afternoon { border: 1px solid rgba(16,185,129,0.45); }
+.tl-border--morning { 
+  border: 1px solid rgba(59,130,246,0.45); 
+  box-shadow: 0 4px 16px -2px rgba(59,130,246,0.15), 0 2px 6px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.6);
+}
+.tl-border--afternoon { 
+  border: 1px solid rgba(16,185,129,0.45); 
+  box-shadow: 0 4px 16px -2px rgba(16,185,129,0.15), 0 2px 6px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.6);
+}
 
 /* Accent stripe */
 .tl-accent-stripe {
-  height: 3px; border-radius: 0 0 6px 6px;
-  margin: 0 1rem; margin-bottom: 0.3rem;
+  height: 3px; border-radius: 0;
+  margin: 0 -1.1rem; margin-bottom: 0.3rem;
 }
 .tl-stripe--morning { background: linear-gradient(90deg, #3b82f6, #60a5fa, #3b82f6); }
 .tl-stripe--afternoon { background: linear-gradient(90deg, #10b981, #34d399, #10b981); }
@@ -3511,26 +3680,34 @@ button {
 /* Header */
 .tl-rect-header {
   display: flex; align-items: center;
-  justify-content: space-between; gap: 0.35rem;
+  justify-content: flex-end; gap: 0.35rem;
+  min-height: 1.4rem;
 }
 .tl-rect-tags {
-  display: flex; flex-wrap: wrap; align-items: center;
-  gap: 0.25rem; flex: 1; min-width: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex; align-items: stretch;
+  gap: 0;
+  z-index: 5;
+  border-radius: 20px 0 10px 0;
+  overflow: hidden;
+  box-shadow: 0 2px 8px -2px rgba(0,0,0,0.25);
 }
 .tl-badge-cat {
-  padding: 0.18rem 0.55rem; border-radius: 8px;
+  padding: 0.22rem 0.6rem;
   font-size: 0.58rem; font-weight: 800; color: white;
   letter-spacing: 0.05em; text-transform: uppercase;
-  box-shadow: 0 2px 8px -2px rgba(0,0,0,0.2);
+  display: flex; align-items: center;
 }
 .tl-badge-cat.cat-work { background: linear-gradient(135deg, #1d4ed8, #3b82f6); }
 .tl-badge-cat.cat-life { background: linear-gradient(135deg, #047857, #10b981); }
 .tl-badge-cat.cat-default { background: linear-gradient(135deg, #475569, #94a3b8); }
 .tl-badge-tag {
-  padding: 0.12rem 0.45rem; border-radius: 6px;
+  padding: 0.22rem 0.5rem;
   font-size: 0.52rem; font-weight: 800; color: white;
   letter-spacing: 0.04em; text-transform: uppercase;
-  box-shadow: 0 1px 4px -1px rgba(0,0,0,0.15);
+  display: flex; align-items: center;
 }
 .tl-badge-tag.tag-priority { background: linear-gradient(135deg, #9f1239, #e11d48); }
 .tl-badge-tag.tag-normal { background: linear-gradient(135deg, #374151, #6b7280); }
@@ -3539,11 +3716,10 @@ button {
 /* Status chip */
 .tl-status-chip {
   display: inline-flex; align-items: center; gap: 0.2rem;
-  padding: 0.18rem 0.5rem; border-radius: 8px;
+  padding: 0.22rem 0.5rem;
   font-size: 0.55rem; font-weight: 800;
   text-transform: uppercase; letter-spacing: 0.05em;
   white-space: nowrap; flex-shrink: 0; color: white;
-  box-shadow: 0 3px 10px -3px rgba(0,0,0,0.25);
 }
 .tl-status-chip.pill-success { background: linear-gradient(135deg, #047857, #10b981) !important; }
 .tl-status-chip.pill-warning { background: linear-gradient(135deg, #92400e, #f59e0b) !important; }
@@ -3602,8 +3778,9 @@ button {
   border-radius: inherit; pointer-events: none;
 }
 .tl-action-delete {
-  background: linear-gradient(135deg, #b91c1c, #ef4444);
-  color: white; box-shadow: 0 3px 10px -3px rgba(239,68,68,0.45);
+  background: transparent;
+  color: #dc2626; border: 1.5px solid rgba(239,68,68,0.3);
+  box-shadow: none;
 }
 .tl-action-done {
   background: linear-gradient(135deg, #047857, #10b981);
