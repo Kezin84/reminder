@@ -250,55 +250,76 @@
           <p>Không có báo cáo nào.</p>
         </div>
         <div v-else v-for="(report, index) in filteredReports" :key="'card-' + report.id" 
-             class="report-card" :class="[getStatusBorderClass(report.trang_thai), { 'highlight-card': report.id === highlightedReportId, 'deleting-row': deletingIds.includes(report.id) }]" @click="openEditModal(report)">
+             class="report-card-timeline" :class="{ 'highlight-card': report.id === highlightedReportId, 'deleting-row': deletingIds.includes(report.id) }" 
+             :style="{ animationDelay: (index * 0.07) + 's' }"
+             @click="openEditModal(report)">
           
-          <!-- Hàng 1: STT & Thời gian -->
-          <div class="card-row-header">
-            <span class="card-id">#{{ index + 1 }}</span>
-            <div class="card-time-group">
-              <div class="time-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                <span>{{ formatDisplayTime(report.thoi_gian).time }}</span>
-                <span class="period-tag-mini" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'is-morning' : 'is-afternoon'">
-                  {{ formatDisplayTime(report.thoi_gian).period }}
-                </span>
-                <span class="sep">•</span>
-                <span class="day-text">{{ formatDisplayTime(report.thoi_gian).thu }}</span>
+          <!-- Hình tròn: STT + Thời gian -->
+          <div class="tl-orb-wrap">
+            <!-- Rotating gradient ring -->
+            <div class="tl-orb-ring" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-ring--morning' : 'tl-ring--afternoon'"></div>
+            <div class="tl-circle" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-circle--morning' : 'tl-circle--afternoon'">
+              <div class="tl-circle-inner">
+                <span class="tl-thu-period">{{ formatDisplayTime(report.thoi_gian).thu }} <span class="tl-period" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'is-morning' : 'is-afternoon'">{{ formatDisplayTime(report.thoi_gian).period }}</span></span>
+                <span class="tl-date">{{ formatDisplayTime(report.thoi_gian).date }}</span>
+                <span class="tl-time">{{ formatDisplayTime(report.thoi_gian).time }}</span>
+                <span class="tl-stt">#{{ index + 1 }}</span>
               </div>
-              <div class="time-secondary">{{ formatDisplayTime(report.thoi_gian).date }}</div>
-            </div>
-            <div class="status-pill-mini" :class="getStatusPillClass(report.trang_thai)">{{ report.trang_thai }}</div>
-          </div>
-
-          <!-- Hàng 2: Tag -->
-          <div class="card-row-tags">
-            <span class="category-badge" :class="getCategoryClass(report.phan_loai)">{{ report.phan_loai }}</span>
-            <span v-if="report.tag" v-for="t in splitTags(report.tag)" :key="t" class="tag-mini" :class="getTagClass(t)">{{ t }}</span>
-          </div>
-
-          <!-- Hàng 3: Nội dung -->
-          <div class="card-row-content">
-            <div class="content-title">{{ report.noi_dung }}</div>
-          </div>
-
-          <!-- Hàng 4: Ghi chú -->
-          <div class="card-row-note" v-if="report.ghi_chu">
-            <div class="content-note">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-              <span>{{ report.ghi_chu }}</span>
+              <!-- Dải sáng chạy quanh viền -->
+              <div class="tl-orbit-trail"></div>
             </div>
           </div>
 
-          <!-- Hàng 5: Hoàn thành, Xoá -->
-          <div class="card-row-actions">
-            <button class="btn-action-full delete" @click.stop="confirmDelete(report.id)">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-              <span>Xoá</span>
-            </button>
-            <button v-if="report.trang_thai !== 'Hoàn thành'" class="btn-action-full success" @click.stop="markAsCompleted(report)">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <span>Hoàn thành</span>
-            </button>
+          <!-- Connector -->
+          <div class="tl-connector" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-conn--morning' : 'tl-conn--afternoon'">
+            <div class="tl-conn-dot"></div>
+          </div>
+
+          <!-- Hình chữ nhật: Nội dung còn lại -->
+          <div class="tl-rect" :class="[report.trang_thai === 'Hoàn thành' ? 'tl-rect--done' : 'tl-rect--pending', formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-border--morning' : 'tl-border--afternoon']">
+            <!-- Top accent stripe -->
+            <div class="tl-accent-stripe" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-stripe--morning' : 'tl-stripe--afternoon'"></div>
+            
+            <!-- Header: Tags + Status -->
+            <div class="tl-rect-header">
+              <div class="tl-rect-tags">
+                <span class="tl-badge-cat" :class="getCategoryClass(report.phan_loai)">{{ report.phan_loai }}</span>
+                <span v-if="report.tag" v-for="t in splitTags(report.tag)" :key="t" class="tl-badge-tag" :class="getTagClass(t)">{{ t }}</span>
+              </div>
+              <div class="tl-status-chip" :class="getStatusPillClass(report.trang_thai)">
+                <svg v-if="report.trang_thai === 'Hoàn thành'" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                {{ report.trang_thai }}
+              </div>
+            </div>
+
+            <!-- Nội dung chính -->
+            <div class="tl-rect-body">
+              <div class="tl-body-text">{{ report.noi_dung }}</div>
+            </div>
+
+            <!-- Ghi chú -->
+            <div class="tl-rect-note" v-if="report.ghi_chu">
+              <div class="tl-note-accent"></div>
+              <div class="tl-note-content">
+                <div class="tl-note-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                </div>
+                <span>{{ report.ghi_chu }}</span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="tl-rect-actions">
+              <button class="tl-action-btn tl-action-delete" @click.stop="confirmDelete(report.id)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                Xoá
+              </button>
+              <button v-if="report.trang_thai !== 'Hoàn thành'" class="tl-action-btn tl-action-done" @click.stop="markAsCompleted(report)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Xong
+              </button>
+            </div>
           </div>
 
         </div>
@@ -3294,6 +3315,302 @@ button {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+}
+
+/* =============================================
+   TIMELINE CARD — ULTRA PREMIUM VIP PRO
+   Rotating ring · Shimmer · Glassmorphism
+   ============================================= */
+.report-card-timeline {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: tl-springIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  position: relative;
+  padding: 4px 0;
+}
+@keyframes tl-springIn {
+  from { opacity: 0; transform: translateX(-16px) scale(0.95); filter: blur(4px); }
+  to   { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+}
+.report-card-timeline:active { transform: scale(0.975); }
+
+/* ===== ORB WRAPPER ===== */
+.tl-orb-wrap {
+  position: relative;
+  width: 96px;
+  min-width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+/* Rotating gradient ring */
+.tl-orb-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  padding: 3px;
+  animation: tl-spin 4s linear infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.tl-ring--morning {
+  background: conic-gradient(#2563eb, #3b82f6, #60a5fa, #93c5fd, #2563eb);
+}
+.tl-ring--afternoon {
+  background: conic-gradient(#10b981, #34d399, #6ee7b7, #a7f3d0, #10b981);
+}
+@keyframes tl-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== CIRCLE ===== */
+.tl-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+.tl-circle-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  position: relative;
+  z-index: 1;
+}
+.tl-circle--morning {
+  background: linear-gradient(145deg, #1d4ed8 0%, #2563eb 40%, #3b82f6 100%);
+  color: white;
+  box-shadow: 0 8px 24px -4px rgba(37,99,235,0.5), inset 0 -3px 8px rgba(0,0,0,0.12), inset 0 2px 6px rgba(255,255,255,0.25);
+}
+.tl-circle--afternoon {
+  background: linear-gradient(145deg, #047857 0%, #10b981 50%, #34d399 100%);
+  color: white;
+  box-shadow: 0 8px 24px -4px rgba(16,185,129,0.5), inset 0 -3px 8px rgba(0,0,0,0.12), inset 0 2px 6px rgba(255,255,255,0.25);
+}
+
+/* Dải sáng chạy quanh viền */
+.tl-orbit-trail {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  z-index: 3;
+  pointer-events: none;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 260deg,
+    rgba(255,255,255,0.6) 300deg,
+    white 345deg,
+    transparent 360deg
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #fff calc(100% - 3.5px), #fff calc(100% - 0.5px), transparent 100%);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #fff calc(100% - 3.5px), #fff calc(100% - 0.5px), transparent 100%);
+  animation: tl-orbitRun 2.5s linear infinite;
+}
+@keyframes tl-orbitRun {
+  to { transform: rotate(360deg); }
+}
+
+/* Thứ + Buổi — to, đậm, trắng rõ */
+.tl-thu-period {
+  font-size: 0.62rem; font-weight: 900; opacity: 1;
+  text-transform: uppercase; line-height: 1;
+  letter-spacing: 0.05em;
+  display: flex; align-items: center; gap: 3px;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+.tl-period {
+  font-size: 0.62rem; font-weight: 900;
+  padding: 2px 7px; border-radius: 6px;
+  text-transform: uppercase; line-height: 1.2;
+  letter-spacing: 0.06em;
+  background: rgba(255,255,255,0.25);
+  color: white;
+}
+/* Ngày/tháng/năm — to, đậm, trắng rõ */
+.tl-date {
+  font-size: 0.62rem; font-weight: 900; opacity: 1;
+  line-height: 1; font-feature-settings: 'tnum';
+  letter-spacing: 0.01em;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+/* Giờ:phút — nhỏ */
+.tl-time {
+  font-size: 0.42rem; font-weight: 600; line-height: 1;
+  opacity: 0.7; letter-spacing: 0.01em;
+  font-feature-settings: 'tnum';
+}
+/* STT — nhỏ */
+.tl-stt {
+  font-size: 0.38rem; font-weight: 600; opacity: 0.6;
+  letter-spacing: 0.04em; line-height: 1;
+}
+
+/* ===== CONNECTOR ===== */
+.tl-connector {
+  width: 16px; min-width: 16px; height: 2px;
+  align-self: center; flex-shrink: 0;
+  z-index: 0; position: relative;
+  margin-left: -2px; margin-right: -2px;
+}
+.tl-conn--morning { background: linear-gradient(90deg, #3b82f6, rgba(59,130,246,0.15)); }
+.tl-conn--afternoon { background: linear-gradient(90deg, #10b981, rgba(16,185,129,0.15)); }
+.tl-conn-dot {
+  position: absolute; right: -2px; top: 50%; transform: translateY(-50%);
+  width: 5px; height: 5px; border-radius: 50%;
+  background: inherit; opacity: 0.6;
+}
+
+/* ===== RECTANGLE — Frosted Glass Premium ===== */
+.tl-rect {
+  flex: 1; min-width: 0;
+  border-radius: 20px;
+  padding: 0 0.9rem 0.7rem 0.9rem;
+  display: flex; flex-direction: column; gap: 0.4rem;
+  position: relative; overflow: hidden;
+  transition: all 0.35s ease;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.tl-rect--done {
+  background: linear-gradient(160deg, rgba(16,185,129,0.06), rgba(5,150,105,0.1), rgba(52,211,153,0.03));
+  box-shadow: 0 6px 24px -8px rgba(16,185,129,0.2), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.7);
+}
+.tl-rect--pending {
+  background: linear-gradient(160deg, rgba(245,158,11,0.04), rgba(217,119,6,0.08), rgba(251,191,36,0.02));
+  box-shadow: 0 6px 24px -8px rgba(245,158,11,0.2), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.7);
+}
+.tl-border--morning { border: 1px solid rgba(59,130,246,0.45); }
+.tl-border--afternoon { border: 1px solid rgba(16,185,129,0.45); }
+
+/* Accent stripe */
+.tl-accent-stripe {
+  height: 3px; border-radius: 0 0 6px 6px;
+  margin: 0 1rem; margin-bottom: 0.3rem;
+}
+.tl-stripe--morning { background: linear-gradient(90deg, #3b82f6, #60a5fa, #3b82f6); }
+.tl-stripe--afternoon { background: linear-gradient(90deg, #10b981, #34d399, #10b981); }
+
+/* Header */
+.tl-rect-header {
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 0.35rem;
+}
+.tl-rect-tags {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: 0.25rem; flex: 1; min-width: 0;
+}
+.tl-badge-cat {
+  padding: 0.18rem 0.55rem; border-radius: 8px;
+  font-size: 0.58rem; font-weight: 800; color: white;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  box-shadow: 0 2px 8px -2px rgba(0,0,0,0.2);
+}
+.tl-badge-cat.cat-work { background: linear-gradient(135deg, #1d4ed8, #3b82f6); }
+.tl-badge-cat.cat-life { background: linear-gradient(135deg, #047857, #10b981); }
+.tl-badge-cat.cat-default { background: linear-gradient(135deg, #475569, #94a3b8); }
+.tl-badge-tag {
+  padding: 0.12rem 0.45rem; border-radius: 6px;
+  font-size: 0.52rem; font-weight: 800; color: white;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  box-shadow: 0 1px 4px -1px rgba(0,0,0,0.15);
+}
+.tl-badge-tag.tag-priority { background: linear-gradient(135deg, #9f1239, #e11d48); }
+.tl-badge-tag.tag-normal { background: linear-gradient(135deg, #374151, #6b7280); }
+.tl-badge-tag.tag-default { background: linear-gradient(135deg, #475569, #94a3b8); }
+
+/* Status chip */
+.tl-status-chip {
+  display: inline-flex; align-items: center; gap: 0.2rem;
+  padding: 0.18rem 0.5rem; border-radius: 8px;
+  font-size: 0.55rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  white-space: nowrap; flex-shrink: 0; color: white;
+  box-shadow: 0 3px 10px -3px rgba(0,0,0,0.25);
+}
+.tl-status-chip.pill-success { background: linear-gradient(135deg, #047857, #10b981) !important; }
+.tl-status-chip.pill-warning { background: linear-gradient(135deg, #92400e, #f59e0b) !important; }
+.tl-status-chip.pill-default { background: linear-gradient(135deg, #374151, #9ca3af) !important; }
+
+/* Body */
+.tl-rect-body { padding: 0 0.1rem; }
+.tl-body-text {
+  font-size: 0.85rem; font-weight: 600; color: #0f172a;
+  line-height: 1.5; word-break: break-word;
+  letter-spacing: -0.01em;
+}
+
+/* Note — Quote style */
+.tl-rect-note {
+  display: flex; align-items: stretch; gap: 0;
+  border-radius: 10px; overflow: hidden;
+  background: linear-gradient(135deg, rgba(255,228,230,0.45), rgba(254,205,211,0.2));
+  backdrop-filter: blur(8px);
+}
+.tl-note-accent {
+  width: 3.5px; min-width: 3.5px; flex-shrink: 0;
+  background: linear-gradient(180deg, #fb7185, #e11d48);
+  border-radius: 3px 0 0 3px;
+}
+.tl-note-content {
+  display: flex; align-items: flex-start; gap: 0.3rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.7rem; color: #881337;
+  font-style: italic; line-height: 1.45;
+}
+.tl-note-content span { flex: 1; }
+.tl-note-icon {
+  width: 18px; height: 18px; min-width: 18px;
+  border-radius: 5px;
+  background: rgba(244,63,94,0.12);
+  display: flex; align-items: center; justify-content: center;
+  color: #e11d48; flex-shrink: 0;
+}
+
+/* Actions */
+.tl-rect-actions {
+  display: flex; gap: 0.35rem;
+  padding-top: 0.35rem; margin-top: auto;
+}
+.tl-action-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  gap: 0.25rem; padding: 0.35rem 0.4rem;
+  border-radius: 10px; font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.03em; border: none; cursor: pointer;
+  transition: all 0.2s ease; position: relative; overflow: hidden;
+}
+.tl-action-btn::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 45%);
+  border-radius: inherit; pointer-events: none;
+}
+.tl-action-delete {
+  background: linear-gradient(135deg, #b91c1c, #ef4444);
+  color: white; box-shadow: 0 3px 10px -3px rgba(239,68,68,0.45);
+}
+.tl-action-done {
+  background: linear-gradient(135deg, #047857, #10b981);
+  color: white; box-shadow: 0 3px 10px -3px rgba(16,185,129,0.45);
+}
+.tl-action-delete:active, .tl-action-done:active {
+  transform: scale(0.92); box-shadow: none;
 }
 
 .pill-success { background: #10b981 !important; color: white !important; }
