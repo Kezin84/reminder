@@ -86,24 +86,31 @@
 
         <div class="elite-filter-divider"></div>
 
-        <div class="elite-filter-row">
-          <div class="elite-select-group">
-            <label>Sắp xếp</label>
-            <CustomSelect v-model="filters.sortOrder" :options="sortOptions" />
+        <button class="filter-expand-btn" @click="isExpandedFilters = !isExpandedFilters">
+          <span style="font-weight: 700; font-size: 0.85rem; color: #475569;">{{ isExpandedFilters ? 'Thu gọn bộ lọc nâng cao' : 'Mở rộng bộ lọc nâng cao' }}</span>
+          <svg :class="{'rotate-180': isExpandedFilters}" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+
+        <transition name="filter-expand">
+          <div v-show="isExpandedFilters" class="elite-filter-row" style="margin-top: 1rem;">
+            <div class="elite-select-group">
+              <label>Sắp xếp</label>
+              <CustomSelect v-model="filters.sortOrder" :options="sortOptions" />
+            </div>
+            <div class="elite-select-group">
+              <label>Độ quan trọng</label>
+              <CustomSelect v-model="filters.tag" :options="priorityOptions" />
+            </div>
+            <div class="elite-select-group">
+              <label>Phân loại</label>
+              <CustomSelect v-model="filters.phan_loai" :options="typeOptions" />
+            </div>
+            <div class="elite-select-group">
+              <label>Trạng thái</label>
+              <CustomSelect v-model="filters.trang_thai" :options="statusOptions" />
+            </div>
           </div>
-          <div class="elite-select-group">
-            <label>Độ quan trọng</label>
-            <CustomSelect v-model="filters.tag" :options="priorityOptions" />
-          </div>
-          <div class="elite-select-group">
-            <label>Phân loại</label>
-            <CustomSelect v-model="filters.phan_loai" :options="typeOptions" />
-          </div>
-          <div class="elite-select-group">
-            <label>Trạng thái</label>
-            <CustomSelect v-model="filters.trang_thai" :options="statusOptions" />
-          </div>
-        </div>
+        </transition>
       </div>
     </div>
 
@@ -146,17 +153,23 @@
 
     <!-- Action Buttons -->
     <div class="action-bar">
+      <button class="mobile-action-btn add" @click="openAddModal">
+        <div class="icon-white-bg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </div>
+        THÊM
+      </button>
       <button class="mobile-action-btn empty-days" @click="showEmptyDays">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-        Báo lịch trống
+        <div class="icon-white-bg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        </div>
+        LỊCH TRỐNG
       </button>
       <button class="mobile-action-btn excel" @click="exportExcel">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        Xuất Excel
-      </button>
-      <button class="mobile-action-btn add" @click="openAddModal">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        Thêm mới
+        <div class="icon-white-bg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        </div>
+        XUẤT EXCEL
       </button>
     </div>
 
@@ -265,9 +278,9 @@
                 <span class="tl-time">{{ formatDisplayTime(report.thoi_gian).time }}</span>
                 <span class="tl-stt">#{{ index + 1 }}</span>
               </div>
-              <!-- Dải sáng chạy quanh viền -->
-              <div class="tl-orbit-trail"></div>
             </div>
+            <!-- Dải sáng chạy quanh viền -->
+            <div class="tl-orbit-trail"></div>
           </div>
 
           <!-- Connector -->
@@ -711,6 +724,8 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import * as XLSX from 'xlsx-js-style'
 import CustomSelect from './CustomSelect.vue'
+
+const isExpandedFilters = ref(false)
 
 const sortOptions = [
   { value: 'desc', label: 'Mới nhất' },
@@ -2410,6 +2425,41 @@ button {
   gap: 1.25rem;
 }
 
+/* Filter Expand Toggle */
+.filter-expand-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  padding: 0.6rem;
+  cursor: pointer;
+  margin: 0.25rem 0 0 0;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.filter-expand-btn:hover {
+  background: #f1f5f9;
+}
+.rotate-180 {
+  transform: rotate(180deg);
+}
+.filter-expand-enter-active,
+.filter-expand-leave-active {
+  transition: all 0.35s ease;
+  overflow: hidden;
+  max-height: 500px;
+  opacity: 1;
+}
+.filter-expand-enter-from,
+.filter-expand-leave-to {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0 !important;
+}
+
 .elite-form-row .elite-form-group {
   flex: 1;
 }
@@ -3230,29 +3280,69 @@ button {
   }
   .mobile-action-btn {
     flex: 1;
-    padding: 0.65rem 0.75rem;
-    font-size: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.6rem 0.2rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+    transition: all 0.2s ease;
+  }
+  .real-icon {
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+  }
+  .icon-white-bg {
+    width: 22px;
+    height: 22px;
+    background: white;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    flex-shrink: 0;
+  }
+  .mobile-action-btn.add .icon-white-bg {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
   }
   .mobile-action-btn.excel {
-    background: #10b981;
+    background: linear-gradient(135deg, #10b981, #059669);
     color: white;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.3);
   }
-  .mobile-action-btn.excel:hover {
-    background: #059669;
+  .mobile-action-btn.excel:active {
+    transform: scale(0.96);
   }
   .mobile-action-btn.empty-days {
-    background: #6366f1;
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
     color: white;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px -2px rgba(124, 58, 237, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  }
+  .mobile-action-btn.empty-days:active {
+    transform: scale(0.96);
   }
   .mobile-action-btn.add {
-    background: #3b82f6;
+    flex: 2;
+    flex-direction: row;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
     color: white;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 15px -2px rgba(37, 99, 235, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    border-radius: 9999px;
   }
-  .mobile-action-btn.add:hover {
-    background: #2563eb;
+  .mobile-action-btn.add:active {
+    transform: scale(0.96);
   }
   .report-container {
     padding-bottom: 80px;
@@ -3308,7 +3398,7 @@ button {
 .card-list {
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: 1.6rem;
 }
 
 .report-card {
@@ -3357,28 +3447,39 @@ button {
 .tl-orb-ring {
   position: absolute;
   inset: -3px;
-  border-radius: 50%;
+  border-radius: 23px;
   padding: 3px;
-  animation: tl-spin 4s linear infinite;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
+  overflow: hidden;
 }
-.tl-ring--morning {
+.tl-orb-ring::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 200%; height: 200%;
+  transform: translate(-50%, -50%);
+  animation: tl-spin-center 4s linear infinite;
+  z-index: -1;
+}
+.tl-ring--morning::before {
   background: conic-gradient(#2563eb, #3b82f6, #60a5fa, #93c5fd, #2563eb);
 }
-.tl-ring--afternoon {
+.tl-ring--afternoon::before {
   background: conic-gradient(#10b981, #34d399, #6ee7b7, #a7f3d0, #10b981);
 }
-@keyframes tl-spin {
-  to { transform: rotate(360deg); }
+
+@keyframes tl-spin-center {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-/* ===== CIRCLE ===== */
+/* ===== SHAPE ===== */
 .tl-circle {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3389,7 +3490,7 @@ button {
 .tl-circle-inner {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
+  border-radius: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -3413,9 +3514,21 @@ button {
 .tl-orbit-trail {
   position: absolute;
   inset: -3px;
-  border-radius: 50%;
+  border-radius: 23px;
+  padding: 3px;
   z-index: 3;
   pointer-events: none;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  overflow: hidden;
+}
+.tl-orbit-trail::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 200%; height: 200%;
+  transform: translate(-50%, -50%);
   background: conic-gradient(
     from 0deg,
     transparent 0deg,
@@ -3424,12 +3537,7 @@ button {
     white 345deg,
     transparent 360deg
   );
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #fff calc(100% - 3.5px), #fff calc(100% - 0.5px), transparent 100%);
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #fff calc(100% - 3.5px), #fff calc(100% - 0.5px), transparent 100%);
-  animation: tl-orbitRun 2.5s linear infinite;
-}
-@keyframes tl-orbitRun {
-  to { transform: rotate(360deg); }
+  animation: tl-spin-center 2.5s linear infinite;
 }
 
 /* Thứ + Buổi — to, đậm, trắng rõ */
@@ -3446,8 +3554,14 @@ button {
   padding: 2px 7px; border-radius: 6px;
   text-transform: uppercase; line-height: 1.2;
   letter-spacing: 0.06em;
-  background: rgba(255,255,255,0.25);
-  color: white;
+  background: white;
+  text-shadow: none;
+}
+.tl-period.is-morning {
+  color: #2563eb;
+}
+.tl-period.is-afternoon {
+  color: #059669;
 }
 /* Ngày/tháng/năm — to, đậm, trắng rõ */
 .tl-date {
@@ -3655,7 +3769,29 @@ button {
   -webkit-backdrop-filter: blur(16px);
 }
 .tl-rect--done {
-  background: linear-gradient(160deg, rgba(16,185,129,0.06), rgba(5,150,105,0.1), rgba(52,211,153,0.03));
+  background: linear-gradient(160deg, #44a08d, #093637);
+  box-shadow: 0 4px 20px -2px rgba(9, 54, 55, 0.5), inset 0 1px 1px rgba(255,255,255,0.15) !important;
+  border-color: rgba(68, 160, 141, 0.4) !important;
+}
+.tl-rect--done .tl-body-text {
+  color: #ecfdf5;
+}
+.tl-rect--done .tl-rect-note {
+  background: rgba(9, 54, 55, 0.4);
+}
+.tl-rect--done .tl-note-content {
+  color: #a7f3d0;
+}
+.tl-rect--done .tl-note-accent {
+  background: linear-gradient(180deg, #44a08d, #093637);
+}
+.tl-rect--done .tl-note-icon {
+  background: rgba(68, 160, 141, 0.2);
+  color: #a7f3d0;
+}
+.tl-rect--done .tl-action-delete {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.3);
 }
 .tl-rect--pending {
   background: linear-gradient(160deg, rgba(245,158,11,0.04), rgba(217,119,6,0.08), rgba(251,191,36,0.02));
