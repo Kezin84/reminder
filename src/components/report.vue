@@ -84,15 +84,15 @@
           </template>
         </div>
 
-        <div class="elite-filter-divider"></div>
+        <div v-show="isMobile" class="elite-filter-divider"></div>
 
-        <button class="filter-expand-btn" @click="isExpandedFilters = !isExpandedFilters">
+        <button v-show="isMobile" class="filter-expand-btn" @click="isExpandedFilters = !isExpandedFilters">
           <span style="font-weight: 700; font-size: 0.85rem; color: #475569;">{{ isExpandedFilters ? 'Thu gọn bộ lọc nâng cao' : 'Mở rộng bộ lọc nâng cao' }}</span>
           <svg :class="{'rotate-180': isExpandedFilters}" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s;"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </button>
 
         <transition name="filter-expand">
-          <div v-show="isExpandedFilters" class="elite-filter-row" style="margin-top: 1rem;">
+          <div v-show="isExpandedFilters && isMobile" class="elite-filter-row" style="margin-top: 1rem;">
             <div class="elite-select-group">
               <label>Sắp xếp</label>
               <CustomSelect v-model="filters.sortOrder" :options="sortOptions" />
@@ -151,125 +151,193 @@
       </div>
     </div>
 
-    <!-- Action Buttons -->
-    <div class="action-bar">
-      <button class="mobile-action-btn add" @click="openAddModal">
-        <div class="icon-white-bg">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    <!-- Action Buttons & PC Filters -->
+    <div class="action-bar-container">
+      <!-- Action Buttons (Now on the left) -->
+      <div class="action-bar">
+        <button class="mobile-action-btn add" @click="openAddModal">
+          <div class="icon-white-bg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </div>
+          THÊM
+        </button>
+        <button class="mobile-action-btn empty-days" @click="showEmptyDays">
+          <div class="icon-white-bg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          </div>
+          LỊCH TRỐNG
+        </button>
+        <button class="mobile-action-btn excel" @click="exportExcel">
+          <div class="icon-white-bg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          </div>
+          XUẤT EXCEL
+        </button>
+      </div>
+
+      <!-- PC Filters (ẩn trên mobile) - Now on the right -->
+      <div v-if="!isMobile" class="elite-filter-row pc-filters">
+        <div class="elite-select-group">
+          <label>Sắp xếp</label>
+          <CustomSelect v-model="filters.sortOrder" :options="sortOptions" />
         </div>
-        THÊM
-      </button>
-      <button class="mobile-action-btn empty-days" @click="showEmptyDays">
-        <div class="icon-white-bg">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <div class="elite-select-group">
+          <label>Độ quan trọng</label>
+          <CustomSelect v-model="filters.tag" :options="priorityOptions" />
         </div>
-        LỊCH TRỐNG
-      </button>
-      <button class="mobile-action-btn excel" @click="exportExcel">
-        <div class="icon-white-bg">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <div class="elite-select-group">
+          <label>Phân loại</label>
+          <CustomSelect v-model="filters.phan_loai" :options="typeOptions" />
         </div>
-        XUẤT EXCEL
-      </button>
+        <div class="elite-select-group">
+          <label>Trạng thái</label>
+          <CustomSelect v-model="filters.trang_thai" :options="statusOptions" />
+        </div>
+      </div>
     </div>
 
     <!-- Bảng Dữ Liệu (PC) -->
+    <!-- Bảng Dữ Liệu -->
     <div ref="tableSection">
-      <!-- Bảng Dữ Liệu (PC) -->
-      <div class="elite-table-container desktop-only">
-        <div class="elite-table-toolbar">
-          <div class="toolbar-left">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line></svg>
-            <h3>DANH SÁCH BÁO CÁO</h3>
-          </div>
-          <div class="toolbar-right">
-            <span class="record-badge">{{ filteredReports.length }} việc</span>
-          </div>
+      <!-- Toolbar (PC only) -->
+      <div class="elite-table-toolbar desktop-only" style="margin-bottom: 1.5rem;">
+        <div class="toolbar-left">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+          <h3>DANH SÁCH BÁO CÁO</h3>
         </div>
-        <div v-if="loading" class="loading-state">
-          <div class="spinner"></div>
-          <p>Đang tải dữ liệu báo cáo...</p>
-        </div>
-        <div v-else class="elite-table-scroll">
-          <table class="elite-table">
-            <thead>
-              <tr>
-                <th width="5%">STT</th>
-                <th width="15%">Thời Gian</th>
-                <th width="10%">Phân Loại</th>
-                <th width="20%">Nội Dung</th>
-                <th width="15%">Ghi Chú</th>
-                <th width="10%">Độ Quan Trọng</th>
-                <th width="10%">Trạng Thái</th>
-                <th width="10%">  Created_time</th>
-                <th width="5%" class="text-right">Thao Tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="filteredReports.length === 0">
-                <td colspan="9" class="empty-state">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
-                  <p>Không có báo cáo nào khớp với tìm kiếm của bạn.</p>
-                </td>
-              </tr>
-              <tr v-for="(report, index) in filteredReports" :key="report.id" class="elite-row" :class="{ 'highlight-row': report.id === highlightedReportId, 'deleting-row': deletingIds.includes(report.id) }" @click="openEditModal(report)">
-                <td><span class="row-index">{{ index + 1 }}</span></td>
-                <td>
-                  <div class="elite-time-cell">
-                    <div class="elite-time-main">
-                      <span class="elite-time-hm">{{ formatDisplayTime(report.thoi_gian).time }}</span>
-                      <span class="elite-time-thu">{{ formatDisplayTime(report.thoi_gian).thu }}</span>
-                      <span class="elite-time-period" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'is-morning' : 'is-afternoon'">
-                        {{ formatDisplayTime(report.thoi_gian).period }}
-                      </span>
-                    </div>
-                    <div class="elite-time-date">{{ formatDisplayTime(report.thoi_gian).date }}</div>
-                  </div>
-                </td>
-                <td><span class="badge" :class="getCategoryClass(report.phan_loai)">{{ report.phan_loai || 'Chưa phân loại' }}</span></td>
-                <td class="col-content">{{ report.noi_dung }}</td>
-                <td class="col-note">{{ report.ghi_chu }}</td>
-                <td>
-                  <div class="tag-list" v-if="report.tag">
-                    <span class="tag" v-for="t in splitTags(report.tag)" :key="t" :class="getTagClass(t)">{{ t }}</span>
-                  </div>
-                </td>
-                <td>
-                  <div class="status-pill-tag" :class="getStatusPillClass(report.trang_thai)">{{ report.trang_thai || 'N/A' }}</div>
-                </td>
-                <td style="font-size: 0.8rem; color: #64748b;">
-                  {{ report.created_time || '' }}
-                </td>
-                <td class="col-actions text-right">
-                  <button v-if="report.trang_thai !== 'Hoàn thành'" class="elite-action-btn success" @click.stop="markAsCompleted(report)" title="Hoàn thành">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  </button>
-                  <button class="elite-action-btn delete" @click.stop="confirmDelete(report.id)" title="Xoá">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="toolbar-right">
+          <span class="record-badge">{{ filteredReports.length }} việc</span>
         </div>
       </div>
 
-      <div class="card-list mobile-only">
+      <!-- Kanban Board: chỉ hiện trên desktop -->
+      <div v-if="!isMobile" class="kanban-board">
+        <div v-for="col in kanbanColumns" :key="col.status" 
+             class="kanban-column"
+             :class="[
+               col.status === 'Hoàn thành' ? 'kb-col-done' : 'kb-col-pending',
+               dragOverColumn === col.status ? 'kb-col-drag-over' : ''
+             ]"
+             @dragover.prevent
+             @dragenter.prevent="onDragEnterColumn(col.status)"
+             @dragleave="onDragLeaveColumn($event, $el)"
+             @drop="onDropReport($event, col.status)">
+          <div class="kanban-header">
+            <div class="kanban-title">
+              <span class="status-dot" :class="col.dotClass"></span>
+              <h3>{{ col.title }}</h3>
+            </div>
+            <span class="kanban-badge">{{ col.reports.length }}</span>
+          </div>
+          <div class="kanban-list">
+            <div v-if="loading" class="loading-state">
+              <div class="spinner"></div>
+              <p>Đang tải dữ liệu báo cáo...</p>
+            </div>
+            <div v-else-if="col.reports.length === 0" class="empty-state" style="padding: 4rem 2rem; opacity: 0.7;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+              <p>Không có báo cáo nào</p>
+            </div>
+            <div v-else v-for="(report, index) in col.reports" :key="'card-' + report.id" 
+                 class="report-card-timeline" :class="{ 'highlight-card': report.id === highlightedReportId, 'deleting-row': deletingIds.includes(report.id) }" 
+                 :style="{ animationDelay: (index * 0.07) + 's' }"
+                 draggable="true"
+                 @dragstart="onDragStartReport($event, report)"
+                 @dragend="onDragEndReport"
+                 @click="openEditModal(report)">
+              
+              <!-- Hình tròn: STT + Thời gian -->
+              <div class="tl-orb-wrap">
+                <!-- Rotating gradient ring -->
+                <div class="tl-orb-ring" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-ring--morning' : 'tl-ring--afternoon'"></div>
+                <div class="tl-circle" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-circle--morning' : 'tl-circle--afternoon'">
+                  <div class="tl-circle-inner">
+                    <span class="tl-thu-period">{{ formatDisplayTime(report.thoi_gian).thu }} <span class="tl-period" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'is-morning' : 'is-afternoon'">{{ formatDisplayTime(report.thoi_gian).period }}</span></span>
+                    <span class="tl-date">{{ formatDisplayTime(report.thoi_gian).date }}</span>
+                    <span class="tl-time">{{ formatDisplayTime(report.thoi_gian).time }}</span>
+                    <span class="tl-stt">#{{ index + 1 }}</span>
+                  </div>
+                </div>
+                <!-- Dải sáng chạy quanh viền -->
+                <div class="tl-orbit-trail"></div>
+              </div>
+
+              <!-- Connector -->
+              <div class="tl-connector" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-conn--morning' : 'tl-conn--afternoon'">
+                <div class="tl-conn-dot"></div>
+                <!-- Tia sáng chạy dọc connector -->
+                <div class="tl-beam-particle" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-beam--morning' : 'tl-beam--afternoon'"></div>
+              </div>
+
+              <!-- Hình chữ nhật: Nội dung còn lại -->
+              <div class="tl-rect" :class="[report.trang_thai === 'Hoàn thành' ? 'tl-rect--done' : 'tl-rect--pending', formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-border--morning' : 'tl-border--afternoon']">
+                <!-- Ánh kim chạy viền -->
+                <div class="tl-shimmer-border" :class="report.trang_thai === 'Hoàn thành' ? 'tl-shimmer--done' : 'tl-shimmer--pending'"></div>
+                
+                <!-- Header: Tags + Status -->
+                <div class="tl-rect-header">
+                  <div class="tl-rect-tags">
+                    <span class="tl-badge-cat" :class="getCategoryClass(report.phan_loai)">{{ report.phan_loai }}</span>
+                    <div class="tl-status-chip" :class="getStatusPillClass(report.trang_thai)">
+                      <svg v-if="report.trang_thai === 'Hoàn thành'" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      <svg v-else xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                      {{ report.trang_thai }}
+                    </div>
+                    <span v-if="report.tag" v-for="t in splitTags(report.tag)" :key="t" v-show="t !== 'BÌNH THƯỜNG'" class="tl-badge-tag" :class="getTagClass(t)">{{ t }}</span>
+                  </div>
+                </div>
+
+                <!-- Nội dung chính -->
+                <div class="tl-rect-body">
+                  <div class="tl-body-text">{{ report.noi_dung }}</div>
+                </div>
+
+                <!-- Ghi chú -->
+                <div class="tl-rect-note" v-if="report.ghi_chu">
+                  <div class="tl-note-accent"></div>
+                  <div class="tl-note-content">
+                    <div class="tl-note-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    </div>
+                    <span>{{ report.ghi_chu }}</span>
+                  </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="tl-rect-actions">
+                  <button class="tl-action-btn tl-action-delete" @click.stop="confirmDelete(report.id)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Xoá
+                  </button>
+                  <button v-if="report.trang_thai !== 'Hoàn thành'" class="tl-action-btn tl-action-done" @click.stop="markAsCompleted(report)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Xong
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile: danh sách đơn, không phân cột -->
+      <div v-else class="mobile-card-list">
         <div v-if="loading" class="loading-state">
           <div class="spinner"></div>
           <p>Đang tải dữ liệu báo cáo...</p>
         </div>
-        <div v-else-if="filteredReports.length === 0" class="empty-state" style="padding: 3rem;">
-          <p>Không có báo cáo nào.</p>
+        <div v-else-if="filteredReports.length === 0" class="empty-state" style="padding: 4rem 2rem; opacity: 0.7;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+          <p>Không có báo cáo nào</p>
         </div>
-        <div v-else v-for="(report, index) in filteredReports" :key="'card-' + report.id" 
-             class="report-card-timeline" :class="{ 'highlight-card': report.id === highlightedReportId, 'deleting-row': deletingIds.includes(report.id) }" 
+        <div v-else v-for="(report, index) in filteredReports" :key="'mob-' + report.id"
+             class="report-card-timeline" :class="{ 'highlight-card': report.id === highlightedReportId, 'deleting-row': deletingIds.includes(report.id) }"
              :style="{ animationDelay: (index * 0.07) + 's' }"
              @click="openEditModal(report)">
-          
+
           <!-- Hình tròn: STT + Thời gian -->
           <div class="tl-orb-wrap">
-            <!-- Rotating gradient ring -->
             <div class="tl-orb-ring" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-ring--morning' : 'tl-ring--afternoon'"></div>
             <div class="tl-circle" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-circle--morning' : 'tl-circle--afternoon'">
               <div class="tl-circle-inner">
@@ -279,27 +347,19 @@
                 <span class="tl-stt">#{{ index + 1 }}</span>
               </div>
             </div>
-            <!-- Dải sáng chạy quanh viền -->
             <div class="tl-orbit-trail"></div>
           </div>
 
           <!-- Connector -->
           <div class="tl-connector" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-conn--morning' : 'tl-conn--afternoon'">
             <div class="tl-conn-dot"></div>
-            <!-- Tia sáng chạy dọc connector -->
             <div class="tl-beam-particle" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-beam--morning' : 'tl-beam--afternoon'"></div>
           </div>
 
-          <!-- Hình chữ nhật: Nội dung còn lại -->
+          <!-- Nội dung -->
           <div class="tl-rect" :class="[report.trang_thai === 'Hoàn thành' ? 'tl-rect--done' : 'tl-rect--pending', formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-border--morning' : 'tl-border--afternoon']">
-            <!-- Tia sáng tỏa ra 2 bên viền hình chữ nhật -->
-            <div class="tl-rect-beam-spread" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-spread--morning' : 'tl-spread--afternoon'"></div>
-            <!-- Glow tại điểm chạm -->
-            <div class="tl-impact-glow" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-glow--morning' : 'tl-glow--afternoon'"></div>
-            <!-- Top accent stripe -->
-            <div class="tl-accent-stripe" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-stripe--morning' : 'tl-stripe--afternoon'"></div>
-            
-            <!-- Header: Tags + Status -->
+            <!-- Ánh kim chạy viền -->
+            <div class="tl-shimmer-border" :class="report.trang_thai === 'Hoàn thành' ? 'tl-shimmer--done' : 'tl-shimmer--pending'"></div>
             <div class="tl-rect-header">
               <div class="tl-rect-tags">
                 <span class="tl-badge-cat" :class="getCategoryClass(report.phan_loai)">{{ report.phan_loai }}</span>
@@ -311,13 +371,9 @@
                 <span v-if="report.tag" v-for="t in splitTags(report.tag)" :key="t" v-show="t !== 'BÌNH THƯỜNG'" class="tl-badge-tag" :class="getTagClass(t)">{{ t }}</span>
               </div>
             </div>
-
-            <!-- Nội dung chính -->
             <div class="tl-rect-body">
               <div class="tl-body-text">{{ report.noi_dung }}</div>
             </div>
-
-            <!-- Ghi chú -->
             <div class="tl-rect-note" v-if="report.ghi_chu">
               <div class="tl-note-accent"></div>
               <div class="tl-note-content">
@@ -327,8 +383,6 @@
                 <span>{{ report.ghi_chu }}</span>
               </div>
             </div>
-
-            <!-- Actions -->
             <div class="tl-rect-actions">
               <button class="tl-action-btn tl-action-delete" @click.stop="confirmDelete(report.id)">
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -340,10 +394,9 @@
               </button>
             </div>
           </div>
-
         </div>
       </div>
-    </div>
+    </div><!-- end tableSection -->
 
     <!-- Elite Modal Form -->
     <div class="elite-modal-overlay" v-if="isModalOpen" @click.self="closeModal">
@@ -625,6 +678,16 @@
           </button>
         </div>
         <div class="elite-modal-body">
+          <div class="empty-days-filter" style="display: flex; gap: 1rem; margin-bottom: 1rem; background: #f8fafc; padding: 1rem; border-radius: 12px; border: 1px solid #e2e8f0; align-items: center;">
+            <div style="display: flex; flex-direction: column; flex: 1;">
+              <label style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 0.25rem;">Từ ngày</label>
+              <input type="date" v-model="emptyFilterDateFrom" @change="recalcEmptyDays" style="padding: 0.5rem; border-radius: 8px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.9rem;" />
+            </div>
+            <div style="display: flex; flex-direction: column; flex: 1;">
+              <label style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 0.25rem;">Đến ngày</label>
+              <input type="date" v-model="emptyFilterDateTo" @change="recalcEmptyDays" style="padding: 0.5rem; border-radius: 8px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.9rem;" />
+            </div>
+          </div>
           <div v-if="emptyDaysViewMode === 'list'">
             <div v-if="emptyDays.length === 0" class="empty-state" style="padding: 2rem;">
               <p>Không có buổi nào trống trong khoảng thời gian này.</p>
@@ -692,6 +755,33 @@
       </div>
     </div>
 
+    <!-- Modal Xác Nhận Hoàn Thành -->
+    <div class="elite-modal-overlay" v-if="isDoneModalOpen" @click.self="isDoneModalOpen = false" style="z-index: 999999;">
+      <div class="elite-modal" style="max-width: 400px;">
+        <div class="elite-modal-header">
+          <div class="elite-modal-title" style="display: flex; align-items: flex-start; gap: 0.6rem;">
+            <div style="margin-top: 0.15rem; color: #10b981;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <h2 style="margin: 0; line-height: 1.3;">Xác nhận hoàn thành?</h2>
+          </div>
+          <button class="elite-btn-close" @click="isDoneModalOpen = false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div class="elite-modal-body">
+          <p style="color: #475569; font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">Đánh dấu báo cáo này là đã hoàn thành? Hệ thống sẽ tự động cập nhật trạng thái.</p>
+          <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+            <button class="btn-secondary" @click="isDoneModalOpen = false" style="padding: 0.6rem 1.25rem;">Hủy</button>
+            <button class="btn-primary" @click="executeMarkAsCompleted" style="background: linear-gradient(135deg, #047857, #10b981); padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 0.5rem; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Hoàn thành
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal Ghi Âm Giọng Nói -->
     <div class="elite-modal-overlay" v-if="isVoiceModalOpen" @click.self="cancelVoiceRecording" style="z-index: 999999;">
       <div class="elite-modal" style="max-width: 420px;">
@@ -721,9 +811,12 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import * as XLSX from 'xlsx-js-style'
 import CustomSelect from './CustomSelect.vue'
+
+const isMobile = ref(window.innerWidth <= 768)
+const onResize = () => { isMobile.value = window.innerWidth <= 768 }
 
 const isExpandedFilters = ref(false)
 
@@ -1012,6 +1105,79 @@ const filteredReports = computed(() => {
 const totalCount = computed(() => baseFilteredReports.value.length)
 const pendingCount = computed(() => baseFilteredReports.value.filter(r => r.trang_thai === 'Chưa xử lý').length)
 const completedCount = computed(() => baseFilteredReports.value.filter(r => r.trang_thai === 'Hoàn thành').length)
+
+const pendingReports = computed(() => filteredReports.value.filter(r => r.trang_thai !== 'Hoàn thành'));
+const completedReports = computed(() => filteredReports.value.filter(r => r.trang_thai === 'Hoàn thành'));
+
+const kanbanColumns = computed(() => [
+  {
+    status: 'Chưa xử lý',
+    title: 'CHƯA XỬ LÝ',
+    dotClass: 'bg-amber-500 shadow-amber-500/50',
+    reports: pendingReports.value
+  },
+  {
+    status: 'Hoàn thành',
+    title: 'HOÀN THÀNH',
+    dotClass: 'bg-emerald-500 shadow-emerald-500/50',
+    reports: completedReports.value
+  }
+]);
+
+const draggedReportId = ref(null);
+const dragOverColumn = ref(null); // track cột đang hover khi kéo
+
+const onDragStartReport = (e, report) => {
+  draggedReportId.value = report.id;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', report.id);
+};
+
+const onDragEndReport = () => {
+  draggedReportId.value = null;
+  dragOverColumn.value = null;
+};
+
+const onDragEnterColumn = (status) => {
+  if (draggedReportId.value) dragOverColumn.value = status;
+};
+
+const onDragLeaveColumn = (e, colEl) => {
+  // Chỉ clear khi thực sự rời khỏi column (không phải vào card con)
+  if (colEl && colEl.contains && colEl.contains(e.relatedTarget)) return;
+  dragOverColumn.value = null;
+};
+
+const onDropReport = async (e, newStatus) => {
+  const id = draggedReportId.value;
+  if (!id) return;
+  const report = reports.value.find(r => r.id === id);
+  if (report && report.trang_thai !== newStatus) {
+    if (API_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
+       alert("Tính năng này cần cấu hình API_URL");
+       return;
+    }
+    const originalStatus = report.trang_thai;
+    report.trang_thai = newStatus;
+    
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'update', ...report })
+      });
+      const result = await response.json();
+      if (result.status !== 'success') {
+        report.trang_thai = originalStatus;
+        alert('Lỗi cập nhật: ' + result.message);
+      }
+    } catch (error) {
+      console.error('Lỗi khi cập nhật trạng thái:', error);
+      report.trang_thai = originalStatus;
+    }
+  }
+  draggedReportId.value = null;
+  dragOverColumn.value = null;
+};
 
 watch(() => filters.value.dateFrom, (newVal) => {
   if (newVal && filters.value.dateTo && newVal > filters.value.dateTo) {
@@ -1510,13 +1676,22 @@ const bulkDelete = async () => {
 }
 
 // Đánh dấu hoàn thành nhanh từ List
-const markAsCompleted = async (report) => {
+const isDoneModalOpen = ref(false)
+const doneTarget = ref(null)
+
+const markAsCompleted = (report) => {
   if (API_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
      alert("Tính năng này cần cấu hình API_URL");
      return;
   }
-  
-  if (!confirm('Xác nhận đánh dấu báo cáo này là Hoàn thành?')) return;
+  doneTarget.value = report;
+  isDoneModalOpen.value = true;
+}
+
+const executeMarkAsCompleted = async () => {
+  if (!doneTarget.value) return;
+  const report = doneTarget.value;
+  isDoneModalOpen.value = false;
 
   const originalStatus = report.trang_thai;
   report.trang_thai = 'Hoàn thành';
@@ -1639,6 +1814,11 @@ const emptyDays = ref([])
 const emptyDaysViewMode = ref('list'); // 'list' or 'calendar'
 const emptyDaysStartDate = ref(null);
 const emptyDaysEndDate = ref(null);
+const emptyFilterDateFrom = ref('');
+const emptyFilterDateTo = ref('');
+// Range riêng cho tab Tổng Quan: luôn là toàn bộ thời gian
+const calendarAllStart = ref(null);
+const calendarAllEnd = ref(null);
 
 const emptyDaysCalendar = computed(() => {
   if (!emptyDaysStartDate.value || !emptyDaysEndDate.value) return [];
@@ -1704,32 +1884,55 @@ const formatDateDMY = (date) => {
   return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
 }
 
+const formatToYYYYMMDD = (d) => {
+  if (!d) return '';
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const showEmptyDays = () => {
+  let startDate, endDate;
+  
+  if (filters.value.filterMode === 'day') {
+    startDate = new Date(filters.value.dateFrom);
+    endDate = new Date(filters.value.dateTo);
+  } else if (filters.value.filterMode === 'month') {
+    const [y, m] = filters.value.monthFrom.split('-');
+    startDate = new Date(Number(y), Number(m) - 1, 1);
+    const [ye, me] = filters.value.monthTo.split('-');
+    endDate = new Date(Number(ye), Number(me), 0);
+  } else {
+    startDate = new Date(Number(filters.value.yearFrom), 0, 1);
+    endDate = new Date(Number(filters.value.yearTo), 11, 31);
+  }
+  
+  if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+    emptyFilterDateFrom.value = formatToYYYYMMDD(startDate);
+    emptyFilterDateTo.value = formatToYYYYMMDD(endDate);
+  }
+  
+  emptyDaysViewMode.value = 'list';
+  recalcEmptyDays();
+  isEmptyDaysModalOpen.value = true;
+};
+
+const recalcEmptyDays = () => {
   try {
-    const slots = [];
-    const currentReports = reports.value || [];
-    const workReports = currentReports.filter(r => r.phan_loai === 'CÔNG VIỆC');
-    
-    let startDate, endDate;
-    
-    if (filters.value.filterMode === 'day') {
-      startDate = new Date(filters.value.dateFrom);
-      endDate = new Date(filters.value.dateTo);
-    } else if (filters.value.filterMode === 'month') {
-      const [y, m] = filters.value.monthFrom.split('-');
-      startDate = new Date(Number(y), Number(m) - 1, 1);
-      const [ye, me] = filters.value.monthTo.split('-');
-      endDate = new Date(Number(ye), Number(me), 0);
-    } else {
-      startDate = new Date(Number(filters.value.yearFrom), 0, 1);
-      endDate = new Date(Number(filters.value.yearTo), 11, 31);
-    }
+    if (!emptyFilterDateFrom.value || !emptyFilterDateTo.value) return;
+
+    const startDate = new Date(emptyFilterDateFrom.value);
+    const endDate = new Date(emptyFilterDateTo.value);
     
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       alert("Vui lòng chọn khoảng thời gian hợp lệ.");
       return;
     }
 
+    const currentReports = reports.value || [];
+    const workReports = currentReports.filter(r => r.phan_loai === 'CÔNG VIỆC');
+    
     const reportSlots = new Set();
     workReports.forEach(r => {
       const d = parseDateFromReport(r.thoi_gian);
@@ -1747,20 +1950,16 @@ const showEmptyDays = () => {
     
     emptyDaysStartDate.value = new Date(tempDate);
     emptyDaysEndDate.value = new Date(finalDate);
-    emptyDaysViewMode.value = 'list';
-
+    
+    const slots = [];
     while (tempDate <= finalDate) {
       const dateStr = `${tempDate.getDate()}/${tempDate.getMonth()+1}/${tempDate.getFullYear()}`;
-      const dayOfWeek = tempDate.getDay(); // 0: CN, 6: T7
+      const dayOfWeek = tempDate.getDay(); 
       
-      // Bỏ qua Sáng/Chiều Chủ Nhật (dayOfWeek === 0)
       if (dayOfWeek !== 0) {
-        // Check morning
         if (!reportSlots.has(`${dateStr}|Sáng`)) {
           slots.push({ date: new Date(tempDate), period: 'Sáng' });
         }
-        
-        // Check afternoon (Bỏ qua Chiều Thứ 7)
         if (dayOfWeek !== 6) {
           if (!reportSlots.has(`${dateStr}|Chiều`)) {
             slots.push({ date: new Date(tempDate), period: 'Chiều' });
@@ -1773,9 +1972,8 @@ const showEmptyDays = () => {
     }
     
     emptyDays.value = slots;
-    isEmptyDaysModalOpen.value = true;
   } catch (error) {
-    console.error("Lỗi showEmptyDays:", error);
+    console.error("Lỗi recalcEmptyDays:", error);
     alert("Có lỗi xảy ra khi tính toán lịch trống.");
   }
 }
@@ -1924,6 +2122,11 @@ const doExportExcel = () => {
 
 onMounted(() => {
   fetchReports()
+  window.addEventListener('resize', onResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize)
 })
 </script>
 
@@ -2023,9 +2226,9 @@ onMounted(() => {
   max-width: 100%;
   margin: 0;
   padding: 2rem 2.5rem;
-  background-color: #f8fafc;
+  background: transparent;
   min-height: 100vh;
-  color: #0f172a;
+  color: #f8fafc;
   box-sizing: border-box;
 }
 
@@ -2040,13 +2243,13 @@ onMounted(() => {
 .title-section h1 {
   font-size: 2.25rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #f8fafc;
   margin: 0 0 0.25rem 0;
   letter-spacing: -0.025em;
 }
 
 .title-section .subtitle {
-  color: #64748b;
+  color: #94a3b8;
   margin: 0;
   font-size: 0.95rem;
 }
@@ -2512,9 +2715,9 @@ button {
 
 .elite-quick-btn {
   flex: 1;
-  background: #f8fafc;
-  color: #475569;
-  border: 1.5px solid #e2e8f0;
+  background: #0d3b3f;
+  color: #4ade80;
+  border: 1.5px solid #14532d;
   padding: 0.6rem;
   border-radius: 10px;
   font-size: 0.85rem;
@@ -2528,21 +2731,21 @@ button {
 }
 
 .elite-quick-btn:hover {
-  background: white;
-  border-color: #34d399;
-  color: #059669;
-  box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.15);
+  background: #0a4d52;
+  border-color: #22c55e;
+  color: #86efac;
+  box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.2);
 }
 
 .elite-quick-btn.active {
-  background: #0f172a;
-  color: #10b981;
-  border-color: #0f172a;
-  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.3);
+  background: #052e16;
+  color: #4ade80;
+  border-color: #16a34a;
+  box-shadow: 0 4px 12px -2px rgba(16, 163, 74, 0.35);
 }
 
 .elite-quick-btn.active svg {
-  color: #10b981;
+  color: #4ade80;
 }
 
 .elite-time-picker {
@@ -3067,55 +3270,112 @@ button {
   display: none;
 }
 
+/* Action Bar Container */
+.action-bar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+  gap: 2rem;
+}
+.pc-filters {
+  flex: 0 1 50%;
+  margin: 0 !important;
+  gap: 0.75rem;
+}
+.pc-filters .elite-select-group label {
+  font-size: 0.65rem;
+  margin-bottom: 0.25rem;
+  letter-spacing: 0.2px;
+}
+.pc-filters :deep(.custom-select-trigger) {
+  padding: 0.4rem 0.8rem !important;
+  font-size: 0.75rem !important;
+  min-height: 34px !important;
+}
+.action-bar-container .action-bar {
+  margin-bottom: 0 !important;
+  flex-shrink: 0;
+}
+
 /* Action Bar (below stat cards) */
 .action-bar {
-  display: flex;
+  display: flex !important;
   gap: 1rem;
-  margin-bottom: 1.5rem;
-  justify-content: flex-end;
+  justify-content: flex-start;
+  flex-wrap: wrap;
 }
+
+/* Desktop: Nút chức năng VIP Pro ngang hàng với Filter */
 .mobile-action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.85rem 2rem;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 1.05rem;
+  gap: 0.6rem;
+  height: 52px;
+  padding: 0 1.75rem;
+  border-radius: 9999px;
+  font-weight: 800;
+  font-size: 0.95rem;
   border: none;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-sizing: border-box;
+}
+
+.action-bar-container .mobile-action-btn .icon-white-bg {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+}
+.action-bar-container .mobile-action-btn .icon-white-bg svg {
+  width: 16px;
+  height: 16px;
 }
 .mobile-action-btn.excel {
-  background: #10b981;
+  background: linear-gradient(135deg, #10b981, #059669);
   color: white;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.4), inset 0 1px 2px rgba(255,255,255,0.2);
 }
 .mobile-action-btn.excel:hover {
-  background: #059669;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -2px rgba(16, 185, 129, 0.5), inset 0 1px 2px rgba(255,255,255,0.2);
 }
 .mobile-action-btn.empty-days {
-  background: #6366f1;
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
   color: white;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 4px 12px -2px rgba(139, 92, 246, 0.4), inset 0 1px 2px rgba(255,255,255,0.2);
 }
 .mobile-action-btn.empty-days:hover {
-  background: #4f46e5;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  background: linear-gradient(135deg, #7c3aed, #5b21b6);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -2px rgba(139, 92, 246, 0.5), inset 0 1px 2px rgba(255,255,255,0.2);
 }
 .mobile-action-btn.add {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   color: white;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px -2px rgba(59, 130, 246, 0.4), inset 0 1px 2px rgba(255,255,255,0.2);
 }
 .mobile-action-btn.add:hover {
-  background: #2563eb;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -2px rgba(59, 130, 246, 0.5), inset 0 1px 2px rgba(255,255,255,0.2);
+}
+
+/* Icon badge bên trong nút - hiện cả desktop lẫn mobile */
+.icon-white-bg {
+  width: 22px;
+  height: 22px;
+  background: white;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  flex-shrink: 0;
 }
 .btn-secondary {
   display: inline-flex;
@@ -3148,20 +3408,6 @@ button {
   cursor: pointer;
   position: relative;
   overflow: hidden;
-}
-.stat-card.elite-active {
-  border-color: #10b981;
-  background: #0f172a;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
-}
-.stat-card.elite-active::after {
-  content: '';
-  position: absolute;
-  top: 0; right: 0;
-  width: 0; height: 0;
-  border-style: solid;
-  border-width: 0 16px 16px 0;
-  border-color: transparent #10b981 transparent transparent;
 }
 .stat-card:hover {
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
@@ -3215,14 +3461,20 @@ button {
 }
 
 /* Colors by Card Type */
-.card-total .stat-value { color: #60a5fa; }
-.card-total .stat-label { color: #93c5fd; }
+.card-total .stat-value { color: #60a5fa !important; }
+.card-total .stat-label { color: #93c5fd !important; }
+.card-total.elite-active { border-color: #60a5fa !important; box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2) !important; background: rgba(96, 165, 250, 0.12) !important; }
+.card-total.elite-active::after { content: ''; position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 16px 16px 0; border-color: transparent #60a5fa transparent transparent; }
 
-.card-pending .stat-value { color: #fbbf24; }
-.card-pending .stat-label { color: #fcd34d; }
+.card-pending .stat-value { color: #fbbf24 !important; }
+.card-pending .stat-label { color: #fcd34d !important; }
+.card-pending.elite-active { border-color: #fbbf24 !important; box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2) !important; background: rgba(251, 191, 36, 0.12) !important; }
+.card-pending.elite-active::after { content: ''; position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 16px 16px 0; border-color: transparent #fbbf24 transparent transparent; }
 
-.card-done .stat-value { color: #34d399; }
-.card-done .stat-label { color: #6ee7b7; }
+.card-done .stat-value { color: #34d399 !important; }
+.card-done .stat-label { color: #6ee7b7 !important; }
+.card-done.elite-active { border-color: #34d399 !important; box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.2) !important; background: rgba(52, 211, 153, 0.12) !important; }
+.card-done.elite-active::after { content: ''; position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 16px 16px 0; border-color: transparent #34d399 transparent transparent; }
 
 /* Date filter */
 .date-filter {
@@ -3272,11 +3524,19 @@ button {
     display: none !important;
   }
 
+  .action-bar-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .action-bar-container .action-bar {
+    margin-bottom: 0.75rem !important;
+  }
   .action-bar {
     display: flex !important;
     flex-direction: row !important;
     gap: 0.5rem !important;
-    margin-bottom: 0.75rem;
   }
   .mobile-action-btn {
     flex: 1;
@@ -3286,6 +3546,8 @@ button {
     justify-content: center;
     gap: 0.35rem;
     padding: 0.6rem 0.2rem;
+    height: auto !important;
+    min-height: 56px;
     font-size: 0.72rem;
     font-weight: 800;
     letter-spacing: 0.02em;
@@ -3293,6 +3555,15 @@ button {
     border: 1px solid rgba(255, 255, 255, 0.15);
     text-shadow: 0 1px 2px rgba(0,0,0,0.25);
     transition: all 0.2s ease;
+  }
+  .action-bar-container .mobile-action-btn .icon-white-bg {
+    width: 22px !important;
+    height: 22px !important;
+    border-radius: 7px !important;
+  }
+  .action-bar-container .mobile-action-btn .icon-white-bg svg {
+    width: 14px !important;
+    height: 14px !important;
   }
   .real-icon {
     object-fit: contain;
@@ -3401,6 +3672,171 @@ button {
   gap: 1.6rem;
 }
 
+.kanban-board {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+@media (max-width: 768px) {
+  .kanban-board {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kanban-column {
+  position: relative;
+  background: white;
+  border-radius: 20px;
+  padding: 1.25rem;
+  border: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 300px;
+  box-shadow: 0 4px 12px -2px rgba(0,0,0,0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.kanban-column::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 5px;
+  z-index: 2;
+}
+
+.kanban-column:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -4px rgba(0,0,0,0.08);
+}
+
+/* VIP Pro styling cho cột Chưa xử lý */
+.kb-col-pending {
+  background: linear-gradient(180deg, rgba(255, 251, 235, 0.6) 0%, #ffffff 100%);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  box-shadow: 0 10px 30px -10px rgba(245, 158, 11, 0.15);
+}
+.kb-col-pending::before {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+.kb-col-pending .kanban-header {
+  border-bottom: 2px dashed rgba(245, 158, 11, 0.25);
+}
+.kb-col-pending .kanban-badge {
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+/* VIP Pro styling cho cột Hoàn thành */
+.kb-col-done {
+  background: linear-gradient(180deg, rgba(236, 253, 245, 0.6) 0%, #ffffff 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.15);
+}
+.kb-col-done::before {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+.kb-col-done .kanban-header {
+  border-bottom: 2px dashed rgba(16, 185, 129, 0.25);
+}
+.kb-col-done .kanban-badge {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+/* ===== DRAG-OVER ANIMATION ===== */
+@keyframes kb-pulse-border {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4), 0 10px 30px -10px rgba(99, 102, 241, 0.3); }
+  50% { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0.0), 0 10px 30px -10px rgba(99, 102, 241, 0.5); }
+}
+
+@keyframes kb-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.kb-col-drag-over {
+  transform: translateY(-4px) scale(1.01) !important;
+  border: 2px dashed rgba(99, 102, 241, 0.7) !important;
+  animation: kb-pulse-border 1s ease-in-out infinite !important;
+  z-index: 2;
+}
+
+.kb-col-drag-over::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(99, 102, 241, 0.08) 50%,
+    transparent 60%
+  );
+  background-size: 200% auto;
+  animation: kb-shimmer 1.2s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.kb-col-drag-over .kanban-header {
+  border-bottom-color: rgba(99, 102, 241, 0.4) !important;
+}
+
+.kanban-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px dashed #e2e8f0;
+  margin-bottom: 0.5rem;
+}
+
+.kanban-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.kanban-title h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: 0.05em;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.kanban-badge {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  border: 1px solid #e2e8f0;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.kanban-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+  flex: 1;
+}
+
+.mobile-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+  padding: 0.5rem 0;
+}
+
 .report-card {
   background: white;
   border-radius: 20px;
@@ -3432,6 +3868,23 @@ button {
   to   { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
 }
 .report-card-timeline:active { transform: scale(0.975); }
+
+/* Hover effects for content cards */
+.report-card-timeline:hover .tl-rect {
+  transform: translateY(-4px) scale(1.015);
+  filter: brightness(1.1);
+  z-index: 10;
+}
+.report-card-timeline:hover .tl-rect--pending {
+  box-shadow: 0 12px 32px -4px rgba(245, 158, 11, 0.3), inset 0 1px 2px rgba(255,255,255,0.1) !important;
+  border-color: rgba(245, 158, 11, 1) !important;
+  background: rgba(245, 158, 11, 0.12) !important;
+}
+.report-card-timeline:hover .tl-rect--done {
+  box-shadow: 0 12px 32px -4px rgba(16, 185, 129, 0.3), inset 0 1px 2px rgba(255,255,255,0.1) !important;
+  border-color: rgba(16, 185, 129, 1) !important;
+  background: rgba(16, 185, 129, 0.12) !important;
+}
 
 /* ===== ORB WRAPPER ===== */
 .tl-orb-wrap {
@@ -3761,40 +4214,75 @@ button {
 .tl-rect {
   flex: 1; min-width: 0;
   border-radius: 20px;
-  padding: 0 1.1rem 0.9rem 1.1rem;
+  padding: 1.25rem 1.1rem 0.9rem 1.1rem;
   display: flex; flex-direction: column; gap: 0.55rem;
   position: relative; overflow: hidden;
   transition: all 0.35s ease;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
+
+/* ===== SHIMMER BORDER ÁNH KIM ===== */
+.tl-shimmer-border {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 10;
+  padding: 2px;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  overflow: hidden;
+}
+
+.tl-shimmer-border::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 250%; height: 250%;
+  transform: translate(-50%, -50%);
+  animation: borderRotate 4s linear infinite;
+}
+
+.tl-shimmer--pending::before {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    rgba(252, 211, 77, 0.1) 40%,
+    rgba(252, 211, 77, 0.9) 50%,
+    rgba(252, 211, 77, 0.1) 60%,
+    transparent 100%
+  );
+}
+
+.tl-shimmer--done::before {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    rgba(110, 231, 183, 0.1) 40%,
+    rgba(110, 231, 183, 0.9) 50%,
+    rgba(110, 231, 183, 0.1) 60%,
+    transparent 100%
+  );
+}
+
+@keyframes borderRotate {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
 .tl-rect--done {
-  background: linear-gradient(160deg, #44a08d, #093637);
-  box-shadow: 0 4px 20px -2px rgba(9, 54, 55, 0.5), inset 0 1px 1px rgba(255,255,255,0.15) !important;
-  border-color: rgba(68, 160, 141, 0.4) !important;
-}
-.tl-rect--done .tl-body-text {
-  color: #ecfdf5;
-}
-.tl-rect--done .tl-rect-note {
-  background: rgba(9, 54, 55, 0.4);
-}
-.tl-rect--done .tl-note-content {
-  color: #a7f3d0;
-}
-.tl-rect--done .tl-note-accent {
-  background: linear-gradient(180deg, #44a08d, #093637);
-}
-.tl-rect--done .tl-note-icon {
-  background: rgba(68, 160, 141, 0.2);
-  color: #a7f3d0;
-}
-.tl-rect--done .tl-action-delete {
-  color: #fca5a5;
-  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(15, 23, 34, 0.6);
+  border: 2px solid rgba(16, 185, 129, 0.8) !important;
+  border-top-width: 3px !important;
+  box-shadow: 0 4px 20px -2px rgba(16, 185, 129, 0.1), inset 0 1px 1px rgba(255,255,255,0.05) !important;
 }
 .tl-rect--pending {
-  background: linear-gradient(160deg, rgba(245,158,11,0.04), rgba(217,119,6,0.08), rgba(251,191,36,0.02));
+  background: rgba(15, 23, 34, 0.6);
+  border: 2px solid rgba(245, 158, 11, 0.8) !important;
+  border-top-width: 3px !important;
+  box-shadow: 0 4px 20px -2px rgba(245, 158, 11, 0.1), inset 0 1px 1px rgba(255,255,255,0.05) !important;
 }
 .tl-border--morning { 
   border: 1px solid rgba(59,130,246,0.45); 
@@ -4815,5 +5303,335 @@ button {
     padding: 0.6rem 0.8rem;
     font-size: 0.9rem;
   }
+}
+
+/* =========================================================
+   DARK THEME VIP PRO OVERRIDES (Microsoft / Youtube Theme)
+   ========================================================= */
+.elite-filter-panel {
+  background: rgba(20, 32, 50, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #f8fafc !important;
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255,255,255,0.05) !important;
+}
+
+/* Modal: giữ màu sáng như ban đầu */
+.elite-modal {
+  background: white !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #0f172a !important;
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.4) !important;
+}
+
+.elite-modal .elite-modal-title h2,
+.elite-modal label,
+.elite-modal .elite-form-group label,
+.elite-modal p {
+  color: #1e293b !important;
+}
+
+.elite-modal .elite-input,
+.elite-modal .elite-select,
+.elite-modal .elite-textarea,
+.elite-modal .elite-select-mini {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+.elite-modal .elite-modal-header {
+  border-bottom-color: #f1f5f9 !important;
+}
+
+.elite-table-toolbar {
+  background: transparent !important;
+  color: #f8fafc !important;
+}
+
+.elite-filter-title, .toolbar-left h3, .kanban-title h3, .elite-modal-title h2, .tl-body-text {
+  color: #f8fafc !important;
+}
+
+.elite-input, .elite-select, .elite-textarea, .elite-select-mini, .time-picker-wrapper select {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f8fafc !important;
+}
+
+.elite-input::placeholder, .elite-textarea::placeholder {
+  color: #64748b !important;
+}
+
+.elite-mode-tabs {
+  background: rgba(0, 0, 0, 0.4) !important;
+}
+
+.elite-mode-tabs button[style*="background: white"],
+.elite-mode-tabs button.active {
+  background: #ffffff !important;
+  color: #065f46 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+}
+
+.elite-mode-tabs button {
+  color: #94a3b8 !important;
+}
+
+.tl-rect {
+  background: rgba(15, 23, 34, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Pending cards: nền trong suốt, viền cam dày */
+.tl-rect--pending {
+  background: rgba(15, 23, 34, 0.6) !important;
+  border: 2px solid rgba(245, 158, 11, 0.8) !important;
+  border-top-width: 3px !important;
+  box-shadow: 0 4px 20px -2px rgba(245, 158, 11, 0.1) !important;
+}
+
+/* Nút trong card pending: xóa = đỏ, xong = xanh lá */
+.tl-rect--pending .tl-action-delete {
+  background: transparent !important;
+  color: #f87171 !important;
+  border: 1.5px solid rgba(248, 113, 113, 0.3) !important;
+}
+
+.tl-rect--pending .tl-action-delete:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #ef4444 !important;
+}
+
+.tl-rect--pending .tl-action-done {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #10b981 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  box-shadow: none !important;
+}
+
+.tl-rect--pending .tl-action-done:hover {
+  background: rgba(16, 185, 129, 0.25) !important;
+}
+
+.kanban-column {
+  background: rgba(15, 23, 34, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.kb-col-pending {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 34, 0.4) 100%) !important;
+  border-color: rgba(245, 158, 11, 0.15) !important;
+}
+
+.kb-col-done {
+  background: linear-gradient(180deg, rgba(20, 50, 60, 0.6) 0%, rgba(15, 23, 34, 0.4) 100%) !important;
+  border-color: rgba(16, 185, 129, 0.15) !important;
+}
+
+.kanban-badge, .record-badge {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #cbd5e1 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.tl-stt, .tl-date, .tl-time, .tl-thu-period, .tl-note-content, .elite-form-group label {
+  color: #cbd5e1 !important;
+}
+
+.tl-circle {
+  background: #1e293b !important;
+}
+
+.tl-circle-inner {
+  background: #0f172a !important;
+}
+
+.empty-state, .kanban-list .empty-state p {
+  color: #94a3b8 !important;
+}
+
+/* Global dark action button styles (for done cards) */
+.tl-action-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #cbd5e1 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Nút xóa luôn đỏ */
+.tl-action-delete {
+  color: #f87171 !important;
+  border-color: rgba(248, 113, 113, 0.3) !important;
+  background: transparent !important;
+}
+
+.tl-action-delete:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #ef4444 !important;
+}
+
+/* Nút xong card done: giữ nguyên phong cách */
+.tl-action-done:hover {
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #10b981 !important;
+}
+
+/* Card hoàn thành: viền xanh lá dày, nền trong suốt */
+.tl-rect--done {
+  background: rgba(15, 23, 34, 0.6) !important;
+  border: 2px solid rgba(16, 185, 129, 0.8) !important;
+  border-top-width: 3px !important;
+  box-shadow: 0 4px 20px -4px rgba(16, 185, 129, 0.1), inset 0 1px 1px rgba(255,255,255,0.05) !important;
+}
+
+.elite-quick-btn {
+  background: #f1f5f9 !important;
+  color: #64748b !important;
+  border-color: #e2e8f0 !important;
+}
+
+.elite-quick-btn.active {
+  background: #0d3b3f !important;
+  color: #4ade80 !important;
+  border-color: #16a34a !important;
+  box-shadow: 0 4px 12px -2px rgba(16, 163, 74, 0.35) !important;
+}
+
+/* Fix inline styles on empty days calendar */
+div[style*="background: white"], 
+div[style*="background: #f8fafc"], 
+div[style*="background: #f1f5f9"],
+div[style*="background: rgba(248, 250, 252"] {
+  background: rgba(15, 23, 34, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+  color: #e2e8f0 !important;
+}
+
+div[style*="background: #fff7ed"] {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.2) !important;
+}
+
+div[style*="background: #fdf4ff"] {
+  background: rgba(168, 85, 247, 0.15) !important;
+  color: #e879f9 !important;
+  border-color: rgba(168, 85, 247, 0.2) !important;
+}
+
+/* =========================================================
+   DEEP DARK THEME — Report Page: Text & Background Fixes
+   ========================================================= */
+
+/* Nền trắng → tối mờ */
+.filters,
+.table-wrapper,
+.status-container,
+.elite-quick-note,
+.tl-rect-note,
+.delete-confirm-modal {
+  background: rgba(13, 20, 30, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
+/* Tất cả màu chữ tối → màu sáng */
+.report-table td,
+.report-table th,
+.col-content,
+.col-time,
+.col-note,
+.elite-label,
+.elite-form-group label,
+.elite-modal-title h2,
+.elite-modal-title p,
+.delete-title,
+.delete-desc,
+.toolbar-left h3,
+.record-meta span,
+.tl-body-text,
+.tl-date,
+.tl-time,
+.tl-thu-period,
+.tl-stt {
+  color: #e2e8f0 !important;
+}
+
+/* Table header */
+.report-table th {
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: #94a3b8 !important;
+  border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Table rows */
+.report-table td {
+  border-bottom-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+.report-table tr:hover td {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Filter inputs */
+.filters input,
+.filters select,
+.elite-input,
+.elite-select,
+.elite-textarea {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f1f5f9 !important;
+}
+
+.filters input:focus,
+.filters select:focus {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border-color: rgba(34, 211, 238, 0.4) !important;
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1) !important;
+}
+
+/* Stat cards (summary cards) */
+.stat-card {
+  background: rgba(25, 38, 58, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 4px 16px -4px rgba(0,0,0,0.4) !important;
+}
+
+/* Button icon hovers */
+.btn-icon:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.btn-icon.edit:hover {
+  color: #60a5fa !important;
+  background: rgba(59, 130, 246, 0.15) !important;
+}
+
+.btn-icon.delete:hover {
+  color: #f87171 !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+}
+
+/* Status container pill */
+.status-container {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #e2e8f0 !important;
+}
+
+/* Tags */
+.tag {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #cbd5e1 !important;
+}
+
+/* Section headings inside inline styles */
+h3[style*="color: #1e293b"],
+span[style*="color: #1e293b"],
+span[style*="color: #334155"] {
+  color: #e2e8f0 !important;
 }
 </style>
