@@ -2226,7 +2226,7 @@ onUnmounted(() => {
   max-width: 100%;
   margin: 0;
   padding: 2rem 2.5rem;
-  background: transparent;
+  background: radial-gradient(circle at 0% 5%, rgba(30, 120, 180, 0.18) 0%, transparent 45%);
   min-height: 100vh;
   color: #f8fafc;
   box-sizing: border-box;
