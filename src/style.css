@@ -160,8 +160,10 @@ code {
 
 .sidebar {
   width: 260px;
-  background: #111720;
-  border-right: none;
+  background: 
+    radial-gradient(circle at 15% 90%, rgba(30, 120, 180, 0.25) 0%, transparent 55%),
+    #0d1b2a;
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -272,7 +274,7 @@ code {
 
 .main-content {
   flex: 1;
-  background: radial-gradient(circle at 80% 10%, #15454b 0%, #0c171e 30%, #091016 100%);
+  background: radial-gradient(circle at 80% 10%, #132a3e 0%, #0e1c2b 30%, #0a1520 100%);
   overflow-y: auto;
   position: relative;
   max-width: calc(100% - 260px);
@@ -299,7 +301,7 @@ code {
     top: auto;
     height: auto;
     z-index: 9999;
-    background: #0b1118;
+    background: #0d1b2a;
     box-shadow: 0 -4px 24px rgba(0,0,0,0.5);
   }
   .logo {
