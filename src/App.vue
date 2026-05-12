@@ -2,7 +2,15 @@
   <div class="app-layout" :class="{ 'sidebar-collapsed': !isSidebarOpen }">
     <aside class="sidebar">
       <div class="logo">
-        <h2 v-if="isSidebarOpen">Mini CRM</h2>
+        <div v-if="isSidebarOpen" style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
+          <div style="flex-shrink: 0; width: 42px; height: 42px; border-radius: 50%; overflow: hidden; border: 2px solid rgba(16,185,129,0.3); box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
+            <img :src="'/avatar.jpg'" @error="$event.target.src='https://ui-avatars.com/api/?name=Lê+Phi+Sơn&background=047857&color=fff&bold=true'" alt="Lê Phi Sơn" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <div style="display: flex; flex-direction: column; justify-content: center;">
+            <h2 style="margin: 0; color: #f8fafc; font-size: 15px; font-weight: 700; letter-spacing: 0;">Lê Phi Sơn</h2>
+            <span style="color: #10b981; font-size: 12px; font-weight: 600;">Phó giám đốc NTS</span>
+          </div>
+        </div>
         <button class="toggle-btn" @click="isSidebarOpen = !isSidebarOpen">
           <svg v-if="isSidebarOpen" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
           <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
@@ -16,6 +24,34 @@
         <router-link to="/customer" class="nav-item" title="Khách hàng">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           <span v-if="isSidebarOpen">Khách hàng</span>
+        </router-link>
+        <router-link to="/baogia" class="nav-item" title="Tạo Báo giá">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <span v-if="isSidebarOpen">Tạo Báo giá</span>
+        </router-link>
+        <router-link to="/quanlybaogia" class="nav-item" title="Quản lý báo giá">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+          <span v-if="isSidebarOpen">Quản lý báo giá</span>
+        </router-link>
+        <router-link to="/quanlydieukhoan" class="nav-item" title="Quản lý Điều khoản">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 3v5h5M16 13H8M16 17H8M10 9H8"/></svg>
+          <span v-if="isSidebarOpen">Quản lý Điều khoản</span>
+        </router-link>
+        <router-link to="/quanlyhanghoa" class="nav-item" title="Nhập Hàng Hóa">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          <span v-if="isSidebarOpen">Nhập Hàng Hóa</span>
+        </router-link>
+        <router-link to="/po-preview" class="nav-item" title="Xem PO">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <span v-if="isSidebarOpen">Xem PO</span>
+        </router-link>
+        <router-link to="/tra-cuu-mst" class="nav-item" title="Tra cứu MST">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span v-if="isSidebarOpen">Tra cứu MST</span>
+        </router-link>
+        <router-link to="/sale-report" class="nav-item" title="Sale Report">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span v-if="isSidebarOpen">Sale Report</span>
         </router-link>
       </nav>
     </aside>
