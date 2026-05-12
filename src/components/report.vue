@@ -1,11 +1,11 @@
 <template>
   <div class="report-container">
-    <header class="header">
-      <div class="title-section">
-        <h1>Quản Lý Báo Cáo</h1>
+    <header class="header" style="position: relative; justify-content: center;">
+      <div class="title-section" style="text-align: center;">
+        <h1 style="color: #10b981; text-transform: uppercase;">Quản Lý Báo Cáo</h1>
         <p class="subtitle">Theo dõi và cập nhật trạng thái công việc</p>
       </div>
-      <div class="header-actions">
+      <div class="header-actions" style="position: absolute; right: 0;">
         <button class="btn-excel" @click="exportExcel">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
           <span>Xuất Excel</span>
@@ -42,7 +42,7 @@
             </div>
           </div>
 
-          <div class="elite-date-group group-period" style="min-width: 90px; max-width: 120px;">
+          <div class="elite-date-group group-period" style="min-width: 90px; max-width: 140px;">
             <label>Buổi</label>
             <CustomSelect v-model="filters.period" :options="periodOptions" />
           </div>
@@ -155,7 +155,7 @@
     <div class="action-bar-container">
       <!-- Action Buttons (Now on the left) -->
       <div class="action-bar">
-        <button class="mobile-action-btn add" @click="openAddModal">
+        <button v-if="isMobile" class="mobile-action-btn add" @click="openAddModal">
           <div class="icon-white-bg">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
           </div>
@@ -166,6 +166,18 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
           </div>
           LỊCH TRỐNG
+        </button>
+        <button class="mobile-action-btn distribute-tasks" @click="openDistributeModal">
+          <div class="icon-white-bg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"></path><path d="M4 20L21 3"></path><path d="M21 16v5h-5"></path><path d="M15 15l6 6"></path><path d="M4 4l5 5"></path></svg>
+          </div>
+          CHIA VIỆC
+        </button>
+        <button v-if="!isMobile" class="mobile-action-btn move-tasks" @click="openMoveModal">
+          <div class="icon-white-bg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l4-4 4 4"/><path d="M9 5v14"/><path d="M19 15l-4 4-4-4"/><path d="M15 19V5"/></svg>
+          </div>
+          CHUYỂN VIỆC
         </button>
         <button class="mobile-action-btn excel" @click="exportExcel">
           <div class="icon-white-bg">
@@ -200,12 +212,20 @@
     <!-- Bảng Dữ Liệu -->
     <div ref="tableSection">
       <!-- Toolbar (PC only) -->
-      <div class="elite-table-toolbar desktop-only" style="margin-bottom: 1.5rem;">
-        <div class="toolbar-left">
+      <div class="elite-table-toolbar desktop-only" style="margin-bottom: 1.5rem; position: relative;">
+        <!-- Nút THÊM căn trái tuyệt đối -->
+        <button class="tech-vip-btn" @click="openAddModal" style="position: absolute; left: 0; z-index: 10; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer;">
+          <div style="background: rgba(255,255,255,0.25); border-radius: 50%; padding: 0.3rem; display: flex; align-items: center; justify-content: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </div>
+          THÊM
+        </button>
+
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 0.5rem;">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line></svg>
           <h3>DANH SÁCH BÁO CÁO</h3>
         </div>
-        <div class="toolbar-right">
+        <div class="toolbar-right" style="margin-left: 1rem;">
           <span class="record-badge">{{ filteredReports.length }} việc</span>
         </div>
       </div>
@@ -654,49 +674,49 @@
       </div>
     </div>
 
-    <!-- Modal Báo Lịch Trống -->
-    <div class="elite-modal-overlay" v-if="isEmptyDaysModalOpen" @click.self="isEmptyDaysModalOpen = false" style="z-index: 999999;">
-      <div class="elite-modal" style="max-width: 500px;">
-        <div class="elite-modal-header">
+    <!-- Modal Lịch Trống (Empty Schedule) -->
+    <div class="elite-modal-overlay" v-if="isEmptyDaysModalOpen" @click.self="isEmptyDaysModalOpen = false" style="z-index: 999999; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);">
+      <div class="elite-modal dark-mode-modal" style="max-width: 900px; width: 95%; max-height: 95vh; display: flex; flex-direction: column; background: #0f172a !important; border: 1px solid rgba(255,255,255,0.1) !important; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+        <div class="elite-modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.05) !important; background: transparent !important;">
           <div class="elite-modal-title" style="display: flex; align-items: flex-start; gap: 0.6rem;">
-            <div style="margin-top: 0.15rem; color: #4f46e5;">
+            <div style="margin-top: 0.15rem; color: #3b82f6;">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
             </div>
             <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.4rem; flex: 1;">
-              <h2 style="margin: 0; line-height: 1.3;">DANH SÁCH NGÀY TRỐNG</h2>
-              <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                <span v-if="emptyDays.length > 0" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(239, 68, 68, 0.2); white-space: nowrap;">Có {{ emptyDays.length }} buổi</span>
-                <div style="display: flex; background: #f1f5f9; padding: 2px; border-radius: 8px;">
-                  <button @click="emptyDaysViewMode = 'list'" :style="emptyDaysViewMode === 'list' ? 'background: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1);' : 'background: transparent; color: #64748b;'" style="padding: 4px 12px; border: none; font-size: 0.8rem; font-weight: 600; border-radius: 6px; cursor: pointer;">Danh Sách</button>
-                  <button @click="emptyDaysViewMode = 'calendar'" :style="emptyDaysViewMode === 'calendar' ? 'background: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1);' : 'background: transparent; color: #64748b;'" style="padding: 4px 12px; border: none; font-size: 0.8rem; font-weight: 600; border-radius: 6px; cursor: pointer;">Tổng Quan</button>
+              <h2 style="margin: 0; line-height: 1.3; color: #f8fafc !important;">DANH SÁCH NGÀY TRỐNG</h2>
+              <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; gap: 1rem;">
+                <span v-if="emptyDays.length > 0" style="background: rgba(16,185,129,0.1); color: #34d399; padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(16,185,129,0.2); white-space: nowrap;">Có {{ emptyDays.length }} buổi</span>
+                <div style="display: flex; background: rgba(255,255,255,0.05); padding: 3px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+                  <button @click="emptyDaysViewMode = 'list'" :style="emptyDaysViewMode === 'list' ? 'background: #3b82f6; color: white; box-shadow: 0 1px 2px rgba(0,0,0,0.2);' : 'background: transparent; color: #94a3b8;'" style="padding: 4px 10px; border: none; font-size: 0.75rem; font-weight: 700; border-radius: 4px; cursor: pointer; transition: all 0.2s;">Danh Sách</button>
+                  <button @click="emptyDaysViewMode = 'calendar'" :style="emptyDaysViewMode === 'calendar' ? 'background: #3b82f6; color: white; box-shadow: 0 1px 2px rgba(0,0,0,0.2);' : 'background: transparent; color: #94a3b8;'" style="padding: 4px 10px; border: none; font-size: 0.75rem; font-weight: 700; border-radius: 4px; cursor: pointer; transition: all 0.2s;">Lịch</button>
                 </div>
               </div>
             </div>
           </div>
-          <button class="elite-btn-close" @click="isEmptyDaysModalOpen = false">
+          <button class="elite-btn-close" @click="isEmptyDaysModalOpen = false" style="color: #94a3b8;">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
-        <div class="elite-modal-body">
-          <div class="empty-days-filter" style="display: flex; gap: 1rem; margin-bottom: 1rem; background: #f8fafc; padding: 1rem; border-radius: 12px; border: 1px solid #e2e8f0; align-items: center;">
+        <div class="elite-modal-body" style="padding: 1.5rem;">
+          <div class="empty-days-filter" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; background: linear-gradient(to right, #1e293b, #0f172a); padding: 1.2rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); align-items: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
             <div style="display: flex; flex-direction: column; flex: 1;">
-              <label style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 0.25rem;">Từ ngày</label>
-              <input type="date" v-model="emptyFilterDateFrom" @change="recalcEmptyDays" style="padding: 0.5rem; border-radius: 8px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.9rem;" />
+              <label style="font-size: 0.75rem; font-weight: 700; color: #f8fafc !important; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.05em;">Từ ngày</label>
+              <input type="date" v-model="emptyFilterDateFrom" @change="recalcEmptyDays" style="padding: 0.6rem 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); font-family: inherit; font-size: 0.95rem; color: #f8fafc; background: #0f172a; outline: none; transition: border-color 0.2s; color-scheme: dark;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'" />
             </div>
             <div style="display: flex; flex-direction: column; flex: 1;">
-              <label style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 0.25rem;">Đến ngày</label>
-              <input type="date" v-model="emptyFilterDateTo" @change="recalcEmptyDays" style="padding: 0.5rem; border-radius: 8px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.9rem;" />
+              <label style="font-size: 0.75rem; font-weight: 700; color: #f8fafc !important; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.05em;">Đến ngày</label>
+              <input type="date" v-model="emptyFilterDateTo" @change="recalcEmptyDays" style="padding: 0.6rem 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); font-family: inherit; font-size: 0.95rem; color: #f8fafc; background: #0f172a; outline: none; transition: border-color 0.2s; color-scheme: dark;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'" />
             </div>
           </div>
           <div v-if="emptyDaysViewMode === 'list'">
-            <div v-if="emptyDays.length === 0" class="empty-state" style="padding: 2rem;">
+            <div v-if="emptyDays.length === 0" class="empty-state" style="padding: 2rem; text-align: center; color: #94a3b8;">
               <p>Không có buổi nào trống trong khoảng thời gian này.</p>
             </div>
-            <div v-else class="empty-days-list" style="max-height: 400px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.8rem; padding: 0.5rem;">
-              <div v-for="(slot, idx) in emptyDays" :key="idx" class="empty-day-item" @click="openAddModalWithSlot(slot)" style="padding: 0.8rem; background: #f8fafc; border-radius: 16px; border: 1.5px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; transition: all 0.2s; cursor: pointer;">
+            <div v-else class="empty-days-list" style="max-height: 400px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.8rem; padding: 0.2rem;">
+              <div v-for="(slot, idx) in emptyDays" :key="idx" class="empty-day-item" @click="openAddModalWithSlot(slot)" style="padding: 0.8rem; background: #1e293b; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; gap: 0.2rem; transition: all 0.2s; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onmouseover="this.style.borderColor='#3b82f6'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.05)'; this.style.transform='none'">
                 <span style="font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">{{ getThuText(slot.date) }}</span>
-                <span style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">{{ formatDateDMY(slot.date) }}</span>
-                <span :class="slot.period === 'Sáng' ? 'empty-badge-morning' : 'empty-badge-afternoon'" style="margin-top: 0.4rem;">
+                <span style="font-size: 0.95rem; font-weight: 700; color: #f8fafc;">{{ formatDateDMY(slot.date) }}</span>
+                <span :style="slot.period === 'Sáng' ? 'background: rgba(59,130,246,0.1); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2);' : 'background: rgba(168,85,247,0.1); color: #c084fc; border: 1px solid rgba(168,85,247,0.2);'" style="margin-top: 0.4rem; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">
                   {{ slot.period === 'Sáng' ? 'Trống Sáng' : 'Trống Chiều' }}
                 </span>
               </div>
@@ -704,25 +724,398 @@
           </div>
           <div v-else class="empty-calendar-view" style="max-height: 450px; overflow-y: auto; padding: 0.5rem;">
             <div v-for="month in emptyDaysCalendar" :key="month.year + '-' + month.month" style="margin-bottom: 1.5rem;">
-              <h3 style="font-size: 1rem; color: #1e293b; margin-bottom: 0.8rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.4rem;">Tháng {{ month.month }} / {{ month.year }}</h3>
-              <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-bottom: 0.5rem;">
-                <div v-for="day in ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']" :key="day" style="font-size: 0.75rem; font-weight: 700; color: #64748b;">{{ day }}</div>
+              <h3 style="font-size: 1rem; color: #f8fafc; font-weight: 700; margin-bottom: 0.8rem; border-bottom: 2px solid rgba(255,255,255,0.05); padding-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                Tháng {{ month.month }} / {{ month.year }}
+              </h3>
+              <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; margin-bottom: 0.6rem;">
+                <div v-for="day in ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']" :key="day" style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; padding: 0.4rem 0; background: rgba(255,255,255,0.05); border-radius: 6px;">{{ day }}</div>
               </div>
-              <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;">
+              <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;">
                 <div v-for="(day, idx) in month.days" :key="idx" 
-                     style="min-height: 65px; border-radius: 6px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 4px; position: relative;"
-                     :style="day ? (day.inRange ? 'background: #f8fafc; border: 1px solid #e2e8f0;' : 'background: #f1f5f9; opacity: 0.5;') : 'background: transparent;'">
-                  <span v-if="day" style="font-size: 0.8rem; font-weight: 600;" :style="day.isSunday ? 'color: #ef4444;' : 'color: #334155;'">{{ day.dayNum }}</span>
-                  <div v-if="day && day.inRange" style="display: flex; flex-direction: column; gap: 2px; margin-top: auto; width: 100%;">
-                    <div v-if="!day.isSunday && day.emptyMorning" @click="openAddModalWithSlot({ date: day.date, period: 'Sáng' })" style="background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; font-size: 0.6rem; font-weight: 700; border-radius: 4px; width: 100%; cursor: pointer; text-align: center;">Sáng</div>
-                    <div v-if="!day.isSunday && !day.isSaturday && day.emptyAfternoon" @click="openAddModalWithSlot({ date: day.date, period: 'Chiều' })" style="background: #fdf4ff; color: #a21caf; border: 1px solid #fbcfe8; font-size: 0.6rem; font-weight: 700; border-radius: 4px; width: 100%; cursor: pointer; text-align: center;">Chiều</div>
+                     style="min-height: 75px; border-radius: 8px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 6px 4px; position: relative; transition: all 0.2s;"
+                     :style="day ? (day.inRange ? 'background: #1e293b; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 1px 2px rgba(0,0,0,0.1);' : 'background: transparent; border: 1px dashed rgba(255,255,255,0.1); opacity: 0.4;') : 'background: transparent;'">
+                  <span v-if="day" style="font-size: 0.8rem; font-weight: 700; margin-bottom: 0.2rem;" :style="day.isSunday ? 'color: #f87171;' : 'color: #cbd5e1;'">{{ day.dayNum }}</span>
+                  <div v-if="day && !day.inRange" style="font-size: 0.55rem; color: #475569; font-weight: 700; text-align: center; margin-top: auto; text-transform: uppercase; line-height: 1.2;">Ngoài<br>khoảng</div>
+                  <div v-if="day && day.inRange" style="display: flex; flex-direction: column; gap: 3px; margin-top: auto; width: 100%;">
+                    <div v-if="!day.isSunday && day.emptyMorning" @click="openAddModalWithSlot({ date: day.date, period: 'Sáng' })" style="background: rgba(59,130,246,0.1); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2); font-size: 0.65rem; font-weight: 700; border-radius: 6px; width: 100%; cursor: pointer; text-align: center; padding: 3px 0; transition: all 0.2s;" onmouseover="this.style.background='rgba(59,130,246,0.2)'; this.style.transform='scale(1.02)'" onmouseout="this.style.background='rgba(59,130,246,0.1)'; this.style.transform='none'">Sáng</div>
+                    <div v-if="!day.isSunday && !day.isSaturday && day.emptyAfternoon" @click="openAddModalWithSlot({ date: day.date, period: 'Chiều' })" style="background: rgba(168,85,247,0.1); color: #c084fc; border: 1px solid rgba(168,85,247,0.2); font-size: 0.65rem; font-weight: 700; border-radius: 6px; width: 100%; cursor: pointer; text-align: center; padding: 3px 0; transition: all 0.2s;" onmouseover="this.style.background='rgba(168,85,247,0.2)'; this.style.transform='scale(1.02)'" onmouseout="this.style.background='rgba(168,85,247,0.1)'; this.style.transform='none'">Chiều</div>
+                    <div v-if="!day.isSunday && !day.emptyMorning && (day.isSaturday || !day.emptyAfternoon)" style="font-size: 0.65rem; color: #10b981; font-weight: 800; text-align: center; padding: 3px 0; background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.1); border-radius: 6px; width: 100%;">ĐỦ</div>
+                    <div v-if="day.isSunday" style="font-size: 0.65rem; color: #ef4444; font-weight: 800; text-align: center; padding: 3px 0; background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.1); border-radius: 6px; width: 100%;">NGHỈ</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="elite-modal-actions" style="margin-top: 1.5rem;">
-            <button type="button" class="elite-btn-primary" @click="isEmptyDaysModalOpen = false" style="width: 100%; justify-content: center;">Đóng</button>
+          <div class="elite-modal-actions" style="margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1rem;">
+            <button type="button" class="elite-btn-primary" @click="isEmptyDaysModalOpen = false" style="width: 100%; justify-content: center; background: #3b82f6; border-color: #3b82f6; border-radius: 10px; font-weight: 700; font-size: 0.95rem; padding: 0.8rem;">Đóng</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <!-- Modal Chuyển Việc (Move Tasks) -->
+    <div class="elite-modal-overlay" v-if="isMoveModalOpen" @click.self="isMoveModalOpen = false" style="z-index: 999999; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);">
+      <div class="elite-modal dark-mode-modal move-modal-pc" style="width: 96vw; height: 96vh; max-width: 1800px; display: flex; flex-direction: column; background: #0f172a !important; border: 1px solid rgba(255,255,255,0.08) !important; box-shadow: 0 25px 60px -12px rgba(0,0,0,0.7); border-radius: 12px; overflow: hidden;">
+        
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); flex-shrink: 0;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 42px; height: 42px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l4-4 4 4"/><path d="M9 5v14"/><path d="M19 15l-4 4-4-4"/><path d="M15 19V5"/></svg>
+            </div>
+            <div>
+              <h2 style="color: #f8fafc; margin: 0; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em;">CHUYỂN VIỆC (KÉO THẢ)</h2>
+              <p style="color: #94a3b8; margin: 0.1rem 0 0 0; font-size: 0.8rem;">Kéo thẻ công việc từ ô này sang ô khác để đổi lịch làm việc. (Sáng = Xanh dương, Chiều = Xanh lá)</p>
+            </div>
+          </div>
+          <button @click="isMoveModalOpen = false" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #94a3b8; font-size: 1.1rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.2)'; this.style.color='#f87171'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.color='#94a3b8'">✕</button>
+        </div>
+        
+        <!-- Calendar Body -->
+        <div style="flex: 1; overflow-y: auto; padding: 1.5rem; background: #0b1118;">
+          <div v-for="month in moveDaysCalendar" :key="month.year + '-' + month.month" style="margin-bottom: 2rem;">
+            
+            <!-- Month Header -->
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+              <div style="background: linear-gradient(135deg, #3b82f6, #2563eb); padding: 0.3rem 0.8rem; border-radius: 6px;">
+                <span style="color: white; font-weight: 800; font-size: 0.95rem;">Tháng {{ month.month }}</span>
+              </div>
+              <span style="color: #64748b; font-size: 0.9rem; font-weight: 600;">/ {{ month.year }}</span>
+              <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.05);"></div>
+            </div>
+            
+            <!-- Weekday Header Row -->
+            <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0.5rem; margin-bottom: 0.5rem;">
+              <div v-for="dayName in ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN']" :key="dayName" 
+                   :style="dayName === 'CN' ? 'color: #f87171; background: rgba(239,68,68,0.05);' : 'color: #94a3b8; background: rgba(255,255,255,0.03);'"
+                   style="text-align: center; font-weight: 700; font-size: 0.8rem; padding: 0.4rem 0; border-radius: 6px; letter-spacing: 0.02em;">
+                {{ dayName }}
+              </div>
+            </div>
+            
+            <!-- Calendar Grid -->
+            <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0.5rem; grid-auto-rows: minmax(220px, auto);">
+              <div v-for="(day, idx) in month.days" :key="idx"
+                   :style="!day ? 'visibility: hidden;' : day.isSunday ? 'background: rgba(239,68,68,0.02); border-color: rgba(239,68,68,0.1);' : ''"
+                   style="background: #1e293b; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; transition: border-color 0.2s; height: 100%;">
+                
+                <template v-if="day">
+                  <!-- Day Number Bar -->
+                  <div style="padding: 0.3rem 0.6rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); background: rgba(0,0,0,0.2);">
+                    <span style="font-weight: 800; font-size: 0.95rem;" :style="day.isSunday ? 'color: #f87171;' : 'color: #e2e8f0;'">{{ day.dayNum }}</span>
+                    <span v-if="!day.isSunday && (day.morningTasks.length + day.afternoonTasks.length) > 0" style="font-size: 0.75rem; color: #94a3b8; background: rgba(255,255,255,0.08); padding: 0.1rem 0.4rem; border-radius: 4px; font-weight: 700;">{{ day.morningTasks.length + day.afternoonTasks.length }} việc</span>
+                  </div>
+                  
+                  <!-- Drop Zones Container -->
+                  <div v-if="!day.isSunday" style="flex: 1; display: flex; flex-direction: column; padding: 0.4rem; gap: 0.5rem; overflow-y: auto;" class="custom-scrollbar">
+                    
+                    <!-- Sáng Zone -->
+                    <div style="display: flex; flex-direction: column; flex-shrink: 0; border-radius: 6px; padding: 0.4rem; background: rgba(59,130,246,0.05); border: 1px dashed rgba(59,130,246,0.3); transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); min-height: 80px;"
+                         @dragover.prevent="$event.currentTarget.classList.add('drag-over-sang')"
+                         @dragleave.prevent="$event.currentTarget.classList.remove('drag-over-sang')"
+                         @drop.prevent="$event.currentTarget.classList.remove('drag-over-sang'); onMoveTaskDrop($event, day.dateStr, 'Sáng')">
+                      
+                      <div style="font-size: 0.75rem; color: #60a5fa; font-weight: 800; margin-bottom: 0.4rem; text-transform: uppercase; display: flex; justify-content: space-between;">
+                        <span>SÁNG</span>
+                      </div>
+                      
+                      <div v-for="task in day.morningTasks" :key="task.id" draggable="true" 
+                           @dragstart="onMoveTaskDragStart($event, task)" @dragend="draggedMoveTask = null"
+                           :class="{ 'dragging-task': draggedMoveTask && draggedMoveTask.id === task.id, 'drop-success-pulse': successDropTaskId === task.id }"
+                           style="background: linear-gradient(135deg, #1e3a8a, #1d4ed8); border-left: 4px solid #60a5fa; color: white; padding: 0.6rem 0.75rem; border-radius: 6px; font-size: 0.9rem; margin-bottom: 0.65rem; cursor: grab; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.15s;"
+                           onmouseover="if(!this.classList.contains('dragging-task')){this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(37,99,235,0.3)'}" 
+                           onmouseout="if(!this.classList.contains('dragging-task')){this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.2)'}">
+                        <div style="font-weight: 700; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">{{ task.noi_dung }}</div>
+                        <div v-if="task.ghi_chu" style="font-size: 0.8rem; color: #bfdbfe; line-height: 1.35; margin-top: 4px; padding-top: 4px; border-top: 1px dotted rgba(191,219,254,0.3); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                          {{ task.ghi_chu }}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Chiều Zone -->
+                    <div style="display: flex; flex-direction: column; flex-shrink: 0; border-radius: 6px; padding: 0.4rem; background: rgba(16,185,129,0.05); border: 1px dashed rgba(16,185,129,0.3); transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); min-height: 80px;"
+                         @dragover.prevent="$event.currentTarget.classList.add('drag-over-chieu')"
+                         @dragleave.prevent="$event.currentTarget.classList.remove('drag-over-chieu')"
+                         @drop.prevent="$event.currentTarget.classList.remove('drag-over-chieu'); onMoveTaskDrop($event, day.dateStr, 'Chiều')">
+                      
+                      <div style="font-size: 0.75rem; color: #34d399; font-weight: 800; margin-bottom: 0.4rem; text-transform: uppercase; display: flex; justify-content: space-between;">
+                        <span>CHIỀU</span>
+                      </div>
+                      
+                      <div v-for="task in day.afternoonTasks" :key="task.id" draggable="true" 
+                           @dragstart="onMoveTaskDragStart($event, task)" @dragend="draggedMoveTask = null"
+                           :class="{ 'dragging-task': draggedMoveTask && draggedMoveTask.id === task.id, 'drop-success-pulse': successDropTaskId === task.id }"
+                           style="background: linear-gradient(135deg, #064e3b, #047857); border-left: 4px solid #34d399; color: white; padding: 0.6rem 0.75rem; border-radius: 6px; font-size: 0.9rem; margin-bottom: 0.65rem; cursor: grab; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.15s;"
+                           onmouseover="if(!this.classList.contains('dragging-task')){this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(16,185,129,0.3)'}" 
+                           onmouseout="if(!this.classList.contains('dragging-task')){this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.2)'}">
+                        <div style="font-weight: 700; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">{{ task.noi_dung }}</div>
+                        <div v-if="task.ghi_chu" style="font-size: 0.8rem; color: #a7f3d0; line-height: 1.35; margin-top: 4px; padding-top: 4px; border-top: 1px dotted rgba(167,243,208,0.3); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                          {{ task.ghi_chu }}
+                        </div>
+                      </div>
+                    </div>
+                    
+                  </div>
+                  
+                  <!-- Sunday empty state -->
+                  <div v-else style="flex: 1; display: flex; align-items: center; justify-content: center; color: #475569; font-size: 0.75rem; font-style: italic; background: rgba(0,0,0,0.1);">Nghỉ</div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal Chia Việc (Distribute Tasks) -->
+    <div class="elite-modal-overlay" v-if="isDistributeModalOpen" @click.self="isDistributeModalOpen = false" style="z-index: 999999; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);">
+      <div class="elite-modal dark-mode-modal" :style="{ maxWidth: distributeStep === 2 ? '1400px' : '900px', height: distributeStep === 2 ? '95vh' : 'auto' }" style="width: 95%; max-height: 95vh; display: flex; flex-direction: column; transition: all 0.3s ease; background: #0f172a !important; border: 1px solid rgba(255,255,255,0.1) !important; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+        <div class="elite-modal-header" style="flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,0.05) !important; background: transparent !important;">
+          <div class="elite-modal-title" style="display: flex; align-items: flex-start; gap: 0.6rem;">
+            <div style="margin-top: 0.15rem; color: #10b981;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"></path><path d="M4 20L21 3"></path><path d="M21 16v5h-5"></path><path d="M15 15l6 6"></path><path d="M4 4l5 5"></path></svg>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.4rem; flex: 1;">
+              <h2 style="margin: 0; line-height: 1.3; color: #f8fafc !important;">CHIA ĐỀU VIỆC</h2>
+              <div style="font-size: 0.85rem; color: #94a3b8; font-weight: 500;">
+                {{ distributeStep === 1 ? 'Bước 1: Chọn các việc từ những buổi đang bị quá tải.' : 'Bước 2: Chọn các buổi trống để phân bổ việc.' }}
+              </div>
+            </div>
+          </div>
+          <button class="elite-btn-close" @click="isDistributeModalOpen = false" style="color: #94a3b8;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        
+        <div class="elite-modal-body" style="flex: 1; overflow-y: hidden; display: flex; flex-direction: column; padding: 1.5rem;">
+          
+          <div class="empty-days-filter" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; background: linear-gradient(to right, #1e293b, #0f172a); padding: 1.2rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); align-items: center; flex-shrink: 0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+            <div style="display: flex; flex-direction: column; flex: 1;">
+              <label style="font-size: 0.75rem; font-weight: 700; color: #f8fafc !important; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.05em;">Từ ngày</label>
+              <input type="date" v-model="distributeFilterDateFrom" @change="recalcDistributeTasks" style="padding: 0.6rem 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); font-family: inherit; font-size: 0.95rem; color: #f8fafc; background: #0f172a; outline: none; transition: border-color 0.2s; color-scheme: dark;" onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'" />
+            </div>
+            <div style="display: flex; flex-direction: column; flex: 1;">
+              <label style="font-size: 0.75rem; font-weight: 700; color: #f8fafc !important; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.05em;">Đến ngày</label>
+              <input type="date" v-model="distributeFilterDateTo" @change="recalcDistributeTasks" style="padding: 0.6rem 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); font-family: inherit; font-size: 0.95rem; color: #f8fafc; background: #0f172a; outline: none; transition: border-color 0.2s; color-scheme: dark;" onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'" />
+            </div>
+          </div>
+          <!-- BƯỚC 1 -->
+          <div v-if="distributeStep === 1" style="flex: 1; overflow-y: auto; padding-right: 0.5rem;" class="distribute-step-1">
+            <div v-if="overloadedPeriods.length === 0" class="empty-state" style="padding: 3rem; text-align: center;">
+              <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(16,185,129,0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto; border: 1px solid rgba(16,185,129,0.2);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              </div>
+              <h3 style="color: #f8fafc; margin-bottom: 0.5rem; font-size: 1.2rem; font-weight: 700;">Tất cả đều ổn!</h3>
+              <p style="color: #94a3b8; font-size: 0.95rem;">Không có buổi nào bị quá tải (dư việc) trong khoảng thời gian này.</p>
+            </div>
+            
+            <div v-else>
+              <div style="margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.8rem;">
+                <p style="color: #94a3b8; font-size: 0.9rem; margin: 0;">Vui lòng tick chọn các việc bạn muốn san sẻ sang buổi khác:</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                  <!-- Số buổi có từ 2 việc -->
+                  <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    Số buổi có từ 2 việc: <span style="font-weight: 800; color: #f87171; font-size: 1rem;">{{ overloadedPeriods.length }}</span>
+                  </div>
+                  
+                  <!-- Số buổi trống -->
+                  <div style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); color: #93c5fd; padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                    Số buổi trống: <span style="font-weight: 800; color: #60a5fa; font-size: 1rem;">{{ emptyPeriodsForDistribute.length }}</span>
+                  </div>
+
+                  <!-- Đã chọn -->
+                  <div :style="isTaskSelectionFull ? 'color: #fca5a5; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2);' : 'color: #34d399; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2);'" style="padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; transition: all 0.3s;">
+                    <svg v-if="!isTaskSelectionFull" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    Đã chọn: <span style="font-weight: 800; font-size: 1rem;" :style="isTaskSelectionFull ? 'color: #f87171;' : 'color: #10b981;'">{{ selectedTasksToDistribute.length }} / {{ maxTasksToDistribute }}</span> việc
+                  </div>
+                </div>
+              </div>
+              
+              <div v-for="(period, idx) in overloadedPeriods" :key="idx" style="margin-bottom: 1.5rem; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2), 0 2px 4px -1px rgba(0,0,0,0.1);">
+                <div style="background: linear-gradient(to right, #1e293b, #0f172a); padding: 0.85rem 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
+                  <div style="display: flex; align-items: center; gap: 0.6rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <span style="font-weight: 700; color: #f8fafc; font-size: 0.95rem;">{{ getThuText(period.date) }}, {{ formatDateDMY(period.date) }} <span style="color: #475569; margin: 0 0.2rem;">|</span> <span :style="period.period === 'Sáng' ? 'color: #fb923c;' : 'color: #a78bfa;'">{{ period.period }}</span></span>
+                  </div>
+                  <span style="font-size: 0.75rem; font-weight: 700; background: rgba(239,68,68,0.15); color: #f87171; padding: 0.25rem 0.7rem; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(239,68,68,0.2);">{{ period.tasks.length }} việc</span>
+                </div>
+                
+                <div style="padding: 0.75rem;">
+                  <div v-for="task in period.tasks" :key="task.id" 
+                       @click="!isTaskDisabled(task, period) && toggleTaskDistribute(task, period)"
+                       class="distribute-task-item"
+                       style="display: flex; align-items: flex-start; gap: 0.8rem; padding: 0.8rem 1rem; border-radius: 10px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); margin-bottom: 0.4rem;"
+                       :style="selectedTasksToDistribute.some(t => t.id === task.id) ? 'background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15); cursor: pointer;' : (isTaskDisabled(task, period) ? 'background: rgba(15,23,42,0.5); border: 1px dashed rgba(255,255,255,0.1); opacity: 0.5; cursor: not-allowed;' : 'background: #0f172a; border: 1px solid rgba(255,255,255,0.05); cursor: pointer;')"
+                       onmouseover="if(this.style.cursor === 'pointer' && !this.style.transform) this.style.backgroundColor='#1e293b'" onmouseout="if(!this.style.transform && this.style.cursor === 'pointer') this.style.backgroundColor='#0f172a'">
+                    <div style="margin-top: 0.15rem;">
+                      <div style="width: 20px; height: 20px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"
+                           :style="selectedTasksToDistribute.some(t => t.id === task.id) ? 'background: #10b981; border: 1px solid #10b981; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);' : 'border: 2px solid #475569; background: transparent;'">
+                        <svg v-if="selectedTasksToDistribute.some(t => t.id === task.id)" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      </div>
+                    </div>
+                    <div style="flex: 1;">
+                      <div style="font-weight: 600; font-size: 0.95rem; line-height: 1.4; transition: color 0.2s;" :style="selectedTasksToDistribute.some(t => t.id === task.id) ? 'color: #34d399;' : 'color: #f8fafc;'">{{ task.noi_dung }}</div>
+                      <div v-if="task.ghi_chu" style="font-size: 0.8rem; margin-top: 0.35rem; display: flex; align-items: center; gap: 0.4rem;" :style="selectedTasksToDistribute.some(t => t.id === task.id) ? 'color: #6ee7b7;' : 'color: #94a3b8;'">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        {{ task.ghi_chu }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- BƯỚC 2 -->
+          <div v-if="distributeStep === 2" style="flex: 1; display: flex; gap: 1.5rem; overflow: hidden;" class="distribute-step-2">
+            <!-- Left panel: Selected tasks -->
+            <div class="distribute-left-panel" style="width: 35%; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; background: #0f172a; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2), 0 2px 4px -1px rgba(0,0,0,0.1);">
+              <div style="background: linear-gradient(to right, #1e293b, #0f172a); padding: 0.85rem 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 0.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                <span style="font-weight: 700; color: #f8fafc; font-size: 0.95rem;">{{ selectedTasksToDistribute.length }} việc sẽ chia</span>
+              </div>
+              <div style="flex: 1; overflow-y: auto; padding: 0.85rem; background: #0f172a;">
+                <div v-for="task in selectedTasksToDistribute" :key="task.id" 
+                     draggable="true" 
+                     @dragstart="onTaskDragStart(task, $event)"
+                     @dragend="onTaskDragEnd($event)"
+                     style="padding: 0.8rem; background: #1e293b; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.6rem; font-size: 0.85rem; font-weight: 600; color: #cbd5e1; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-left: 3px solid #10b981; cursor: grab; transition: all 0.2s;"
+                     :style="assignedTaskIds.includes(task.id) ? 'opacity: 0.5; pointer-events: none; border-left-color: #64748b; background: rgba(30,41,59,0.5); transform: scale(0.98);' : ''">
+                  {{ task.noi_dung }}
+                  <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.4rem; font-weight: 500; display: flex; align-items: center; gap: 0.3rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    Lịch cũ: <span :style="assignedTaskIds.includes(task.id) ? 'text-decoration: line-through; opacity: 0.7;' : 'color: #94a3b8;'">{{ task.old_thoi_gian || task.thoi_gian }}</span>
+                  </div>
+                  <div v-if="assignedTaskIds.includes(task.id)" style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed rgba(255,255,255,0.1); font-size: 0.75rem; font-weight: 700; color: #10b981; display: flex; align-items: center; gap: 0.4rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Lịch mới: {{ task.thoi_gian }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Right panel: Empty periods -->
+            <div class="distribute-right-panel" style="width: 65%; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; background: #0f172a; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2), 0 2px 4px -1px rgba(0,0,0,0.1);">
+              <div style="background: linear-gradient(to right, #1e293b, #0f172a); padding: 0.85rem 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(16,185,129,0.1); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(16,185,129,0.2);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 0.15rem;">
+                    <span style="font-weight: 700; color: #f8fafc; font-size: 0.95rem;">Chọn buổi nhận việc</span>
+                    <span style="font-size: 0.75rem; font-weight: 700;" :style="isEmptySlotFull ? 'color: #34d399;' : 'color: #94a3b8;'">
+                      Đã chọn {{ selectedEmptyPeriodsForDistribute.length }}/{{ maxEmptySlots }} buổi
+                    </span>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 0.6rem; align-items: center;">
+                  <div style="display: flex; background: rgba(255,255,255,0.05); padding: 3px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+                    <button @click="distributeStep2ViewMode = 'calendar'" :style="distributeStep2ViewMode === 'calendar' ? 'background: #3b82f6; color: white; box-shadow: 0 1px 2px rgba(0,0,0,0.2);' : 'background: transparent; color: #94a3b8;'" style="padding: 4px 10px; border: none; font-size: 0.75rem; font-weight: 700; border-radius: 4px; cursor: pointer; transition: all 0.2s;">Lịch</button>
+                    <button @click="distributeStep2ViewMode = 'list'" :style="distributeStep2ViewMode === 'list' ? 'background: #3b82f6; color: white; box-shadow: 0 1px 2px rgba(0,0,0,0.2);' : 'background: transparent; color: #94a3b8;'" style="padding: 4px 10px; border: none; font-size: 0.75rem; font-weight: 700; border-radius: 4px; cursor: pointer; transition: all 0.2s;">Danh Sách</button>
+                  </div>
+                  <button @click="selectAllEmptyPeriods" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; color: #e2e8f0; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1); transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                    {{ selectedEmptyPeriodsForDistribute.length > 0 ? 'Bỏ chọn' : 'Chọn tất cả' }}
+                  </button>
+                </div>
+              </div>
+              
+              <div v-if="distributeStep2ViewMode === 'list'" style="flex: 1; overflow-y: auto; padding: 1rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.8rem; align-content: flex-start;">
+                <div v-if="emptyPeriodsForDistribute.length === 0" style="grid-column: 1 / -1; padding: 2rem; text-align: center; color: #64748b;">
+                  Không có buổi nào trống trong khoảng thời gian này.
+                </div>
+                
+                <div v-else v-for="period in emptyPeriodsForDistribute" :key="period.id" 
+                     @click="toggleEmptyPeriodDistribute(period.id)"
+                     @dragover.prevent
+                     @dragenter.prevent="$event.currentTarget.style.transform='scale(1.08)'; $event.currentTarget.style.boxShadow='0 0 15px rgba(16,185,129,0.4)'"
+                     @dragleave.prevent="$event.currentTarget.style.transform='scale(1)'; $event.currentTarget.style.boxShadow='none'"
+                     @drop="onTaskDropToPeriod(period.id, $event); $event.currentTarget.style.transform='scale(1)'; $event.currentTarget.style.boxShadow='none'"
+                     style="padding: 0.8rem; border-radius: 12px; border: 2px solid transparent; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; position: relative;"
+                     :style="successDropPeriods.includes(period.id) ? 'background: #10b981; border-color: #10b981; transform: scale(0.9); opacity: 0; pointer-events: none;' : (selectedEmptyPeriodsForDistribute.includes(period.id) ? 'background: rgba(16,185,129,0.1); border-color: #10b981; cursor: pointer;' : (isEmptySlotFull ? 'background: rgba(15,23,42,0.5); border-color: rgba(255,255,255,0.05); opacity: 0.4; cursor: not-allowed;' : 'background: #1e293b; border-color: rgba(255,255,255,0.1); cursor: pointer;'))">
+                  
+                  <div v-if="selectedEmptyPeriodsForDistribute.includes(period.id)" style="position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(16,185,129,0.3); pointer-events: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  </div>
+                  
+                  <span style="font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; pointer-events: none;">{{ getThuText(period.date) }}</span>
+                  <span style="font-size: 0.95rem; font-weight: 700; color: #f8fafc; pointer-events: none;">{{ formatDateDMY(period.date) }}</span>
+                  <span :style="period.period === 'Sáng' ? 'background: rgba(59,130,246,0.1); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2);' : 'background: rgba(168,85,247,0.1); color: #c084fc; border: 1px solid rgba(168,85,247,0.2);'" style="margin-top: 0.4rem; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; pointer-events: none;">
+                    {{ period.period === 'Sáng' ? 'Trống Sáng' : 'Trống Chiều' }}
+                  </span>
+                </div>
+              </div>
+              
+              <div v-else class="empty-calendar-view" style="flex: 1; overflow-y: auto; padding: 1rem;">
+                <div v-for="month in distributeDaysCalendar" :key="month.year + '-' + month.month" style="margin-bottom: 1.5rem;">
+                  <h3 style="font-size: 1rem; color: #f8fafc; font-weight: 700; margin-bottom: 0.8rem; border-bottom: 2px solid rgba(255,255,255,0.05); padding-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    Tháng {{ month.month }} / {{ month.year }}
+                  </h3>
+                  <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; margin-bottom: 0.6rem;">
+                    <div v-for="day in ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']" :key="day" style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; padding: 0.4rem 0; background: rgba(255,255,255,0.05); border-radius: 6px;">{{ day }}</div>
+                  </div>
+                  <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;">
+                    <div v-for="(day, idx) in month.days" :key="idx" 
+                         style="min-height: 75px; border-radius: 8px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 6px 4px; position: relative; transition: all 0.2s;"
+                         :style="day ? (day.inRange ? 'background: #1e293b; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 1px 2px rgba(0,0,0,0.1);' : 'background: transparent; border: 1px dashed rgba(255,255,255,0.1); opacity: 0.4;') : 'background: transparent;'">
+                      <span v-if="day" style="font-size: 0.8rem; font-weight: 700; margin-bottom: 0.2rem;" :style="day.isSunday ? 'color: #f87171;' : 'color: #cbd5e1;'">{{ day.dayNum }}</span>
+                      <div v-if="day && !day.inRange" style="font-size: 0.55rem; color: #475569; font-weight: 700; text-align: center; margin-top: auto; text-transform: uppercase; line-height: 1.2;">Ngoài<br>khoảng</div>
+                      <div v-if="day && day.inRange" style="display: flex; flex-direction: column; gap: 3px; margin-top: auto; width: 100%;">
+                        <div v-if="!day.isSunday && day.emptyMorning" 
+                             @click="toggleEmptyPeriodDistribute(day.emptyMorning.id)" 
+                             @dragover.prevent
+                             @dragenter.prevent="$event.currentTarget.style.transform='scale(1.15)'; $event.currentTarget.style.boxShadow='0 0 12px rgba(59,130,246,0.6)'"
+                             @dragleave.prevent="$event.currentTarget.style.transform='scale(1)'; $event.currentTarget.style.boxShadow='none'"
+                             @drop="onTaskDropToPeriod(day.emptyMorning.id, $event); $event.currentTarget.style.transform='scale(1)'; $event.currentTarget.style.boxShadow='none'"
+                             style="font-size: 0.65rem; font-weight: 700; border-radius: 6px; width: 100%; text-align: center; padding: 3px 0; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); user-select: none;"
+                             :style="successDropPeriods.includes(day.emptyMorning.id) ? 'background: #10b981; color: white; transform: scale(0.9); opacity: 0; pointer-events: none;' : (selectedEmptyPeriodsForDistribute.includes(day.emptyMorning.id) ? 'background: #10b981; color: #0f172a; border: 1px solid #10b981; box-shadow: 0 2px 4px rgba(16,185,129,0.3); transform: scale(1.02); cursor: pointer;' : (isEmptySlotFull ? 'background: rgba(15,23,42,0.5); color: #64748b; border: 1px solid rgba(255,255,255,0.1); opacity: 0.5; cursor: not-allowed;' : 'background: rgba(59,130,246,0.1); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2); cursor: pointer;'))"
+                             onmouseover="if(!this.style.opacity && this.style.backgroundColor !== 'rgb(16, 185, 129)') this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='none'">{{ successDropPeriods.includes(day.emptyMorning.id) ? '✓' : 'Sáng' }}</div>
+                        <div v-if="!day.isSunday && !day.isSaturday && day.emptyAfternoon" 
+                             @click="toggleEmptyPeriodDistribute(day.emptyAfternoon.id)" 
+                             @dragover.prevent
+                             @dragenter.prevent="$event.currentTarget.style.transform='scale(1.15)'; $event.currentTarget.style.boxShadow='0 0 12px rgba(168,85,247,0.6)'"
+                             @dragleave.prevent="$event.currentTarget.style.transform='scale(1)'; $event.currentTarget.style.boxShadow='none'"
+                             @drop="onTaskDropToPeriod(day.emptyAfternoon.id, $event); $event.currentTarget.style.transform='scale(1)'; $event.currentTarget.style.boxShadow='none'"
+                             style="font-size: 0.65rem; font-weight: 700; border-radius: 6px; width: 100%; text-align: center; padding: 3px 0; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); user-select: none;"
+                             :style="successDropPeriods.includes(day.emptyAfternoon.id) ? 'background: #10b981; color: white; transform: scale(0.9); opacity: 0; pointer-events: none;' : (selectedEmptyPeriodsForDistribute.includes(day.emptyAfternoon.id) ? 'background: #10b981; color: #0f172a; border: 1px solid #10b981; box-shadow: 0 2px 4px rgba(16,185,129,0.3); transform: scale(1.02); cursor: pointer;' : (isEmptySlotFull ? 'background: rgba(15,23,42,0.5); color: #64748b; border: 1px solid rgba(255,255,255,0.1); opacity: 0.5; cursor: not-allowed;' : 'background: rgba(168,85,247,0.1); color: #c084fc; border: 1px solid rgba(168,85,247,0.2); cursor: pointer;'))"
+                             onmouseover="if(!this.style.opacity && this.style.backgroundColor !== 'rgb(16, 185, 129)') this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='none'">{{ successDropPeriods.includes(day.emptyAfternoon.id) ? '✓' : 'Chiều' }}</div>
+                        <div v-if="!day.isSunday && !day.emptyMorning && (day.isSaturday || !day.emptyAfternoon)" style="font-size: 0.65rem; color: #10b981; font-weight: 800; text-align: center; padding: 3px 0; background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.1); border-radius: 6px; width: 100%;">ĐỦ</div>
+                        <div v-if="day.isSunday" style="font-size: 0.65rem; color: #ef4444; font-weight: 800; text-align: center; padding: 3px 0; background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.1); border-radius: 6px; width: 100%;">NGHỈ</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="elite-modal-actions" style="margin-top: 1.5rem; flex-shrink: 0; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between;">
+            <div style="display: flex; gap: 0.8rem;">
+              <button v-if="distributeStep === 2" type="button" class="elite-btn-cancel" style="background: rgba(255,255,255,0.05); color: #cbd5e1; border-color: rgba(255,255,255,0.1);" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'" @click="distributeStep = 1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.3rem;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Quay Lại
+              </button>
+            </div>
+            
+            <div style="display: flex; gap: 0.8rem;">
+              <button type="button" class="elite-btn-cancel" style="background: rgba(255,255,255,0.05); color: #cbd5e1; border-color: rgba(255,255,255,0.1);" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'" @click="isDistributeModalOpen = false" :disabled="distributeLoading">Huỷ</button>
+              
+              <button v-if="distributeStep === 1" type="button" class="elite-btn-primary" style="background: #10b981; border-color: #10b981;" @click="nextDistributeStep" :disabled="selectedTasksToDistribute.length === 0">
+                Tiếp Tục ({{ selectedTasksToDistribute.length }} việc)
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 0.3rem;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </button>
+              
+              <button v-else type="button" class="elite-btn-primary" style="background: #3b82f6; border-color: #3b82f6;" @click="executeDistribute" :disabled="!isEmptySlotFull || distributeLoading">
+                <span v-if="distributeLoading" class="spinner-small" style="margin-right: 0.5rem;"></span>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.3rem;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Chia Đều Việc
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -807,6 +1200,29 @@
         </div>
       </div>
     </div>
+    <!-- Custom Alert Modal -->
+    <div class="elite-modal-overlay" v-if="customAlertState.isOpen" @click.self="closeAlert" style="z-index: 9999999; background: rgba(15,23,42,0.8); backdrop-filter: blur(8px);">
+      <div class="elite-modal dark-mode-modal" style="width: 400px; max-width: 90vw; background: #1e293b !important; border: 1px solid rgba(255,255,255,0.1) !important; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-radius: 16px; overflow: hidden; transform: scale(1); animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+        <div style="padding: 1.5rem; text-align: center;">
+          <div style="margin-bottom: 1rem; display: flex; justify-content: center;">
+            <div v-if="customAlertState.type === 'error'" style="width: 56px; height: 56px; border-radius: 50%; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); display: flex; align-items: center; justify-content: center; color: #ef4444;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            </div>
+            <div v-else-if="customAlertState.type === 'success'" style="width: 56px; height: 56px; border-radius: 50%; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); display: flex; align-items: center; justify-content: center; color: #10b981;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <div v-else style="width: 56px; height: 56px; border-radius: 50%; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); display: flex; align-items: center; justify-content: center; color: #3b82f6;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            </div>
+          </div>
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: #f8fafc; margin-bottom: 0.6rem;">Thông báo</h3>
+          <p style="font-size: 0.95rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 1.5rem;">{{ customAlertState.message }}</p>
+          <button @click="closeAlert" style="width: 100%; padding: 0.8rem; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(59,130,246,0.3);" onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#3b82f6'; this.style.transform='none'">
+            Xác nhận
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -817,6 +1233,18 @@ import CustomSelect from './CustomSelect.vue'
 
 const isMobile = ref(window.innerWidth <= 768)
 const onResize = () => { isMobile.value = window.innerWidth <= 768 }
+
+// Custom Alert System
+const customAlertState = ref({ isOpen: false, message: '', type: 'info' })
+const closeAlert = () => { customAlertState.value.isOpen = false }
+const alert = (message) => {
+  const msgLower = String(message).toLowerCase()
+  let type = 'info'
+  if (msgLower.includes('lỗi') || msgLower.includes('không thể') || msgLower.includes('vui lòng') || msgLower.includes('chặn')) type = 'error'
+  else if (msgLower.includes('thành công') || msgLower.includes('xong')) type = 'success'
+  
+  customAlertState.value = { isOpen: true, message, type }
+}
 
 const isExpandedFilters = ref(false)
 
@@ -1820,12 +2248,195 @@ const emptyFilterDateTo = ref('');
 const calendarAllStart = ref(null);
 const calendarAllEnd = ref(null);
 
-const emptyDaysCalendar = computed(() => {
-  if (!emptyDaysStartDate.value || !emptyDaysEndDate.value) return [];
+// State cho chức năng Chia Việc
+const isDistributeModalOpen = ref(false)
+const distributeStep = ref(1) // 1: Chọn việc dư, 2: Chọn buổi nhận
+const overloadedPeriods = ref([])
+const emptyPeriodsForDistribute = ref([])
+const selectedTasksToDistribute = ref([])
+const selectedEmptyPeriodsForDistribute = ref([])
+const distributeLoading = ref(false)
+const successDropPeriods = ref([])
+const assignedTaskIds = ref([])
+
+const distributeFilterDateFrom = ref('')
+const distributeFilterDateTo = ref('')
+
+const recalcDistributeTasks = () => {
+  const currentReports = reports.value || []
+  const workReports = currentReports.filter(r => r.phan_loai === 'CÔNG VIỆC')
+  
+  if (!distributeFilterDateFrom.value || !distributeFilterDateTo.value) return;
+
+  const filterStart = new Date(distributeFilterDateFrom.value);
+  const filterEnd = new Date(distributeFilterDateTo.value);
+
+  if (isNaN(filterStart.getTime()) || isNaN(filterEnd.getTime())) {
+    return;
+  }
+  
+  filterStart.setHours(0, 0, 0, 0);
+  filterEnd.setHours(23, 59, 59, 999);
+
+  const reportMap = new Map() 
+  workReports.forEach(r => {
+    const d = parseDateFromReport(r.thoi_gian)
+    if (d && d >= filterStart && d <= filterEnd) {
+      const displayTime = formatDisplayTime(r.thoi_gian)
+      const dateStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth()+1).padStart(2, '0')}/${d.getFullYear()}`
+      const key = `${dateStr}|${displayTime.period}`
+      if (!reportMap.has(key)) {
+        reportMap.set(key, [])
+      }
+      reportMap.get(key).push(r)
+    }
+  })
+
+  const overloaded = []
+  reportMap.forEach((tasks, key) => {
+    if (tasks.length >= 2) {
+      const [dateStr, period] = key.split('|')
+      const [dd, mm, yyyy] = dateStr.split('/')
+      const d = new Date(yyyy, mm - 1, dd)
+      overloaded.push({ date: d, period, tasks })
+    }
+  })
+  overloaded.sort((a, b) => a.date - b.date || (a.period === 'Sáng' ? -1 : 1))
+  overloadedPeriods.value = overloaded
+
+  const tempDate = new Date(filterStart)
+  tempDate.setHours(0,0,0,0)
+  const finalDate = new Date(filterEnd)
+  finalDate.setHours(23,59,59,999)
+  
+  const empty = []
+  while (tempDate <= finalDate) {
+    const d = new Date(tempDate)
+    const dateStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth()+1).padStart(2, '0')}/${d.getFullYear()}`
+    const dayOfWeek = d.getDay() 
+    
+    if (dayOfWeek !== 0) {
+      if (!reportMap.has(`${dateStr}|Sáng`)) {
+        empty.push({ date: d, period: 'Sáng', id: `${dateStr}|Sáng` })
+      }
+      if (dayOfWeek !== 6) {
+        if (!reportMap.has(`${dateStr}|Chiều`)) {
+          empty.push({ date: d, period: 'Chiều', id: `${dateStr}|Chiều` })
+        }
+      }
+    }
+    
+    tempDate.setDate(tempDate.getDate() + 1)
+  }
+  emptyPeriodsForDistribute.value = empty
+
+  // Reset selections when dates change
+  selectedTasksToDistribute.value = []
+  selectedEmptyPeriodsForDistribute.value = []
+  assignedTaskIds.value = []
+}
+
+const openDistributeModal = () => {
+  let startDate, endDate;
+  
+  if (filters.value.filterMode === 'day') {
+    startDate = new Date(filters.value.dateFrom);
+    endDate = new Date(filters.value.dateTo);
+  } else if (filters.value.filterMode === 'month') {
+    const [y, m] = filters.value.monthFrom.split('-');
+    startDate = new Date(Number(y), Number(m) - 1, 1);
+    const [ye, me] = filters.value.monthTo.split('-');
+    endDate = new Date(Number(ye), Number(me), 0);
+  } else {
+    startDate = new Date(Number(filters.value.yearFrom), 0, 1);
+    endDate = new Date(Number(filters.value.yearTo), 11, 31);
+  }
+  
+  if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+    distributeFilterDateFrom.value = formatToYYYYMMDD(startDate);
+    distributeFilterDateTo.value = formatToYYYYMMDD(endDate);
+  }
+  
+  recalcDistributeTasks()
+  
+  distributeStep.value = 1
+  isDistributeModalOpen.value = true
+}
+
+const maxTasksToDistribute = computed(() => emptyPeriodsForDistribute.value.length)
+const isTaskSelectionFull = computed(() => selectedTasksToDistribute.value.length >= maxTasksToDistribute.value)
+
+const isTaskDisabled = (task, period) => {
+  if (selectedTasksToDistribute.value.some(t => t.id === task.id)) return false;
+  if (isTaskSelectionFull.value) return true;
+  
+  const selectedFromPeriodCount = period.tasks.filter(pt => selectedTasksToDistribute.value.some(st => st.id === pt.id)).length;
+  if (selectedFromPeriodCount >= period.tasks.length - 1) return true;
+  
+  return false;
+}
+
+const toggleTaskDistribute = (task, period) => {
+  if (isTaskDisabled(task, period) && !selectedTasksToDistribute.value.some(t => t.id === task.id)) {
+    return;
+  }
+
+  const idx = selectedTasksToDistribute.value.findIndex(t => t.id === task.id)
+  if (idx >= 0) {
+    selectedTasksToDistribute.value.splice(idx, 1)
+  } else {
+    selectedTasksToDistribute.value.push(task)
+  }
+}
+
+const maxEmptySlots = computed(() => selectedTasksToDistribute.value.length)
+
+const isEmptySlotFull = computed(() => selectedEmptyPeriodsForDistribute.value.length >= maxEmptySlots.value)
+
+const toggleEmptyPeriodDistribute = (periodId) => {
+  if (distributeStep.value === 2) {
+    // Chế độ gán nhanh khi click: Lấy công việc đầu tiên chưa được phân công
+    const unassignedTask = selectedTasksToDistribute.value.find(t => !assignedTaskIds.value.includes(t.id))
+    
+    if (unassignedTask) {
+      assignTaskToPeriod(unassignedTask.id, periodId)
+    } else {
+      alert("Tất cả công việc đã được phân công!")
+    }
+  } else {
+    // Chế độ cũ (nếu có dùng cho giao diện khác)
+    const idx = selectedEmptyPeriodsForDistribute.value.indexOf(periodId)
+    if (idx >= 0) {
+      selectedEmptyPeriodsForDistribute.value.splice(idx, 1)
+    } else {
+      if (selectedEmptyPeriodsForDistribute.value.length >= maxEmptySlots.value) return
+      selectedEmptyPeriodsForDistribute.value.push(periodId)
+    }
+  }
+}
+
+const selectAllEmptyPeriods = () => {
+  if (selectedEmptyPeriodsForDistribute.value.length > 0) {
+    selectedEmptyPeriodsForDistribute.value = []
+  } else {
+    // Chỉ chọn tối đa = số việc
+    selectedEmptyPeriodsForDistribute.value = emptyPeriodsForDistribute.value.slice(0, maxEmptySlots.value).map(p => p.id)
+  }
+}
+
+const distributeStep2ViewMode = ref('calendar')
+
+const distributeDaysCalendar = computed(() => {
+  if (!distributeFilterDateFrom.value || !distributeFilterDateTo.value) return [];
   const result = [];
   
-  let currMonth = new Date(emptyDaysStartDate.value.getFullYear(), emptyDaysStartDate.value.getMonth(), 1);
-  const endMonth = new Date(emptyDaysEndDate.value.getFullYear(), emptyDaysEndDate.value.getMonth(), 1);
+  const start = new Date(distributeFilterDateFrom.value);
+  start.setHours(0,0,0,0);
+  const end = new Date(distributeFilterDateTo.value);
+  end.setHours(23,59,59,999);
+  
+  let currMonth = new Date(start.getFullYear(), start.getMonth(), 1);
+  const endMonth = new Date(end.getFullYear(), end.getMonth(), 1);
   
   while (currMonth <= endMonth) {
     const year = currMonth.getFullYear();
@@ -1844,14 +2455,389 @@ const emptyDaysCalendar = computed(() => {
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(year, month, d);
       // Only include if dateObj is within search range
-      const inRange = dateObj >= emptyDaysStartDate.value && dateObj <= emptyDaysEndDate.value;
+      const inRange = dateObj >= start && dateObj <= end;
       
       const dayOfWeek = dateObj.getDay();
       const isSunday = dayOfWeek === 0;
       const isSaturday = dayOfWeek === 6;
       
-      const emptyMorning = emptyDays.value.find(e => e.date.getTime() === dateObj.getTime() && e.period === 'Sáng');
-      const emptyAfternoon = emptyDays.value.find(e => e.date.getTime() === dateObj.getTime() && e.period === 'Chiều');
+      const dateStr = `${String(d).padStart(2, '0')}/${String(month+1).padStart(2, '0')}/${year}`;
+      const emptyMorning = emptyPeriodsForDistribute.value.find(e => e.id === `${dateStr}|Sáng`);
+      const emptyAfternoon = emptyPeriodsForDistribute.value.find(e => e.id === `${dateStr}|Chiều`);
+      
+      days.push({
+        date: dateObj,
+        dayNum: d,
+        inRange,
+        isSunday,
+        isSaturday,
+        emptyMorning: emptyMorning || null,
+        emptyAfternoon: emptyAfternoon || null
+      });
+    }
+    
+    result.push({
+      year,
+      month: month + 1,
+      days
+    });
+    
+    currMonth.setMonth(currMonth.getMonth() + 1);
+  }
+  
+  return result;
+});
+
+const nextDistributeStep = () => {
+  if (selectedTasksToDistribute.value.length === 0) {
+    alert("Vui lòng chọn ít nhất 1 việc để chia.")
+    return
+  }
+  distributeStep.value = 2
+}
+const onTaskDragStart = (task, event) => {
+  event.dataTransfer.setData('taskId', task.id)
+  event.dataTransfer.effectAllowed = 'move'
+  setTimeout(() => {
+    if (event.target && event.target.style) {
+      event.target.style.boxShadow = '0 0 15px rgba(16,185,129,0.3)'
+    }
+  }, 0)
+}
+
+const onTaskDragEnd = (event) => {
+  if (event.target && event.target.style) {
+    event.target.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)'
+  }
+}
+
+const assignTaskToPeriod = (taskId, periodId) => {
+  const task = selectedTasksToDistribute.value.find(t => t.id === taskId)
+  const period = emptyPeriodsForDistribute.value.find(p => p.id === periodId)
+  
+  if (!task || !period) return
+  
+  try {
+    const d = new Date(period.date)
+    const hour = period.period === 'Sáng' ? '08' : '14'
+    const minute = '00'
+    const dayOfWeek = d.getDay()
+    const thu = dayOfWeek === 0 ? 8 : dayOfWeek + 1
+    const dd = String(d.getDate()).padStart(2, '0')
+    const mm = String(d.getMonth() + 1).padStart(2, '0')
+    const yyyy = d.getFullYear()
+    
+    const newThoiGian = `${hour}:${minute} /${thu} /${dd}/${mm}/${yyyy}`
+    
+    // Cập nhật Optimistic UI lập tức
+    const reportInList = reports.value.find(r => r.id === task.id)
+    if (reportInList) {
+      reportInList.thoi_gian = newThoiGian
+    }
+    
+    // Thêm hiệu ứng thành công
+    successDropPeriods.value.push(periodId)
+    
+    // Đánh dấu là đã phân công và lưu lại lịch cũ
+    assignedTaskIds.value.push(task.id)
+    if (!task.old_thoi_gian) {
+      task.old_thoi_gian = task.thoi_gian
+    }
+    task.thoi_gian = newThoiGian
+    
+    setTimeout(() => {
+      // Xoá hiệu ứng và xoá buổi trống khỏi lịch
+      successDropPeriods.value = successDropPeriods.value.filter(id => id !== periodId)
+      emptyPeriodsForDistribute.value = emptyPeriodsForDistribute.value.filter(p => p.id !== periodId)
+      
+      if (assignedTaskIds.value.length === selectedTasksToDistribute.value.length) {
+        setTimeout(() => {
+          alert("Đã chia xong tất cả công việc!")
+          isDistributeModalOpen.value = false
+          // Refresh full data after completely done
+          fetchReports()
+        }, 100)
+      }
+    }, 600)
+    
+    // Gửi data ngầm lên server (không await để không làm lag UI)
+    const updatedReport = { ...task, thoi_gian: newThoiGian }
+    fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'update', ...updatedReport })
+    })
+    .then(response => response.json())
+    .then(result => {
+      if (result.status !== 'success') {
+        console.error('Lỗi cập nhật từ server', result)
+      }
+    })
+    .catch(error => {
+      console.error("Lỗi mạng khi chia việc:", error)
+    })
+  } catch (error) {
+    console.error("Lỗi gán việc:", error)
+  }
+}
+
+const onTaskDropToPeriod = (periodId, event) => {
+  event.preventDefault()
+  const taskId = event.dataTransfer.getData('taskId')
+  if (taskId) {
+    assignTaskToPeriod(taskId, periodId)
+  }
+}
+
+const executeDistribute = async () => {
+  if (selectedEmptyPeriodsForDistribute.value.length === 0) {
+    alert("Vui lòng chọn ít nhất 1 buổi trống để nhận việc.")
+    return
+  }
+
+
+  const emptyPeriods = emptyPeriodsForDistribute.value.filter(p => selectedEmptyPeriodsForDistribute.value.includes(p.id))
+  
+  distributeLoading.value = true
+  try {
+    for (let i = 0; i < selectedTasksToDistribute.value.length; i++) {
+      const task = selectedTasksToDistribute.value[i]
+      const period = emptyPeriods[i % emptyPeriods.length] 
+      
+      const d = new Date(period.date)
+      const hour = period.period === 'Sáng' ? '08' : '14'
+      const minute = '00'
+      const dayOfWeek = d.getDay()
+      const thu = dayOfWeek === 0 ? 8 : dayOfWeek + 1
+      const dd = String(d.getDate()).padStart(2, '0')
+      const mm = String(d.getMonth() + 1).padStart(2, '0')
+      const yyyy = d.getFullYear()
+      
+      // Format: "HH:MM /thu /DD/MM/YYYY"
+      const newThoiGian = `${hour}:${minute} /${thu} /${dd}/${mm}/${yyyy}`
+      
+      // Cập nhật UI ngay (optimistic update)
+      const reportInList = reports.value.find(r => r.id === task.id)
+      if (reportInList) {
+        reportInList.thoi_gian = newThoiGian
+      }
+      
+      // Gửi lên Google Apps Script
+      const updatedReport = { ...task, thoi_gian: newThoiGian }
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'update', ...updatedReport })
+      })
+      const result = await response.json()
+      if (result.status !== 'success') {
+        throw new Error(result.message || 'Lỗi cập nhật từ server')
+      }
+    }
+    
+    alert("Chia việc thành công!")
+    isDistributeModalOpen.value = false
+    await fetchReports()
+  } catch (error) {
+    console.error("Lỗi chia việc:", error)
+    alert("Có lỗi xảy ra khi chia việc: " + error.message)
+    await fetchReports() // Reload to get correct state
+  } finally {
+    distributeLoading.value = false
+  }
+}
+
+// ====== CHUYỂN VIỆC (MOVE TASKS) LOGIC ======
+const isMoveModalOpen = ref(false)
+const draggedMoveTask = ref(null)
+
+const openMoveModal = () => {
+  isMoveModalOpen.value = true
+}
+
+const moveDaysCalendar = computed(() => {
+  let startStr, endStr;
+  if (filters.value.filterMode === 'day') {
+    startStr = filters.value.dateFrom;
+    endStr = filters.value.dateTo;
+  } else if (filters.value.filterMode === 'month') {
+    startStr = `${filters.value.monthFrom}-01`;
+    const [y, m] = filters.value.monthTo.split('-');
+    const lastDay = new Date(y, m, 0).getDate();
+    endStr = `${filters.value.monthTo}-${lastDay}`;
+  } else {
+    startStr = `${filters.value.yearFrom}-01-01`;
+    endStr = `${filters.value.yearTo}-12-31`;
+  }
+
+  if (!startStr || !endStr) {
+    const today = new Date();
+    startStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
+    endStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()}`;
+  }
+
+  const result = [];
+  
+  const start = new Date(startStr);
+  start.setHours(0,0,0,0);
+  const end = new Date(endStr);
+  end.setHours(23,59,59,999);
+  
+  let currMonth = new Date(start.getFullYear(), start.getMonth(), 1);
+  const endMonth = new Date(end.getFullYear(), end.getMonth(), 1);
+  
+  while (currMonth <= endMonth) {
+    const year = currMonth.getFullYear();
+    const month = currMonth.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDayOfWeek = new Date(year, month, 1).getDay(); // 0 is Sunday
+    const startOffset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+    
+    const days = [];
+    for (let i = 0; i < startOffset; i++) {
+      days.push(null);
+    }
+    
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateObj = new Date(year, month, d);
+      const inRange = dateObj >= start && dateObj <= end;
+      
+      const dayOfWeek = dateObj.getDay();
+      const isSunday = dayOfWeek === 0;
+      const dateStr = `${String(d).padStart(2, '0')}/${String(month+1).padStart(2, '0')}/${year}`;
+      
+      const morningTasks = reports.value.filter(r => {
+        const rd = parseDateFromReport(r.thoi_gian);
+        if (!rd) return false;
+        const rdStr = `${String(rd.getDate()).padStart(2, '0')}/${String(rd.getMonth()+1).padStart(2, '0')}/${rd.getFullYear()}`;
+        return rdStr === dateStr && rd.getHours() < 12;
+      });
+      
+      const afternoonTasks = reports.value.filter(r => {
+        const rd = parseDateFromReport(r.thoi_gian);
+        if (!rd) return false;
+        const rdStr = `${String(rd.getDate()).padStart(2, '0')}/${String(rd.getMonth()+1).padStart(2, '0')}/${rd.getFullYear()}`;
+        return rdStr === dateStr && rd.getHours() >= 12;
+      });
+      
+      days.push({
+        date: dateObj,
+        dayNum: d,
+        inRange,
+        isSunday,
+        morningTasks,
+        afternoonTasks,
+        dateStr
+      });
+    }
+    
+    result.push({ year, month: month + 1, days });
+    currMonth.setMonth(currMonth.getMonth() + 1);
+  }
+  return result;
+});
+
+const successDropTaskId = ref(null);
+
+const onMoveTaskDragStart = (e, task) => {
+  draggedMoveTask.value = task;
+  e.dataTransfer.effectAllowed = 'move';
+  // Required for Firefox
+  if (e.dataTransfer) {
+    e.dataTransfer.setData('text/plain', task.id);
+  }
+};
+
+const onMoveTaskDrop = async (e, dateStr, period) => {
+  if (!draggedMoveTask.value) return;
+  const task = draggedMoveTask.value;
+  draggedMoveTask.value = null;
+  
+  const [d, m, y] = dateStr.split('/');
+  const targetDate = new Date(`${y}-${m}-${d}`);
+  
+  const hour = period === 'Sáng' ? '08' : '14';
+  const minute = '00';
+  const dayOfWeek = targetDate.getDay();
+  const thu = dayOfWeek === 0 ? 8 : dayOfWeek + 1;
+  const newThoiGian = `${hour}:${minute} /${thu} /${d}/${m}/${y}`;
+  
+  const td = parseDateFromReport(task.thoi_gian);
+  if (!td) return;
+  const oldDateStr = `${String(td.getDate()).padStart(2, '0')}/${String(td.getMonth()+1).padStart(2, '0')}/${td.getFullYear()}`;
+  const oldPeriod = td.getHours() < 12 ? 'Sáng' : 'Chiều';
+  
+  // Do nothing if dropping in same slot
+  if (oldDateStr === dateStr && oldPeriod === period) return; 
+  
+  try {
+    const updatedTask = { ...task, thoi_gian: newThoiGian };
+    
+    // Optimistic UI Update
+    const idx = reports.value.findIndex(r => r.id === task.id);
+    if (idx !== -1) {
+      reports.value[idx].thoi_gian = updatedTask.thoi_gian;
+    }
+    
+    // Add success animation
+    successDropTaskId.value = task.id;
+    setTimeout(() => {
+      if (successDropTaskId.value === task.id) {
+        successDropTaskId.value = null;
+      }
+    }, 800);
+    
+    // Background API Sync
+    fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'update', ...updatedTask })
+    }).catch(e => {
+      console.error("API Update Move Task error:", e);
+      alert("Đồng bộ server thất bại, vui lòng tải lại trang.");
+    });
+    
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const emptyDaysCalendar = computed(() => {
+  if (!emptyDaysStartDate.value || !emptyDaysEndDate.value) return [];
+  const result = [];
+  
+  const start = new Date(emptyDaysStartDate.value);
+  start.setHours(0,0,0,0);
+  const end = new Date(emptyDaysEndDate.value);
+  end.setHours(23,59,59,999);
+  
+  let currMonth = new Date(start.getFullYear(), start.getMonth(), 1);
+  const endMonth = new Date(end.getFullYear(), end.getMonth(), 1);
+  
+  while (currMonth <= endMonth) {
+    const year = currMonth.getFullYear();
+    const month = currMonth.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDayOfWeek = new Date(year, month, 1).getDay(); // 0 is Sunday
+    
+    // Adjust firstDayOfWeek if we want Monday to be first (0 = Monday, 6 = Sunday)
+    const startOffset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+    
+    const days = [];
+    for (let i = 0; i < startOffset; i++) {
+      days.push(null); // empty padding
+    }
+    
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateObj = new Date(year, month, d);
+      // Only include if dateObj is within search range
+      const inRange = dateObj >= start && dateObj <= end;
+      
+      const dayOfWeek = dateObj.getDay();
+      const isSunday = dayOfWeek === 0;
+      const isSaturday = dayOfWeek === 6;
+      
+      const dateStr = `${String(d).padStart(2, '0')}/${String(month+1).padStart(2, '0')}/${year}`;
+      
+      const emptyMorning = emptyDays.value.find(e => e.id === `${dateStr}|Sáng`);
+      const emptyAfternoon = emptyDays.value.find(e => e.id === `${dateStr}|Chiều`);
       
       days.push({
         date: dateObj,
@@ -1954,15 +2940,16 @@ const recalcEmptyDays = () => {
     const slots = [];
     while (tempDate <= finalDate) {
       const dateStr = `${tempDate.getDate()}/${tempDate.getMonth()+1}/${tempDate.getFullYear()}`;
+      const paddedDateStr = `${String(tempDate.getDate()).padStart(2, '0')}/${String(tempDate.getMonth()+1).padStart(2, '0')}/${tempDate.getFullYear()}`;
       const dayOfWeek = tempDate.getDay(); 
       
       if (dayOfWeek !== 0) {
         if (!reportSlots.has(`${dateStr}|Sáng`)) {
-          slots.push({ date: new Date(tempDate), period: 'Sáng' });
+          slots.push({ date: new Date(tempDate), period: 'Sáng', id: `${paddedDateStr}|Sáng` });
         }
         if (dayOfWeek !== 6) {
           if (!reportSlots.has(`${dateStr}|Chiều`)) {
-            slots.push({ date: new Date(tempDate), period: 'Chiều' });
+            slots.push({ date: new Date(tempDate), period: 'Chiều', id: `${paddedDateStr}|Chiều` });
           }
         }
       }
@@ -2136,6 +3123,43 @@ onUnmounted(() => {
    Dựa trên CSS thuần, với Micro-animations
 ========================================= */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+/* Dragging Effects for Move Tasks Modal */
+.dragging-task {
+  opacity: 0.5 !important;
+  transform: scale(0.98) !important;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5) !important;
+  border-left-color: #64748b !important;
+  background: rgba(30,41,59,0.8) !important;
+}
+.drag-over-sang {
+  background: rgba(59,130,246,0.15) !important;
+  border-color: rgba(59,130,246,0.5) !important;
+  padding-bottom: 45px !important;
+}
+.drag-over-chieu {
+  background: rgba(16,185,129,0.15) !important;
+  border-color: rgba(16,185,129,0.5) !important;
+  padding-bottom: 45px !important;
+}
+.drop-success-pulse {
+  animation: taskPulseSuccess 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes taskPulseSuccess {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8);
+    transform: scale(1.05);
+    background: #10b981 !important;
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(16, 185, 129, 0);
+    transform: scale(1);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    transform: scale(1);
+  }
+}
 
 /* Voice Recording Button */
 .header-actions-group {
@@ -3354,6 +4378,26 @@ button {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px -2px rgba(139, 92, 246, 0.5), inset 0 1px 2px rgba(255,255,255,0.2);
 }
+.mobile-action-btn.distribute-tasks {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: white;
+  box-shadow: 0 4px 12px -2px rgba(249, 115, 22, 0.4), inset 0 1px 2px rgba(255,255,255,0.2);
+}
+.mobile-action-btn.distribute-tasks:hover {
+  background: linear-gradient(135deg, #ea580c, #c2410c);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -2px rgba(249, 115, 22, 0.5), inset 0 1px 2px rgba(255,255,255,0.2);
+}
+.mobile-action-btn.move-tasks {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  box-shadow: 0 4px 12px -2px rgba(239, 68, 68, 0.4), inset 0 1px 2px rgba(255,255,255,0.2);
+}
+.mobile-action-btn.move-tasks:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -2px rgba(239, 68, 68, 0.5), inset 0 1px 2px rgba(255,255,255,0.2);
+}
 .mobile-action-btn.add {
   background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   color: white;
@@ -4034,6 +5078,36 @@ button {
 .tl-stt {
   font-size: 0.38rem; font-weight: 600; opacity: 0.6;
   letter-spacing: 0.04em; line-height: 1;
+}
+
+/* PC Size Adjustments */
+@media (min-width: 769px) {
+  .tl-orb-wrap {
+    width: 120px;
+    min-width: 120px;
+    height: 120px;
+  }
+  .tl-circle-inner {
+    gap: 3px;
+  }
+  .tl-thu-period {
+    font-size: 0.85rem;
+    gap: 4px;
+  }
+  .tl-period {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 8px;
+  }
+  .tl-date {
+    font-size: 0.95rem;
+  }
+  .tl-time {
+    font-size: 0.6rem;
+  }
+  .tl-stt {
+    font-size: 0.55rem;
+  }
 }
 
 /* ===== CONNECTOR ===== */
@@ -4797,7 +5871,7 @@ button {
   display: flex;
   align-items: flex-end;
   gap: 1rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 /* Mode Tabs */
 .elite-mode-tabs {
@@ -4833,8 +5907,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  min-width: 140px;
-  max-width: 250px;
+  min-width: 120px;
   flex: 1;
 }
 .group-period {
@@ -5222,23 +6295,23 @@ button {
     max-width: none !important;
   }
   .elite-date-group.group-date {
-    flex: 1 1 40% !important;
+    flex: 1 1 100% !important;
+    margin-bottom: 0.2rem;
   }
   
   .elite-date-group label {
-    font-size: 0.7rem;
-    margin-bottom: 0.15rem;
+    font-size: 0.75rem;
+    margin-bottom: 0.35rem;
+    color: #f8fafc !important;
   }
   .elite-date-group .elite-input {
-    padding: 0.45rem 0.6rem;
-    font-size: 0.8rem;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+    width: 100%;
+    box-sizing: border-box;
   }
   .elite-range-sep {
-    display: flex;
-    font-size: 0.85rem;
-    padding: 0 0.15rem;
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
+    display: none !important;
   }
 
   /* Row 3: Selects in 2x2 grid */
@@ -5633,5 +6706,79 @@ h3[style*="color: #1e293b"],
 span[style*="color: #1e293b"],
 span[style*="color: #334155"] {
   color: #e2e8f0 !important;
+}
+
+@media (max-width: 768px) {
+  .distribute-left-panel {
+    display: none !important;
+  }
+  .distribute-right-panel {
+    width: 100% !important;
+  }
+  .empty-days-filter {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.8rem !important;
+  }
+  .empty-days-filter > div {
+    width: 100% !important;
+  }
+}
+
+/* Drag & Drop Overrides */
+.drag-over-sang {
+  background: rgba(59, 130, 246, 0.15) !important;
+  border: 2px dashed #3b82f6 !important;
+  box-shadow: inset 0 0 15px rgba(59, 130, 246, 0.2);
+  padding: 0.6rem 0.4rem !important;
+}
+
+.drag-over-chieu {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border: 2px dashed #10b981 !important;
+  box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.2);
+  padding: 0.6rem 0.4rem !important;
+}
+
+.dragging-task {
+  opacity: 0.5 !important;
+  transform: scale(0.95) !important;
+  box-shadow: none !important;
+}
+
+@keyframes dropPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  50% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.drop-success-pulse {
+  animation: dropPulse 0.5s ease-out;
+}
+
+/* Tech VIP Add Button */
+.tech-vip-btn {
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%) !important;
+  border: 1px solid rgba(96, 165, 250, 0.4) !important;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.2) !important;
+  padding: 0.8rem 3.5rem !important;
+  border-radius: 12px !important;
+  font-size: 1.15rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase !important;
+  color: #ffffff !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  backdrop-filter: blur(10px);
+}
+
+.tech-vip-btn:hover {
+  transform: translateY(-3px) scale(1.02) !important;
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.7), inset 0 0 15px rgba(255, 255, 255, 0.3) !important;
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #60a5fa 100%) !important;
+}
+
+.tech-vip-btn:active {
+  transform: translateY(1px) scale(0.98) !important;
 }
 </style>
