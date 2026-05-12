@@ -235,13 +235,8 @@
         <div v-for="col in kanbanColumns" :key="col.status" 
              class="kanban-column"
              :class="[
-               col.status === 'Hoàn thành' ? 'kb-col-done' : 'kb-col-pending',
-               dragOverColumn === col.status ? 'kb-col-drag-over' : ''
-             ]"
-             @dragover.prevent
-             @dragenter.prevent="onDragEnterColumn(col.status)"
-             @dragleave="onDragLeaveColumn($event, $el)"
-             @drop="onDropReport($event, col.status)">
+               col.status === 'Hoàn thành' ? 'kb-col-done' : 'kb-col-pending'
+             ]">
           <div class="kanban-header">
             <div class="kanban-title">
               <span class="status-dot" :class="col.dotClass"></span>
@@ -249,93 +244,180 @@
             </div>
             <span class="kanban-badge">{{ col.reports.length }}</span>
           </div>
-          <div class="kanban-list">
-            <div v-if="loading" class="loading-state">
-              <div class="spinner"></div>
-              <p>Đang tải dữ liệu báo cáo...</p>
-            </div>
-            <div v-else-if="col.reports.length === 0" class="empty-state" style="padding: 4rem 2rem; opacity: 0.7;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
-              <p>Không có báo cáo nào</p>
-            </div>
-            <div v-else v-for="(report, index) in col.reports" :key="'card-' + report.id" 
-                 class="report-card-timeline" :class="{ 'highlight-card': report.id === highlightedReportId, 'deleting-row': deletingIds.includes(report.id) }" 
-                 :style="{ animationDelay: (index * 0.07) + 's' }"
-                 draggable="true"
-                 @dragstart="onDragStartReport($event, report)"
-                 @dragend="onDragEndReport"
-                 @click="openEditModal(report)">
-              
-              <!-- Hình tròn: STT + Thời gian -->
-              <div class="tl-orb-wrap">
-                <!-- Rotating gradient ring -->
-                <div class="tl-orb-ring" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-ring--morning' : 'tl-ring--afternoon'"></div>
-                <div class="tl-circle" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-circle--morning' : 'tl-circle--afternoon'">
-                  <div class="tl-circle-inner">
-                    <span class="tl-thu-period">{{ formatDisplayTime(report.thoi_gian).thu }} <span class="tl-period" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'is-morning' : 'is-afternoon'">{{ formatDisplayTime(report.thoi_gian).period }}</span></span>
-                    <span class="tl-date">{{ formatDisplayTime(report.thoi_gian).date }}</span>
-                    <span class="tl-time">{{ formatDisplayTime(report.thoi_gian).time }}</span>
-                    <span class="tl-stt">#{{ index + 1 }}</span>
-                  </div>
+
+          <div class="kanban-inner-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; flex: 1;">
+            <!-- Cột Sáng -->
+            <div class="inner-col inner-col-morning"
+                 :class="{ 'kb-col-drag-over': dragOverColumn === col.status + '-Sáng' }"
+                 @dragover.prevent
+                 @dragenter.prevent="onDragEnterColumn(col.status, 'Sáng')"
+                 @dragleave="onDragLeaveColumn($event, $el)"
+                 @drop="onDropReport($event, col.status, 'Sáng')"
+                 style="display: flex; flex-direction: column; gap: 0.5rem; height: 100%; border-radius: 12px; padding: 0.5rem; background: rgba(59, 130, 246, 0.02); border: 1px dashed rgba(59, 130, 246, 0.1);">
+              <div class="inner-col-header" style="text-align: center; font-size: 1.1rem; font-weight: 900; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Buổi sáng</div>
+              <div class="kanban-list" style="padding: 0; min-height: 100px;">
+                <div v-if="loading" class="loading-state">
+                  <div class="spinner"></div>
                 </div>
-                <!-- Dải sáng chạy quanh viền -->
-                <div class="tl-orbit-trail"></div>
-              </div>
-
-              <!-- Connector -->
-              <div class="tl-connector" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-conn--morning' : 'tl-conn--afternoon'">
-                <div class="tl-conn-dot"></div>
-                <!-- Tia sáng chạy dọc connector -->
-                <div class="tl-beam-particle" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-beam--morning' : 'tl-beam--afternoon'"></div>
-              </div>
-
-              <!-- Hình chữ nhật: Nội dung còn lại -->
-              <div class="tl-rect" :class="[report.trang_thai === 'Hoàn thành' ? 'tl-rect--done' : 'tl-rect--pending', formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-border--morning' : 'tl-border--afternoon']">
-                <!-- Ánh kim chạy viền -->
-                <div class="tl-shimmer-border" :class="report.trang_thai === 'Hoàn thành' ? 'tl-shimmer--done' : 'tl-shimmer--pending'"></div>
-                
-                <!-- Header: Tags + Status -->
-                <div class="tl-rect-header">
-                  <div class="tl-rect-tags">
-                    <span class="tl-badge-cat" :class="getCategoryClass(report.phan_loai)">{{ report.phan_loai }}</span>
-                    <div class="tl-status-chip" :class="getStatusPillClass(report.trang_thai)">
-                      <svg v-if="report.trang_thai === 'Hoàn thành'" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      <svg v-else xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                      {{ report.trang_thai }}
+                <div v-else-if="col.reports.filter(r => formatDisplayTime(r.thoi_gian).period === 'Sáng').length === 0" class="empty-state" style="padding: 2rem 1rem;">
+                  <div v-if="col.status === 'Chưa xử lý'" class="empty-add-btn-simple" @click="openAddModalForPeriod('Sáng')" title="Thêm công việc">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  </div>
+                  <span v-else style="font-size: 0.75rem; opacity: 0.5;">Trống</span>
+                </div>
+                <template v-else>
+                  <div v-for="(report, index) in col.reports.filter(r => formatDisplayTime(r.thoi_gian).period === 'Sáng')" :key="'card-' + report.id" 
+                       class="report-card-timeline" :class="{ 'highlight-card': report.id === highlightedReportId, 'deleting-row': deletingIds.includes(report.id), 'dropped-success': report.id === droppedReportId }" 
+                       :style="{ animationDelay: (index * 0.07) + 's' }"
+                       draggable="true"
+                       @dragstart="onDragStartReport($event, report)"
+                       @dragend="onDragEndReport"
+                       @click="openEditModal(report)">
+                    <!-- Hình tròn: STT + Thời gian -->
+                    <div class="tl-orb-wrap">
+                      <div class="tl-orb-ring" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-ring--morning' : 'tl-ring--afternoon'"></div>
+                      <div class="tl-circle" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-circle--morning' : 'tl-circle--afternoon'">
+                        <div class="tl-circle-inner">
+                          <span class="tl-thu-period">{{ formatDisplayTime(report.thoi_gian).thu }} <span class="tl-period" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'is-morning' : 'is-afternoon'">{{ formatDisplayTime(report.thoi_gian).period }}</span></span>
+                          <span class="tl-date">{{ formatDisplayTime(report.thoi_gian).date }}</span>
+                          <span class="tl-time">{{ formatDisplayTime(report.thoi_gian).time }}</span>
+                          <span class="tl-stt">#{{ index + 1 }}</span>
+                        </div>
+                      </div>
+                      <div class="tl-orbit-trail"></div>
                     </div>
-                    <span v-if="report.tag" v-for="t in splitTags(report.tag)" :key="t" v-show="t !== 'BÌNH THƯỜNG'" class="tl-badge-tag" :class="getTagClass(t)">{{ t }}</span>
-                  </div>
-                </div>
-
-                <!-- Nội dung chính -->
-                <div class="tl-rect-body">
-                  <div class="tl-body-text">{{ report.noi_dung }}</div>
-                </div>
-
-                <!-- Ghi chú -->
-                <div class="tl-rect-note" v-if="report.ghi_chu">
-                  <div class="tl-note-accent"></div>
-                  <div class="tl-note-content">
-                    <div class="tl-note-icon">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <!-- Connector -->
+                    <div class="tl-connector" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-conn--morning' : 'tl-conn--afternoon'">
+                      <div class="tl-conn-dot"></div>
+                      <div class="tl-beam-particle" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-beam--morning' : 'tl-beam--afternoon'"></div>
                     </div>
-                    <span>{{ report.ghi_chu }}</span>
+                    <!-- Hình chữ nhật: Nội dung còn lại -->
+                    <div class="tl-rect" :class="[report.trang_thai === 'Hoàn thành' ? 'tl-rect--done' : 'tl-rect--pending', formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-border--morning' : 'tl-border--afternoon']">
+                      <div class="tl-shimmer-border" :class="report.trang_thai === 'Hoàn thành' ? 'tl-shimmer--done' : 'tl-shimmer--pending'"></div>
+                      <div class="tl-rect-header">
+                        <div class="tl-rect-tags">
+                          <span class="tl-badge-cat" :class="getCategoryClass(report.phan_loai)">{{ report.phan_loai }}</span>
+                          <div class="tl-status-chip" :class="getStatusPillClass(report.trang_thai)">
+                            <svg v-if="report.trang_thai === 'Hoàn thành'" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <svg v-else xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            {{ report.trang_thai }}
+                          </div>
+                          <span v-if="report.tag" v-for="t in splitTags(report.tag)" :key="t" v-show="t !== 'BÌNH THƯỜNG'" class="tl-badge-tag" :class="getTagClass(t)">{{ t }}</span>
+                        </div>
+                      </div>
+                      <div class="tl-rect-body">
+                        <div class="tl-body-text">{{ report.noi_dung }}</div>
+                      </div>
+                      <div class="tl-rect-note" v-if="report.ghi_chu">
+                        <div class="tl-note-accent"></div>
+                        <div class="tl-note-content">
+                          <div class="tl-note-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                          </div>
+                          <span>{{ report.ghi_chu }}</span>
+                        </div>
+                      </div>
+                      <div class="tl-rect-actions">
+                        <button class="tl-action-btn tl-action-delete" @click.stop="confirmDelete(report.id)">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                          Xoá
+                        </button>
+                        <button v-if="report.trang_thai !== 'Hoàn thành'" class="tl-action-btn tl-action-done" @click.stop="markAsCompleted(report)">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          Xong
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="tl-rect-actions">
-                  <button class="tl-action-btn tl-action-delete" @click.stop="confirmDelete(report.id)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    Xoá
-                  </button>
-                  <button v-if="report.trang_thai !== 'Hoàn thành'" class="tl-action-btn tl-action-done" @click.stop="markAsCompleted(report)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    Xong
-                  </button>
-                </div>
+                </template>
               </div>
+            </div>
 
+            <!-- Cột Chiều -->
+            <div class="inner-col inner-col-afternoon"
+                 :class="{ 'kb-col-drag-over': dragOverColumn === col.status + '-Chiều' }"
+                 @dragover.prevent
+                 @dragenter.prevent="onDragEnterColumn(col.status, 'Chiều')"
+                 @dragleave="onDragLeaveColumn($event, $el)"
+                 @drop="onDropReport($event, col.status, 'Chiều')"
+                 style="display: flex; flex-direction: column; gap: 0.5rem; height: 100%; border-radius: 12px; padding: 0.5rem; background: rgba(168, 85, 247, 0.02); border: 1px dashed rgba(168, 85, 247, 0.1);">
+              <div class="inner-col-header" style="text-align: center; font-size: 1.1rem; font-weight: 900; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Buổi chiều</div>
+              <div class="kanban-list" style="padding: 0; min-height: 100px;">
+                <div v-if="loading" class="loading-state">
+                  <div class="spinner"></div>
+                </div>
+                <div v-else-if="col.reports.filter(r => formatDisplayTime(r.thoi_gian).period === 'Chiều').length === 0" class="empty-state" style="padding: 2rem 1rem;">
+                  <div v-if="col.status === 'Chưa xử lý'" class="empty-add-btn-simple" @click="openAddModalForPeriod('Chiều')" title="Thêm công việc">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  </div>
+                  <span v-else style="font-size: 0.75rem; opacity: 0.5;">Trống</span>
+                </div>
+                <template v-else>
+                  <div v-for="(report, index) in col.reports.filter(r => formatDisplayTime(r.thoi_gian).period === 'Chiều')" :key="'card-' + report.id" 
+                       class="report-card-timeline" :class="{ 'highlight-card': report.id === highlightedReportId, 'deleting-row': deletingIds.includes(report.id), 'dropped-success': report.id === droppedReportId }" 
+                       :style="{ animationDelay: (index * 0.07) + 's' }"
+                       draggable="true"
+                       @dragstart="onDragStartReport($event, report)"
+                       @dragend="onDragEndReport"
+                       @click="openEditModal(report)">
+                    <!-- Hình tròn: STT + Thời gian -->
+                    <div class="tl-orb-wrap">
+                      <div class="tl-orb-ring" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-ring--morning' : 'tl-ring--afternoon'"></div>
+                      <div class="tl-circle" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-circle--morning' : 'tl-circle--afternoon'">
+                        <div class="tl-circle-inner">
+                          <span class="tl-thu-period">{{ formatDisplayTime(report.thoi_gian).thu }} <span class="tl-period" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'is-morning' : 'is-afternoon'">{{ formatDisplayTime(report.thoi_gian).period }}</span></span>
+                          <span class="tl-date">{{ formatDisplayTime(report.thoi_gian).date }}</span>
+                          <span class="tl-time">{{ formatDisplayTime(report.thoi_gian).time }}</span>
+                          <span class="tl-stt">#{{ index + 1 }}</span>
+                        </div>
+                      </div>
+                      <div class="tl-orbit-trail"></div>
+                    </div>
+                    <!-- Connector -->
+                    <div class="tl-connector" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-conn--morning' : 'tl-conn--afternoon'">
+                      <div class="tl-conn-dot"></div>
+                      <div class="tl-beam-particle" :class="formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-beam--morning' : 'tl-beam--afternoon'"></div>
+                    </div>
+                    <!-- Hình chữ nhật: Nội dung còn lại -->
+                    <div class="tl-rect" :class="[report.trang_thai === 'Hoàn thành' ? 'tl-rect--done' : 'tl-rect--pending', formatDisplayTime(report.thoi_gian).period === 'Sáng' ? 'tl-border--morning' : 'tl-border--afternoon']">
+                      <div class="tl-shimmer-border" :class="report.trang_thai === 'Hoàn thành' ? 'tl-shimmer--done' : 'tl-shimmer--pending'"></div>
+                      <div class="tl-rect-header">
+                        <div class="tl-rect-tags">
+                          <span class="tl-badge-cat" :class="getCategoryClass(report.phan_loai)">{{ report.phan_loai }}</span>
+                          <div class="tl-status-chip" :class="getStatusPillClass(report.trang_thai)">
+                            <svg v-if="report.trang_thai === 'Hoàn thành'" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <svg v-else xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            {{ report.trang_thai }}
+                          </div>
+                          <span v-if="report.tag" v-for="t in splitTags(report.tag)" :key="t" v-show="t !== 'BÌNH THƯỜNG'" class="tl-badge-tag" :class="getTagClass(t)">{{ t }}</span>
+                        </div>
+                      </div>
+                      <div class="tl-rect-body">
+                        <div class="tl-body-text">{{ report.noi_dung }}</div>
+                      </div>
+                      <div class="tl-rect-note" v-if="report.ghi_chu">
+                        <div class="tl-note-accent"></div>
+                        <div class="tl-note-content">
+                          <div class="tl-note-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                          </div>
+                          <span>{{ report.ghi_chu }}</span>
+                        </div>
+                      </div>
+                      <div class="tl-rect-actions">
+                        <button class="tl-action-btn tl-action-delete" @click.stop="confirmDelete(report.id)">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                          Xoá
+                        </button>
+                        <button v-if="report.trang_thai !== 'Hoàn thành'" class="tl-action-btn tl-action-done" @click.stop="markAsCompleted(report)">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          Xong
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
             </div>
           </div>
         </div>
@@ -347,12 +429,14 @@
           <div class="spinner"></div>
           <p>Đang tải dữ liệu báo cáo...</p>
         </div>
-        <div v-else-if="filteredReports.length === 0" class="empty-state" style="padding: 4rem 2rem; opacity: 0.7;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
-          <p>Không có báo cáo nào</p>
+        <div v-else-if="filteredReports.length === 0" class="empty-state" style="padding: 4rem 2rem;">
+          <div class="empty-add-btn-simple" @click="openAddModal" title="Thêm công việc">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </div>
+          <p style="opacity: 0.5; font-size: 0.85rem; margin-top: 1rem;">Trống</p>
         </div>
         <div v-else v-for="(report, index) in filteredReports" :key="'mob-' + report.id"
-             class="report-card-timeline" :class="{ 'highlight-card': report.id === highlightedReportId, 'deleting-row': deletingIds.includes(report.id) }"
+             class="report-card-timeline" :class="{ 'highlight-card': report.id === highlightedReportId, 'deleting-row': deletingIds.includes(report.id), 'dropped-success': report.id === droppedReportId }"
              :style="{ animationDelay: (index * 0.07) + 's' }"
              @click="openEditModal(report)">
 
@@ -1553,6 +1637,7 @@ const kanbanColumns = computed(() => [
 ]);
 
 const draggedReportId = ref(null);
+const droppedReportId = ref(null);
 const dragOverColumn = ref(null); // track cột đang hover khi kéo
 
 const onDragStartReport = (e, report) => {
@@ -1566,8 +1651,8 @@ const onDragEndReport = () => {
   dragOverColumn.value = null;
 };
 
-const onDragEnterColumn = (status) => {
-  if (draggedReportId.value) dragOverColumn.value = status;
+const onDragEnterColumn = (status, period) => {
+  if (draggedReportId.value) dragOverColumn.value = status + '-' + period;
 };
 
 const onDragLeaveColumn = (e, colEl) => {
@@ -1576,31 +1661,53 @@ const onDragLeaveColumn = (e, colEl) => {
   dragOverColumn.value = null;
 };
 
-const onDropReport = async (e, newStatus) => {
+const onDropReport = async (e, newStatus, newPeriod) => {
   const id = draggedReportId.value;
   if (!id) return;
   const report = reports.value.find(r => r.id === id);
-  if (report && report.trang_thai !== newStatus) {
-    if (API_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
-       alert("Tính năng này cần cấu hình API_URL");
-       return;
-    }
-    const originalStatus = report.trang_thai;
-    report.trang_thai = newStatus;
-    
-    try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'update', ...report })
-      });
-      const result = await response.json();
-      if (result.status !== 'success') {
-        report.trang_thai = originalStatus;
-        alert('Lỗi cập nhật: ' + result.message);
+  if (report) {
+    const currentPeriod = formatDisplayTime(report.thoi_gian).period;
+    if (report.trang_thai !== newStatus || currentPeriod !== newPeriod) {
+      if (API_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
+         alert("Tính năng này cần cấu hình API_URL");
+         return;
       }
-    } catch (error) {
-      console.error('Lỗi khi cập nhật trạng thái:', error);
-      report.trang_thai = originalStatus;
+      const originalStatus = report.trang_thai;
+      const originalTime = report.thoi_gian;
+      
+      report.trang_thai = newStatus;
+
+      droppedReportId.value = report.id;
+      setTimeout(() => {
+        if (droppedReportId.value === report.id) droppedReportId.value = null;
+      }, 800);
+      
+      if (currentPeriod !== newPeriod) {
+        const timeObj = parseTimeString(report.thoi_gian);
+        timeObj.hour = newPeriod === 'Sáng' ? '08' : '14';
+        timeObj.minute = '00';
+        let validDayStr = timeObj.day;
+        const maxDay = new Date(Number(timeObj.year), Number(timeObj.month), 0).getDate();
+        if (Number(validDayStr) > maxDay) validDayStr = String(maxDay).padStart(2, '0');
+        report.thoi_gian = `${timeObj.hour}:${timeObj.minute} /${timeObj.thu} /${validDayStr}/${timeObj.month}/${timeObj.year}`;
+      }
+      
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'update', ...report })
+        });
+        const result = await response.json();
+        if (result.status !== 'success') {
+          report.trang_thai = originalStatus;
+          report.thoi_gian = originalTime;
+          alert('Lỗi cập nhật: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Lỗi khi cập nhật trạng thái:', error);
+        report.trang_thai = originalStatus;
+        report.thoi_gian = originalTime;
+      }
     }
   }
   draggedReportId.value = null;
@@ -1838,6 +1945,17 @@ const openAddModal = () => {
   timeInputs.value = getNowTimeInputs();
   isModalOpen.value = true
 }
+
+const openAddModalForPeriod = (period) => {
+  openAddModal();
+  if (period === 'Sáng') {
+    timeInputs.value.hour = '08';
+    timeInputs.value.minute = '00';
+  } else if (period === 'Chiều') {
+    timeInputs.value.hour = '14';
+    timeInputs.value.minute = '00';
+  }
+};
 
 const openAddModalWithSlot = (slot) => {
   isEmptyDaysModalOpen.value = false;
@@ -6780,5 +6898,46 @@ span[style*="color: #334155"] {
 
 .tech-vip-btn:active {
   transform: translateY(1px) scale(0.98) !important;
+}
+
+@keyframes drop-epic-success {
+  0% { transform: scale(1); filter: brightness(1); }
+  30% { transform: scale(1.04); filter: brightness(1.2); }
+  60% { transform: scale(1.01); filter: brightness(1.1); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+@keyframes drop-glow {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8); border-color: #10b981; }
+  50% { box-shadow: 0 0 30px 10px rgba(16, 185, 129, 0); border-color: rgba(16, 185, 129, 0.5); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); border-color: rgba(255, 255, 255, 0.05); }
+}
+
+.dropped-success {
+  animation: drop-epic-success 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  z-index: 50 !important;
+  position: relative;
+}
+
+.dropped-success .tl-rect {
+  animation: drop-glow 0.8s ease-out forwards;
+}
+
+.empty-add-btn-simple {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ffffff;
+  margin: 1rem auto;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.empty-add-btn-simple:hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 </style>
