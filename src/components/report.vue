@@ -317,6 +317,26 @@
                           <span>{{ report.ghi_chu }}</span>
                         </div>
                       </div>
+
+                      <div class="tl-attachments" v-if="report.img_save || report.link_excel_bao_gia || report.link_excel_mua_hang" style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; padding: 0 0.5rem;">
+                        <div v-if="report.img_save" style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                          <a v-for="(link, i) in report.img_save.split('\n').filter(Boolean)" :key="'img'+i" :href="link" target="_blank" @click.stop style="width: 45px; height: 45px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: block; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                             <img :src="link" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" />
+                          </a>
+                        </div>
+                        <div v-if="report.link_excel_bao_gia" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
+                          <a v-for="(link, i) in report.link_excel_bao_gia.split('\n').filter(Boolean)" :key="'bg'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))"  class="tl-attach-badge" style="background: rgba(16,185,129,0.1); color: #34d399; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(16,185,129,0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(16,185,129,0.2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(16,185,129,0.1)'; this.style.transform='none'" :title="getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            {{ getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá') }}
+                          </a>
+                        </div>
+                        <div v-if="report.link_excel_mua_hang" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
+                          <a v-for="(link, i) in report.link_excel_mua_hang.split('\n').filter(Boolean)" :key="'mh'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng'))"  class="tl-attach-badge" style="background: rgba(139,92,246,0.1); color: #a78bfa; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(139,92,246,0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(139,92,246,0.1)'; this.style.transform='none'" :title="getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            {{ getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng') }}
+                          </a>
+                        </div>
+                      </div>
                       <div class="tl-rect-actions">
                         <button class="tl-action-btn tl-action-delete" @click.stop="confirmDelete(report.id)">
                           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -404,6 +424,26 @@
                           <span>{{ report.ghi_chu }}</span>
                         </div>
                       </div>
+
+                      <div class="tl-attachments" v-if="report.img_save || report.link_excel_bao_gia || report.link_excel_mua_hang" style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; padding: 0 0.5rem;">
+                        <div v-if="report.img_save" style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                          <a v-for="(link, i) in report.img_save.split('\n').filter(Boolean)" :key="'img'+i" :href="link" target="_blank" @click.stop style="width: 45px; height: 45px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: block; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" :title="`Ảnh ${i + 1}`">
+                             <img :src="link" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" />
+                          </a>
+                        </div>
+                        <div v-if="report.link_excel_bao_gia" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
+                          <a v-for="(link, i) in report.link_excel_bao_gia.split('\n').filter(Boolean)" :key="'bg'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))"  class="tl-attach-badge" style="background: rgba(16,185,129,0.1); color: #34d399; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(16,185,129,0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(16,185,129,0.2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(16,185,129,0.1)'; this.style.transform='none'" :title="getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            {{ getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá') }}
+                          </a>
+                        </div>
+                        <div v-if="report.link_excel_mua_hang" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
+                          <a v-for="(link, i) in report.link_excel_mua_hang.split('\n').filter(Boolean)" :key="'mh'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng'))"  class="tl-attach-badge" style="background: rgba(139,92,246,0.1); color: #a78bfa; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(139,92,246,0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(139,92,246,0.1)'; this.style.transform='none'" :title="getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            {{ getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng') }}
+                          </a>
+                        </div>
+                      </div>
                       <div class="tl-rect-actions">
                         <button class="tl-action-btn tl-action-delete" @click.stop="confirmDelete(report.id)">
                           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -485,6 +525,26 @@
                   <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                 </div>
                 <span>{{ report.ghi_chu }}</span>
+              </div>
+            </div>
+
+            <div class="tl-attachments" v-if="report.img_save || report.link_excel_bao_gia || report.link_excel_mua_hang" style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; padding: 0 0.5rem;">
+              <div v-if="report.img_save" style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                <a v-for="(link, i) in report.img_save.split('\n').filter(Boolean)" :key="'img'+i" :href="link" target="_blank" @click.stop style="width: 45px; height: 45px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: block; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" :title="`Ảnh ${i + 1}`">
+                   <img :src="link" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" />
+                </a>
+              </div>
+              <div v-if="report.link_excel_bao_gia" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
+                <a v-for="(link, i) in report.link_excel_bao_gia.split('\n').filter(Boolean)" :key="'bg'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))"  class="tl-attach-badge" style="background: rgba(16,185,129,0.1); color: #34d399; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(16,185,129,0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(16,185,129,0.2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(16,185,129,0.1)'; this.style.transform='none'" :title="getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá')">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                  {{ getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá') }}
+                </a>
+              </div>
+              <div v-if="report.link_excel_mua_hang" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
+                <a v-for="(link, i) in report.link_excel_mua_hang.split('\n').filter(Boolean)" :key="'mh'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng'))"  class="tl-attach-badge" style="background: rgba(139,92,246,0.1); color: #a78bfa; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(139,92,246,0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(139,92,246,0.1)'; this.style.transform='none'" :title="getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng')">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                  {{ getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng') }}
+                </a>
               </div>
             </div>
             <div class="tl-rect-actions">
@@ -631,6 +691,57 @@
               </button>
             </div>
             <textarea v-model="formData.ghi_chu" placeholder="Các ghi chú bổ sung nếu có..." rows="1" class="elite-input"></textarea>
+          </div>
+
+          <!-- Upload Files -->
+          <div class="elite-form-group">
+            <label style="display: flex; justify-content: space-between;">
+              <span>Đính Kèm (Ảnh / Excel)</span>
+              <span v-if="isUploadingFiles" style="color: #3b82f6; font-size: 0.8rem; font-weight: bold; animation: pulse 1s infinite;">Đang tải lên...</span>
+            </label>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+              <div class="file-upload-wrapper" style="flex: 1; min-width: 140px;">
+                <button type="button" style="width: 100%; padding: 0.5rem; font-size: 0.85rem; background: #0f172a; color: #f8fafc; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 600; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" @click="$refs.imgUploadInput.click()" :disabled="isUploadingFiles" onmouseover="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 8px rgba(59,130,246,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.2)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                  Tải Ảnh
+                </button>
+                <input type="file" accept="image/*" multiple ref="imgUploadInput" style="display: none;" @change="handleImgUpload" />
+                <div v-if="formData.img_save" class="upload-preview-list" style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem;">
+                  <div v-for="(link, i) in formData.img_save.split('\n').filter(Boolean)" :key="i" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 0.3rem 0.5rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);">
+                    <a :href="link" target="_blank" style="color: #60a5fa; font-size: 0.75rem; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%;" :title="`Ảnh ${i + 1}`">Ảnh {{ i + 1 }}</a>
+                    <button type="button" @click="removeLink('img_save', i)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 2px;">✕</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="file-upload-wrapper" style="flex: 1; min-width: 140px;">
+                <button type="button" style="width: 100%; padding: 0.5rem; font-size: 0.85rem; background: #0f172a; color: #34d399; border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 600; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" @click="$refs.bgUploadInput.click()" :disabled="isUploadingFiles" onmouseover="this.style.borderColor='#10b981'; this.style.boxShadow='0 0 8px rgba(16,185,129,0.3)'" onmouseout="this.style.borderColor='rgba(16,185,129,0.3)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                  File Báo Giá
+                </button>
+                <input type="file" accept=".xlsx,.xls" multiple ref="bgUploadInput" style="display: none;" @change="e => handleExcelUpload(e, 'link_excel_bao_gia')" />
+                <div v-if="formData.link_excel_bao_gia" class="upload-preview-list" style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem;">
+                  <div v-for="(link, i) in formData.link_excel_bao_gia.split('\n').filter(Boolean)" :key="i" style="display: flex; justify-content: space-between; align-items: center; background: rgba(16,185,129,0.05); padding: 0.3rem 0.5rem; border-radius: 4px; border: 1px solid rgba(16,185,129,0.1);">
+                    <a href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(formData, 'link_excel_bao_gia', i, 'Báo giá'))" style="color: #34d399; font-size: 0.75rem; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%;" :title="getExcelFileName(formData, 'link_excel_bao_gia', i, 'Báo giá')">{{ getExcelFileName(formData, 'link_excel_bao_gia', i, 'Báo giá') }}</a>
+                    <button type="button" @click="removeLink('link_excel_bao_gia', i)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 2px;">✕</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="file-upload-wrapper" style="flex: 1; min-width: 140px;">
+                <button type="button" style="width: 100%; padding: 0.5rem; font-size: 0.85rem; background: #0f172a; color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 600; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" @click="$refs.mhUploadInput.click()" :disabled="isUploadingFiles" onmouseover="this.style.borderColor='#8b5cf6'; this.style.boxShadow='0 0 8px rgba(139,92,246,0.3)'" onmouseout="this.style.borderColor='rgba(139,92,246,0.3)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                  File Mua Hàng
+                </button>
+                <input type="file" accept=".xlsx,.xls" multiple ref="mhUploadInput" style="display: none;" @change="e => handleExcelUpload(e, 'link_excel_mua_hang')" />
+                <div v-if="formData.link_excel_mua_hang" class="upload-preview-list" style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem;">
+                  <div v-for="(link, i) in formData.link_excel_mua_hang.split('\n').filter(Boolean)" :key="i" style="display: flex; justify-content: space-between; align-items: center; background: rgba(139,92,246,0.05); padding: 0.3rem 0.5rem; border-radius: 4px; border: 1px solid rgba(139,92,246,0.1);">
+                    <a href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(formData, 'link_excel_mua_hang', i, 'Mua hàng'))" style="color: #a78bfa; font-size: 0.75rem; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%;" :title="getExcelFileName(formData, 'link_excel_mua_hang', i, 'Mua hàng')">{{ getExcelFileName(formData, 'link_excel_mua_hang', i, 'Mua hàng') }}</a>
+                    <button type="button" @click="removeLink('link_excel_mua_hang', i)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 2px;">✕</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="elite-form-group" v-if="isEditing">
@@ -915,6 +1026,25 @@
                         <div v-if="task.ghi_chu" style="font-size: 0.8rem; color: #bfdbfe; line-height: 1.35; margin-top: 4px; padding-top: 4px; border-top: 1px dotted rgba(191,219,254,0.3); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                           {{ task.ghi_chu }}
                         </div>
+                        <div v-if="task.img_save || task.link_excel_bao_gia || task.link_excel_mua_hang" style="display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 6px; padding-top: 6px; border-top: 1px dotted rgba(255,255,255,0.2);">
+                          <template v-if="task.img_save">
+                            <a v-for="(link, i) in task.img_save.split('\n').filter(Boolean)" :key="'m-img'+i" :href="link" target="_blank" @click.stop style="width: 24px; height: 24px; border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: block;" :title="`Ảnh ${i + 1}`">
+                              <img :src="link" style="width: 100%; height: 100%; object-fit: cover;" />
+                            </a>
+                          </template>
+                          <template v-if="task.link_excel_bao_gia">
+                            <a v-for="(link, i) in task.link_excel_bao_gia.split('\n').filter(Boolean)" :key="'m-bg'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(task, 'link_excel_bao_gia', i, 'Báo giá'))"  style="background: rgba(16,185,129,0.2); color: #a7f3d0; padding: 2px 4px; border-radius: 4px; font-size: 0.65rem; text-decoration: none; display: flex; align-items: center; gap: 2px; border: 1px solid rgba(16,185,129,0.3);" :title="getExcelFileName(task, 'link_excel_bao_gia', i, 'Báo giá')">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                              {{ getExcelFileName(task, 'link_excel_bao_gia', i, 'Báo giá') }}
+                            </a>
+                          </template>
+                          <template v-if="task.link_excel_mua_hang">
+                            <a v-for="(link, i) in task.link_excel_mua_hang.split('\n').filter(Boolean)" :key="'m-mh'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(task, 'link_excel_mua_hang', i, 'Mua hàng'))"  style="background: rgba(139,92,246,0.2); color: #ddd6fe; padding: 2px 4px; border-radius: 4px; font-size: 0.65rem; text-decoration: none; display: flex; align-items: center; gap: 2px; border: 1px solid rgba(139,92,246,0.3);" :title="getExcelFileName(task, 'link_excel_mua_hang', i, 'Mua hàng')">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                              {{ getExcelFileName(task, 'link_excel_mua_hang', i, 'Mua hàng') }}
+                            </a>
+                          </template>
+                        </div>
                       </div>
                     </div>
                     
@@ -937,6 +1067,25 @@
                         <div style="font-weight: 700; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">{{ task.noi_dung }}</div>
                         <div v-if="task.ghi_chu" style="font-size: 0.8rem; color: #a7f3d0; line-height: 1.35; margin-top: 4px; padding-top: 4px; border-top: 1px dotted rgba(167,243,208,0.3); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                           {{ task.ghi_chu }}
+                        </div>
+                        <div v-if="task.img_save || task.link_excel_bao_gia || task.link_excel_mua_hang" style="display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 6px; padding-top: 6px; border-top: 1px dotted rgba(255,255,255,0.2);">
+                          <template v-if="task.img_save">
+                            <a v-for="(link, i) in task.img_save.split('\n').filter(Boolean)" :key="'a-img'+i" :href="link" target="_blank" @click.stop style="width: 24px; height: 24px; border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: block;" :title="`Ảnh ${i + 1}`">
+                              <img :src="link" style="width: 100%; height: 100%; object-fit: cover;" />
+                            </a>
+                          </template>
+                          <template v-if="task.link_excel_bao_gia">
+                            <a v-for="(link, i) in task.link_excel_bao_gia.split('\n').filter(Boolean)" :key="'a-bg'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(task, 'link_excel_bao_gia', i, 'Báo giá'))"  style="background: rgba(16,185,129,0.2); color: #a7f3d0; padding: 2px 4px; border-radius: 4px; font-size: 0.65rem; text-decoration: none; display: flex; align-items: center; gap: 2px; border: 1px solid rgba(16,185,129,0.3);" :title="getExcelFileName(task, 'link_excel_bao_gia', i, 'Báo giá')">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                              {{ getExcelFileName(task, 'link_excel_bao_gia', i, 'Báo giá') }}
+                            </a>
+                          </template>
+                          <template v-if="task.link_excel_mua_hang">
+                            <a v-for="(link, i) in task.link_excel_mua_hang.split('\n').filter(Boolean)" :key="'a-mh'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(task, 'link_excel_mua_hang', i, 'Mua hàng'))"  style="background: rgba(139,92,246,0.2); color: #ddd6fe; padding: 2px 4px; border-radius: 4px; font-size: 0.65rem; text-decoration: none; display: flex; align-items: center; gap: 2px; border: 1px solid rgba(139,92,246,0.3);" :title="getExcelFileName(task, 'link_excel_mua_hang', i, 'Mua hàng')">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                              {{ getExcelFileName(task, 'link_excel_mua_hang', i, 'Mua hàng') }}
+                            </a>
+                          </template>
                         </div>
                       </div>
                     </div>
@@ -1755,8 +1904,13 @@ const formData = ref({
   noi_dung: '',
   ghi_chu: '',
   tag: 'BÌNH THƯỜNG',
-  trang_thai: 'Chưa xử lý'
+  trang_thai: 'Chưa xử lý',
+  img_save: '',
+  link_excel_bao_gia: '',
+  link_excel_mua_hang: ''
 })
+
+const isUploadingFiles = ref(false)
 
 const timeInputs = ref({
   hour: '00',
@@ -1940,7 +2094,12 @@ const openAddModal = () => {
     noi_dung: '',
     ghi_chu: '',
     tag: 'BÌNH THƯỜNG',
-    trang_thai: 'Chưa xử lý'
+    trang_thai: 'Chưa xử lý',
+    img_save: '',
+    link_excel_bao_gia: '',
+    link_excel_mua_hang: '',
+    ten_file_bao_gia: '',
+    ten_file_mua_hang: ''
   }
   timeInputs.value = getNowTimeInputs();
   isModalOpen.value = true
@@ -1966,7 +2125,12 @@ const openAddModalWithSlot = (slot) => {
     noi_dung: '',
     ghi_chu: '',
     tag: 'BÌNH THƯỜNG',
-    trang_thai: 'Chưa xử lý'
+    trang_thai: 'Chưa xử lý',
+    img_save: '',
+    link_excel_bao_gia: '',
+    link_excel_mua_hang: '',
+    ten_file_bao_gia: '',
+    ten_file_mua_hang: ''
   };
   
   const d = slot.date;
@@ -1989,7 +2153,7 @@ const hasChanges = computed(() => {
   if (!isEditing.value) return true;
   if (!originalData.value || !originalTimeInputs.value) return false;
   
-  const formKeys = ['phan_loai', 'noi_dung', 'ghi_chu', 'tag', 'trang_thai'];
+  const formKeys = ['phan_loai', 'noi_dung', 'ghi_chu', 'tag', 'trang_thai', 'img_save', 'link_excel_bao_gia', 'link_excel_mua_hang', 'ten_file_bao_gia', 'ten_file_mua_hang'];
   for (const k of formKeys) {
     if (formData.value[k] !== originalData.value[k]) return true;
   }
@@ -2005,6 +2169,11 @@ const hasChanges = computed(() => {
 const openEditModal = (report) => {
   isEditing.value = true
   formData.value = { ...report }
+  if (!formData.value.img_save) formData.value.img_save = ''
+  if (!formData.value.link_excel_bao_gia) formData.value.link_excel_bao_gia = ''
+  if (!formData.value.link_excel_mua_hang) formData.value.link_excel_mua_hang = ''
+  if (!formData.value.ten_file_bao_gia) formData.value.ten_file_bao_gia = ''
+  if (!formData.value.ten_file_mua_hang) formData.value.ten_file_mua_hang = ''
   originalData.value = { ...report }
   timeInputs.value = parseTimeString(report.thoi_gian);
   originalTimeInputs.value = { ...timeInputs.value }
@@ -2064,6 +2233,82 @@ const insertCustomerQuote = (customer) => {
   customerSearch.value = '';
 }
 
+const handleImgUpload = async (e) => {
+  const files = e.target.files
+  if (!files || files.length === 0) return
+  
+  isUploadingFiles.value = true
+  try {
+    for (const file of files) {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      await new Promise(r => reader.onload = r)
+      const base64 = String(reader.result).split(',')[1]
+      
+      const fd = new FormData()
+      fd.append('key', 'b202a4bdc79bf1dc72f6f6ded6b74501')
+      fd.append('image', base64)
+      const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: fd }).then(r => r.json())
+      
+      if (res.success) {
+        formData.value.img_save = formData.value.img_save ? formData.value.img_save + '\n' + res.data.url : res.data.url
+      } else {
+        alert('Lỗi tải ảnh: ' + (res.error?.message || 'Không rõ'))
+      }
+    }
+  } catch (err) {
+    console.error(err)
+    alert('Lỗi mạng khi tải ảnh lên')
+  } finally {
+    isUploadingFiles.value = false
+    e.target.value = ''
+  }
+}
+
+const handleExcelUpload = async (e, field) => {
+  const files = e.target.files
+  if (!files || files.length === 0) return
+  
+  isUploadingFiles.value = true
+  try {
+    for (const file of files) {
+      const fd = new FormData()
+      fd.append('upload_preset', 'upload_file')
+      fd.append('file', file)
+      const res = await fetch('https://api.cloudinary.com/v1_1/db6fzs3rh/auto/upload', { method: 'POST', body: fd }).then(r => r.json())
+      
+      if (res.secure_url) {
+        formData.value[field] = formData.value[field] ? formData.value[field] + '\n' + res.secure_url : res.secure_url
+        const nameField = field.replace('link_excel_', 'ten_file_')
+        formData.value[nameField] = formData.value[nameField] ? formData.value[nameField] + '\n' + file.name : file.name
+      } else {
+        alert('Lỗi tải file: ' + (res.error?.message || 'Không rõ'))
+      }
+    }
+  } catch (err) {
+    console.error(err)
+    alert('Lỗi mạng khi tải file lên Cloudinary')
+  } finally {
+    isUploadingFiles.value = false
+    e.target.value = ''
+  }
+}
+
+const removeLink = (field, index) => {
+  const links = formData.value[field].split('\n').filter(Boolean)
+  links.splice(index, 1)
+  formData.value[field] = links.join('\n')
+
+  if (field.startsWith('link_excel_')) {
+    const nameField = field.replace('link_excel_', 'ten_file_')
+    if (formData.value[nameField]) {
+      const names = formData.value[nameField].split('\n').filter(Boolean)
+      names.splice(index, 1)
+      formData.value[nameField] = names.join('\n')
+    }
+  }
+}
+
 // Lưu (Thêm/Sửa)
 const highlightedReportId = ref(null)
 
@@ -2084,6 +2329,11 @@ const saveReport = async (options = {}) => {
   formData.value.thoi_gian = formatTimeString();
 
   saving.value = true
+  if (isUploadingFiles.value) {
+    alert('Vui lòng đợi file đang được tải lên xong trước khi lưu.')
+    saving.value = false
+    return
+  }
   
   // Tạo độ trễ giả 500ms để hiển thị trạng thái "Đang lưu..." (UX)
   await new Promise(r => setTimeout(r, 500));
@@ -2323,6 +2573,36 @@ const getStatusDotClass = (status) => {
     case 'Chưa xử lý': return 'bg-amber-500 shadow-amber-500/50'
     default: return 'bg-slate-300'
   }
+}
+
+
+const downloadExcelFile = async (url, fileName) => {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Network response was not ok');
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = blobUrl;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(blobUrl);
+    a.remove();
+  } catch (error) {
+    console.error('Lỗi khi tải file', error);
+    window.open(url, '_blank');
+  }
+}
+
+const getExcelFileName = (dataObj, field, index, prefix) => {
+  const nameField = field.replace('link_excel_', 'ten_file_');
+  if (dataObj && dataObj[nameField]) {
+    const names = String(dataObj[nameField]).split('\n').filter(Boolean);
+    if (names[index]) return names[index];
+  }
+  return `${prefix} ${index + 1}`;
 }
 
 const getStatusPillClass = (status) => {
@@ -6456,7 +6736,25 @@ button {
     min-height: 44px;
   }
 
-  /* Compact Modal Layout for Mobile */
+  /* Compact Modal Layout for Mobile - LEFT SIDEBAR */
+  .elite-modal-overlay {
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+  }
+  .elite-modal {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    animation: slideRightMobile 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+  @keyframes slideRightMobile {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+
   .elite-modal-header {
     padding: 1rem 1.25rem 0.75rem;
   }
