@@ -6837,7 +6837,7 @@ button {
 
 /* Modal Dark Mode Theme (Chiều) */
 .elite-modal.dark-mode-modal {
-  background: #0f172a !important;
+  background: #1e293b !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
   color: #f8fafc !important;
 }
