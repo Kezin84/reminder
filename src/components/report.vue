@@ -305,25 +305,23 @@
                           <span v-if="report.tag" v-for="t in splitTags(report.tag)" :key="t" v-show="t !== 'BÌNH THƯỜNG'" class="tl-badge-tag" :class="getTagClass(t)">{{ t }}</span>
                         </div>
                       </div>
+                      <div v-if="report.img_save" style="display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0.5rem 0.5rem 0 0.5rem;">
+                        <a v-for="(link, i) in report.img_save.split('\n').filter(Boolean)" :key="'img'+i" href="#" @click.prevent.stop="selectedImage = link" style="width: 45px; height: 45px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: block; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                           <img :src="link" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" />
+                        </a>
+                      </div>
                       <div class="tl-rect-body">
                         <div class="tl-body-text">{{ report.noi_dung }}</div>
                       </div>
                       <div class="tl-rect-note" v-if="report.ghi_chu">
                         <div class="tl-note-accent"></div>
                         <div class="tl-note-content">
-                          <div class="tl-note-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                          </div>
+                          <div class="tl-note-icon">NOTE</div>
                           <span>{{ report.ghi_chu }}</span>
                         </div>
                       </div>
 
-                      <div class="tl-attachments" v-if="report.img_save || report.link_excel_bao_gia || report.link_excel_mua_hang" style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; padding: 0 0.5rem;">
-                        <div v-if="report.img_save" style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
-                          <a v-for="(link, i) in report.img_save.split('\n').filter(Boolean)" :key="'img'+i" :href="link" target="_blank" @click.stop style="width: 45px; height: 45px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: block; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                             <img :src="link" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" />
-                          </a>
-                        </div>
+                      <div class="tl-attachments" v-if="report.link_excel_bao_gia || report.link_excel_mua_hang" style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; padding: 0 0.5rem;">
                         <div v-if="report.link_excel_bao_gia" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
                           <a v-for="(link, i) in report.link_excel_bao_gia.split('\n').filter(Boolean)" :key="'bg'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))"  class="tl-attach-badge" style="background: rgba(16,185,129,0.1); color: #34d399; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(16,185,129,0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(16,185,129,0.2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(16,185,129,0.1)'; this.style.transform='none'" :title="getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
@@ -412,25 +410,23 @@
                           <span v-if="report.tag" v-for="t in splitTags(report.tag)" :key="t" v-show="t !== 'BÌNH THƯỜNG'" class="tl-badge-tag" :class="getTagClass(t)">{{ t }}</span>
                         </div>
                       </div>
+                      <div v-if="report.img_save" style="display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0.5rem 0.5rem 0 0.5rem;">
+                        <a v-for="(link, i) in report.img_save.split('\n').filter(Boolean)" :key="'img'+i" href="#" @click.prevent.stop="selectedImage = link" style="width: 45px; height: 45px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: block; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" :title="`Ảnh ${i + 1}`">
+                           <img :src="link" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" />
+                        </a>
+                      </div>
                       <div class="tl-rect-body">
                         <div class="tl-body-text">{{ report.noi_dung }}</div>
                       </div>
                       <div class="tl-rect-note" v-if="report.ghi_chu">
                         <div class="tl-note-accent"></div>
                         <div class="tl-note-content">
-                          <div class="tl-note-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                          </div>
+                          <div class="tl-note-icon">NOTE</div>
                           <span>{{ report.ghi_chu }}</span>
                         </div>
                       </div>
 
-                      <div class="tl-attachments" v-if="report.img_save || report.link_excel_bao_gia || report.link_excel_mua_hang" style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; padding: 0 0.5rem;">
-                        <div v-if="report.img_save" style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
-                          <a v-for="(link, i) in report.img_save.split('\n').filter(Boolean)" :key="'img'+i" :href="link" target="_blank" @click.stop style="width: 45px; height: 45px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: block; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" :title="`Ảnh ${i + 1}`">
-                             <img :src="link" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" />
-                          </a>
-                        </div>
+                      <div class="tl-attachments" v-if="report.link_excel_bao_gia || report.link_excel_mua_hang" style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; padding: 0 0.5rem;">
                         <div v-if="report.link_excel_bao_gia" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
                           <a v-for="(link, i) in report.link_excel_bao_gia.split('\n').filter(Boolean)" :key="'bg'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))"  class="tl-attach-badge" style="background: rgba(16,185,129,0.1); color: #34d399; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(16,185,129,0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(16,185,129,0.2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(16,185,129,0.1)'; this.style.transform='none'" :title="getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
@@ -515,25 +511,23 @@
                 <span v-if="report.tag" v-for="t in splitTags(report.tag)" :key="t" v-show="t !== 'BÌNH THƯỜNG'" class="tl-badge-tag" :class="getTagClass(t)">{{ t }}</span>
               </div>
             </div>
+            <div v-if="report.img_save" style="display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0.5rem 0.5rem 0 0.5rem;">
+              <a v-for="(link, i) in report.img_save.split('\n').filter(Boolean)" :key="'img'+i" href="#" @click.prevent.stop="selectedImage = link" style="width: 45px; height: 45px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: block; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" :title="`Ảnh ${i + 1}`">
+                 <img :src="link" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" />
+              </a>
+            </div>
             <div class="tl-rect-body">
               <div class="tl-body-text">{{ report.noi_dung }}</div>
             </div>
             <div class="tl-rect-note" v-if="report.ghi_chu">
               <div class="tl-note-accent"></div>
               <div class="tl-note-content">
-                <div class="tl-note-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                </div>
+                <div class="tl-note-icon">NOTE</div>
                 <span>{{ report.ghi_chu }}</span>
               </div>
             </div>
 
-            <div class="tl-attachments" v-if="report.img_save || report.link_excel_bao_gia || report.link_excel_mua_hang" style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; padding: 0 0.5rem;">
-              <div v-if="report.img_save" style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
-                <a v-for="(link, i) in report.img_save.split('\n').filter(Boolean)" :key="'img'+i" :href="link" target="_blank" @click.stop style="width: 45px; height: 45px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: block; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" :title="`Ảnh ${i + 1}`">
-                   <img :src="link" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" />
-                </a>
-              </div>
+            <div class="tl-attachments" v-if="report.link_excel_bao_gia || report.link_excel_mua_hang" style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; padding: 0 0.5rem;">
               <div v-if="report.link_excel_bao_gia" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
                 <a v-for="(link, i) in report.link_excel_bao_gia.split('\n').filter(Boolean)" :key="'bg'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))"  class="tl-attach-badge" style="background: rgba(16,185,129,0.1); color: #34d399; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(16,185,129,0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(16,185,129,0.2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(16,185,129,0.1)'; this.style.transform='none'" :title="getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá')">
                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
@@ -564,7 +558,7 @@
 
     <!-- Elite Modal Form -->
     <div class="elite-modal-overlay" v-if="isModalOpen" @click.self="closeModal">
-      <div class="elite-modal">
+      <div class="elite-modal" :class="{'dark-mode-modal': isAfternoon}">
         <div class="elite-modal-header">
           <div class="elite-modal-title-wrapper" style="display: flex; flex-direction: column; gap: 0.25rem;">
             <div class="elite-modal-title">
@@ -596,6 +590,25 @@
                 <option value="BÌNH THƯỜNG">BÌNH THƯỜNG</option>
                 <option value="ƯU TIÊN">ƯU TIÊN</option>
               </select>
+            </div>
+            <div class="elite-form-group" v-if="isEditing">
+              <label>Trạng Thái</label>
+              <div class="elite-status-toggle">
+                <button 
+                  type="button" 
+                  :class="['toggle-btn', formData.trang_thai === 'Hoàn thành' ? 'active-success' : '']"
+                  @click="formData.trang_thai = 'Hoàn thành'"
+                >
+                  Hoàn thành
+                </button>
+                <button 
+                  type="button" 
+                  :class="['toggle-btn', formData.trang_thai === 'Chưa xử lý' ? 'active-warning' : '']"
+                  @click="formData.trang_thai = 'Chưa xử lý'"
+                >
+                  Chưa xử lý
+                </button>
+              </div>
             </div>
           </div>
 
@@ -666,103 +679,95 @@
             </div>
           </div>
           
-          <div class="elite-form-group">
-            <div class="form-group-header">
-              <label>Nội Dung <span class="required">*</span></label>
-              <div class="header-actions-group">
-                <button type="button" class="elite-voice-btn" @click="startVoiceRecognition('noi_dung')" :class="{ 'is-recording': isRecordingVoice === 'noi_dung' }" title="Nhập liệu bằng giọng nói">
-                  <svg v-if="isRecordingVoice !== 'noi_dung'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+          <div class="elite-form-row">
+            <div class="elite-form-group">
+              <div class="form-group-header">
+                <label>Nội Dung <span class="required">*</span></label>
+                <div class="header-actions-group">
+                  <button type="button" class="elite-voice-btn" @click="startVoiceRecognition('noi_dung')" :class="{ 'is-recording': isRecordingVoice === 'noi_dung' }" title="Nhập liệu bằng giọng nói">
+                    <svg v-if="isRecordingVoice !== 'noi_dung'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12"></rect></svg>
+                  </button>
+                  <button type="button" class="elite-quote-btn" @click="openCustomerModal">
+                    BÁO GIÁ
+                  </button>
+                </div>
+              </div>
+              <textarea v-model="formData.noi_dung" required placeholder="Mô tả chi tiết nội dung báo cáo..." rows="3" class="elite-input"></textarea>
+            </div>
+
+            <div class="elite-form-group">
+              <div class="form-group-header">
+                <label style="color: #ef4444 !important; font-weight: 700 !important;">Ghi Chú</label>
+                <button type="button" class="elite-voice-btn" @click="startVoiceRecognition('ghi_chu')" :class="{ 'is-recording': isRecordingVoice === 'ghi_chu' }" title="Nhập liệu bằng giọng nói">
+                  <svg v-if="isRecordingVoice !== 'ghi_chu'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
                   <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12"></rect></svg>
                 </button>
-                <button type="button" class="elite-quote-btn" @click="openCustomerModal">
-                  BÁO GIÁ
-                </button>
               </div>
+              <textarea v-model="formData.ghi_chu" placeholder="Các ghi chú bổ sung nếu có..." rows="3" class="elite-input" style="color: #ef4444 !important; font-weight: 700 !important;"></textarea>
             </div>
-            <textarea v-model="formData.noi_dung" required placeholder="Mô tả chi tiết nội dung báo cáo..." rows="3" class="elite-input"></textarea>
-          </div>
-
-          <div class="elite-form-group">
-            <div class="form-group-header">
-              <label>Ghi Chú</label>
-              <button type="button" class="elite-voice-btn" @click="startVoiceRecognition('ghi_chu')" :class="{ 'is-recording': isRecordingVoice === 'ghi_chu' }" title="Nhập liệu bằng giọng nói">
-                <svg v-if="isRecordingVoice !== 'ghi_chu'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12"></rect></svg>
-              </button>
-            </div>
-            <textarea v-model="formData.ghi_chu" placeholder="Các ghi chú bổ sung nếu có..." rows="1" class="elite-input"></textarea>
           </div>
 
           <!-- Upload Files -->
           <div class="elite-form-group">
             <label style="display: flex; justify-content: space-between;">
               <span>Đính Kèm (Ảnh / Excel)</span>
-              <span v-if="isUploadingFiles" style="color: #3b82f6; font-size: 0.8rem; font-weight: bold; animation: pulse 1s infinite;">Đang tải lên...</span>
             </label>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-              <div class="file-upload-wrapper" style="flex: 1; min-width: 140px;">
+            <div style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+              <!-- Image Upload Row -->
+              <div class="file-upload-wrapper" style="width: 100%;">
                 <button type="button" style="width: 100%; padding: 0.5rem; font-size: 0.85rem; background: #0f172a; color: #f8fafc; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 600; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" @click="$refs.imgUploadInput.click()" :disabled="isUploadingFiles" onmouseover="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 8px rgba(59,130,246,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.2)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                  Tải Ảnh
+                  <svg v-if="isUploadingFiles !== 'img'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-right: 6px; animation: spin 0.8s linear infinite; transform-origin: center;"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" style="opacity: 0.25;"></circle><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" style="opacity: 0.75;"></path></svg>
+                  {{ isUploadingFiles === 'img' ? 'Đang tải...' : 'Tải Ảnh' }}
                 </button>
                 <input type="file" accept="image/*" multiple ref="imgUploadInput" style="display: none;" @change="handleImgUpload" />
-                <div v-if="formData.img_save" class="upload-preview-list" style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem;">
-                  <div v-for="(link, i) in formData.img_save.split('\n').filter(Boolean)" :key="i" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 0.3rem 0.5rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);">
-                    <a :href="link" target="_blank" style="color: #60a5fa; font-size: 0.75rem; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%;" :title="`Ảnh ${i + 1}`">Ảnh {{ i + 1 }}</a>
-                    <button type="button" @click="removeLink('img_save', i)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 2px;">✕</button>
+                <div v-if="formData.img_save" class="upload-preview-gallery" style="margin-top: 0.8rem; display: flex; flex-wrap: wrap; gap: 0.8rem;">
+                  <div v-for="(link, i) in formData.img_save.split('\n').filter(Boolean)" :key="i" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; width: 80px;">
+                    <a href="#" @click.prevent.stop="selectedImage = link" style="display: block; width: 80px; height: 80px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.1); overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: transform 0.2s, border-color 0.2s;" onmouseover="this.style.transform='scale(1.05)'; this.style.borderColor='#3b82f6'" onmouseout="this.style.transform='scale(1)'; this.style.borderColor='rgba(255,255,255,0.1)'" :title="`Xem Ảnh ${i + 1}`">
+                      <img :src="link" style="width: 100%; height: 100%; object-fit: cover;" />
+                    </a>
+                    <button type="button" @click="removeLink('img_save', i)" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; cursor: pointer; padding: 4px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; transition: background 0.2s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 4px;" onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'">
+                      ✕ Xóa
+                    </button>
                   </div>
                 </div>
               </div>
 
-              <div class="file-upload-wrapper" style="flex: 1; min-width: 140px;">
-                <button type="button" style="width: 100%; padding: 0.5rem; font-size: 0.85rem; background: #0f172a; color: #34d399; border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 600; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" @click="$refs.bgUploadInput.click()" :disabled="isUploadingFiles" onmouseover="this.style.borderColor='#10b981'; this.style.boxShadow='0 0 8px rgba(16,185,129,0.3)'" onmouseout="this.style.borderColor='rgba(16,185,129,0.3)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                  File Báo Giá
-                </button>
-                <input type="file" accept=".xlsx,.xls" multiple ref="bgUploadInput" style="display: none;" @change="e => handleExcelUpload(e, 'link_excel_bao_gia')" />
-                <div v-if="formData.link_excel_bao_gia" class="upload-preview-list" style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem;">
-                  <div v-for="(link, i) in formData.link_excel_bao_gia.split('\n').filter(Boolean)" :key="i" style="display: flex; justify-content: space-between; align-items: center; background: rgba(16,185,129,0.05); padding: 0.3rem 0.5rem; border-radius: 4px; border: 1px solid rgba(16,185,129,0.1);">
-                    <a href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(formData, 'link_excel_bao_gia', i, 'Báo giá'))" style="color: #34d399; font-size: 0.75rem; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%;" :title="getExcelFileName(formData, 'link_excel_bao_gia', i, 'Báo giá')">{{ getExcelFileName(formData, 'link_excel_bao_gia', i, 'Báo giá') }}</a>
-                    <button type="button" @click="removeLink('link_excel_bao_gia', i)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 2px;">✕</button>
+              <!-- Excel Files Row -->
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <div class="file-upload-wrapper" style="flex: 1; min-width: 140px;">
+                  <button type="button" style="width: 100%; padding: 0.5rem; font-size: 0.85rem; background: #0f172a; color: #34d399; border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 600; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" @click="$refs.bgUploadInput.click()" :disabled="isUploadingFiles" onmouseover="this.style.borderColor='#10b981'; this.style.boxShadow='0 0 8px rgba(16,185,129,0.3)'" onmouseout="this.style.borderColor='rgba(16,185,129,0.3)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
+                    <svg v-if="isUploadingFiles !== 'bg'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-right: 6px; animation: spin 0.8s linear infinite; transform-origin: center;"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" style="opacity: 0.25;"></circle><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" style="opacity: 0.75;"></path></svg>
+                    {{ isUploadingFiles === 'bg' ? 'Đang tải...' : 'File Báo Giá' }}
+                  </button>
+                  <input type="file" accept=".xlsx,.xls" multiple ref="bgUploadInput" style="display: none;" @change="e => handleExcelUpload(e, 'link_excel_bao_gia')" />
+                  <div v-if="formData.link_excel_bao_gia" class="upload-preview-list" style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem;">
+                    <div v-for="(link, i) in formData.link_excel_bao_gia.split('\n').filter(Boolean)" :key="i" style="display: flex; justify-content: space-between; align-items: center; background: rgba(16,185,129,0.05); padding: 0.3rem 0.5rem; border-radius: 4px; border: 1px solid rgba(16,185,129,0.1);">
+                      <a href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(formData, 'link_excel_bao_gia', i, 'Báo giá'))" style="color: #34d399; font-size: 0.75rem; font-weight: 600; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%;" :title="getExcelFileName(formData, 'link_excel_bao_gia', i, 'Báo giá')">{{ getExcelFileName(formData, 'link_excel_bao_gia', i, 'Báo giá') }}</a>
+                      <button type="button" @click="removeLink('link_excel_bao_gia', i)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 2px;">✕</button>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div class="file-upload-wrapper" style="flex: 1; min-width: 140px;">
+                <div class="file-upload-wrapper" style="flex: 1; min-width: 140px;">
                 <button type="button" style="width: 100%; padding: 0.5rem; font-size: 0.85rem; background: #0f172a; color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 600; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" @click="$refs.mhUploadInput.click()" :disabled="isUploadingFiles" onmouseover="this.style.borderColor='#8b5cf6'; this.style.boxShadow='0 0 8px rgba(139,92,246,0.3)'" onmouseout="this.style.borderColor='rgba(139,92,246,0.3)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                  File Mua Hàng
+                  <svg v-if="isUploadingFiles !== 'mh'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-right: 6px; animation: spin 0.8s linear infinite; transform-origin: center;"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" style="opacity: 0.25;"></circle><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" style="opacity: 0.75;"></path></svg>
+                  {{ isUploadingFiles === 'mh' ? 'Đang tải...' : 'File Mua Hàng' }}
                 </button>
                 <input type="file" accept=".xlsx,.xls" multiple ref="mhUploadInput" style="display: none;" @change="e => handleExcelUpload(e, 'link_excel_mua_hang')" />
                 <div v-if="formData.link_excel_mua_hang" class="upload-preview-list" style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem;">
                   <div v-for="(link, i) in formData.link_excel_mua_hang.split('\n').filter(Boolean)" :key="i" style="display: flex; justify-content: space-between; align-items: center; background: rgba(139,92,246,0.05); padding: 0.3rem 0.5rem; border-radius: 4px; border: 1px solid rgba(139,92,246,0.1);">
-                    <a href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(formData, 'link_excel_mua_hang', i, 'Mua hàng'))" style="color: #a78bfa; font-size: 0.75rem; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%;" :title="getExcelFileName(formData, 'link_excel_mua_hang', i, 'Mua hàng')">{{ getExcelFileName(formData, 'link_excel_mua_hang', i, 'Mua hàng') }}</a>
+                    <a href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(formData, 'link_excel_mua_hang', i, 'Mua hàng'))" style="color: #a78bfa; font-size: 0.75rem; font-weight: 600; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%;" :title="getExcelFileName(formData, 'link_excel_mua_hang', i, 'Mua hàng')">{{ getExcelFileName(formData, 'link_excel_mua_hang', i, 'Mua hàng') }}</a>
                     <button type="button" @click="removeLink('link_excel_mua_hang', i)" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 2px;">✕</button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-
-          <div class="elite-form-group" v-if="isEditing">
-            <label>Trạng Thái</label>
-            <div class="elite-status-toggle">
-              <button 
-                type="button" 
-                :class="['toggle-btn', formData.trang_thai === 'Hoàn thành' ? 'active-success' : '']"
-                @click="formData.trang_thai = 'Hoàn thành'"
-              >
-                Hoàn thành
-              </button>
-              <button 
-                type="button" 
-                :class="['toggle-btn', formData.trang_thai === 'Chưa xử lý' ? 'active-warning' : '']"
-                @click="formData.trang_thai = 'Chưa xử lý'"
-              >
-                Chưa xử lý
-              </button>
-            </div>
-          </div>
+        </div>
 
           <div class="elite-modal-actions form-actions-grid">
             <button type="button" class="elite-btn-cancel" @click="closeModal" :disabled="saving">Huỷ Bỏ</button>
@@ -1028,7 +1033,7 @@
                         </div>
                         <div v-if="task.img_save || task.link_excel_bao_gia || task.link_excel_mua_hang" style="display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 6px; padding-top: 6px; border-top: 1px dotted rgba(255,255,255,0.2);">
                           <template v-if="task.img_save">
-                            <a v-for="(link, i) in task.img_save.split('\n').filter(Boolean)" :key="'m-img'+i" :href="link" target="_blank" @click.stop style="width: 24px; height: 24px; border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: block;" :title="`Ảnh ${i + 1}`">
+                            <a v-for="(link, i) in task.img_save.split('\n').filter(Boolean)" :key="'m-img'+i" href="#" @click.prevent.stop="selectedImage = link" style="width: 24px; height: 24px; border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: block;" :title="`Ảnh ${i + 1}`">
                               <img :src="link" style="width: 100%; height: 100%; object-fit: cover;" />
                             </a>
                           </template>
@@ -1070,7 +1075,7 @@
                         </div>
                         <div v-if="task.img_save || task.link_excel_bao_gia || task.link_excel_mua_hang" style="display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 6px; padding-top: 6px; border-top: 1px dotted rgba(255,255,255,0.2);">
                           <template v-if="task.img_save">
-                            <a v-for="(link, i) in task.img_save.split('\n').filter(Boolean)" :key="'a-img'+i" :href="link" target="_blank" @click.stop style="width: 24px; height: 24px; border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: block;" :title="`Ảnh ${i + 1}`">
+                            <a v-for="(link, i) in task.img_save.split('\n').filter(Boolean)" :key="'a-img'+i" href="#" @click.prevent.stop="selectedImage = link" style="width: 24px; height: 24px; border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: block;" :title="`Ảnh ${i + 1}`">
                               <img :src="link" style="width: 100%; height: 100%; object-fit: cover;" />
                             </a>
                           </template>
@@ -1456,6 +1461,15 @@
         </div>
       </div>
     </div>
+    <!-- Image Preview Modal -->
+    <div v-if="selectedImage" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; z-index: 999999; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);" @click="selectedImage = null">
+      <div style="position: relative; max-width: 90vw; max-height: 90vh; display: flex; justify-content: center; align-items: center;" @click.stop>
+        <button @click="selectedImage = null" style="position: absolute; top: -40px; right: 0; background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.4)'; this.style.transform='scale(1.1)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='scale(1)'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <img :src="selectedImage" style="max-width: 100%; max-height: 90vh; border-radius: 8px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); object-fit: contain;" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -1466,6 +1480,7 @@ import CustomSelect from './CustomSelect.vue'
 
 const isMobile = ref(window.innerWidth <= 768)
 const onResize = () => { isMobile.value = window.innerWidth <= 768 }
+const selectedImage = ref(null)
 
 // Custom Alert System
 const customAlertState = ref({ isOpen: false, message: '', type: 'info' })
@@ -2237,7 +2252,7 @@ const handleImgUpload = async (e) => {
   const files = e.target.files
   if (!files || files.length === 0) return
   
-  isUploadingFiles.value = true
+  isUploadingFiles.value = 'img'
   try {
     for (const file of files) {
       const reader = new FileReader()
@@ -2269,7 +2284,7 @@ const handleExcelUpload = async (e, field) => {
   const files = e.target.files
   if (!files || files.length === 0) return
   
-  isUploadingFiles.value = true
+  isUploadingFiles.value = field === 'link_excel_bao_gia' ? 'bg' : 'mh'
   try {
     for (const file of files) {
       const fd = new FormData()
@@ -3975,7 +3990,7 @@ button {
 .elite-modal {
   background: white;
   width: calc(100% - 2rem);
-  max-width: 550px;
+  max-width: 680px;
   max-height: 95vh;
   overflow-y: auto;
   border-radius: 24px;
@@ -4261,15 +4276,17 @@ button {
 }
 
 .toggle-btn.active-success {
-  background: white;
-  color: #10b981;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+  background: #10b981 !important;
+  color: white !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
 .toggle-btn.active-warning {
-  background: white;
-  color: #f59e0b;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+  background: #f59e0b !important;
+  color: white !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
 }
 
 /* Modal Actions */
@@ -5028,6 +5045,7 @@ button {
     border-radius: 8px;
   }
   .mobile-action-btn.excel {
+    order: -1;
     background: linear-gradient(135deg, #10b981, #059669);
     color: white;
     box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.3);
@@ -5044,7 +5062,8 @@ button {
     transform: scale(0.96);
   }
   .mobile-action-btn.add {
-    flex: 2;
+    order: 2;
+    flex-basis: 100%;
     flex-direction: row;
     gap: 0.5rem;
     padding: 0.6rem 1rem;
@@ -5052,7 +5071,7 @@ button {
     background: linear-gradient(135deg, #3b82f6, #1d4ed8);
     color: white;
     box-shadow: 0 4px 15px -2px rgba(37, 99, 235, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3);
-    border-radius: 9999px;
+    border-radius: 14px;
   }
   .mobile-action-btn.add:active {
     transform: scale(0.96);
@@ -5849,11 +5868,12 @@ button {
 }
 .tl-note-content span { flex: 1; }
 .tl-note-icon {
-  width: 18px; height: 18px; min-width: 18px;
-  border-radius: 5px;
-  background: rgba(244,63,94,0.12);
+  height: 18px; padding: 0 4px;
+  border-radius: 4px;
+  background: rgba(244,63,94,0.15);
   display: flex; align-items: center; justify-content: center;
-  color: #e11d48; flex-shrink: 0;
+  color: #f87171 !important; flex-shrink: 0;
+  font-size: 0.65rem; font-weight: 800; letter-spacing: 0.5px;
 }
 
 /* Actions */
@@ -6815,6 +6835,72 @@ button {
   box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.4) !important;
 }
 
+/* Modal Dark Mode Theme (Chiều) */
+.elite-modal.dark-mode-modal {
+  background: #0f172a !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
+}
+.elite-modal.dark-mode-modal .elite-modal-title h2,
+.elite-modal.dark-mode-modal label,
+.elite-modal.dark-mode-modal .elite-form-group label,
+.elite-modal.dark-mode-modal p {
+  color: #f8fafc !important;
+}
+.elite-modal.dark-mode-modal .elite-input,
+.elite-modal.dark-mode-modal .elite-select,
+.elite-modal.dark-mode-modal .elite-textarea,
+.elite-modal.dark-mode-modal .elite-select-mini {
+  background: rgba(15, 23, 42, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f8fafc !important;
+}
+.elite-modal.dark-mode-modal .elite-input:focus,
+.elite-modal.dark-mode-modal .elite-select:focus,
+.elite-modal.dark-mode-modal .elite-textarea:focus {
+  border-color: #a855f7 !important;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15) !important;
+}
+.elite-modal.dark-mode-modal .elite-btn-save {
+  background: linear-gradient(135deg, #a855f7, #7e22ce) !important;
+  box-shadow: 0 4px 15px -3px rgba(168, 85, 247, 0.5) !important;
+}
+.elite-modal.dark-mode-modal .elite-btn-save:hover {
+  background: linear-gradient(135deg, #9333ea, #6b21a8) !important;
+}
+.elite-modal.dark-mode-modal .upload-zone {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+.elite-modal.dark-mode-modal .upload-zone:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: #a855f7 !important;
+}
+.elite-modal.dark-mode-modal .elite-modal-title svg {
+  color: #a855f7 !important;
+}
+.elite-modal.dark-mode-modal .elite-modal-header {
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  background: rgba(15, 23, 42, 0.4) !important;
+}
+
+.elite-modal.dark-mode-modal .elite-btn-cancel {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #cbd5e1 !important;
+}
+.elite-modal.dark-mode-modal .elite-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #f8fafc !important;
+}
+.elite-modal.dark-mode-modal .elite-btn-close {
+  color: #94a3b8 !important;
+}
+.elite-modal.dark-mode-modal .elite-btn-close:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #f8fafc !important;
+}
+
 .elite-modal .elite-modal-title h2,
 .elite-modal label,
 .elite-modal .elite-form-group label,
@@ -6927,8 +7013,13 @@ button {
   border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-.tl-stt, .tl-date, .tl-time, .tl-thu-period, .tl-note-content, .elite-form-group label {
+.tl-stt, .tl-date, .tl-time, .tl-thu-period, .elite-form-group label {
   color: #cbd5e1 !important;
+}
+
+.tl-note-content {
+  color: #f87171 !important; /* Bright Red */
+  font-weight: 600 !important;
 }
 
 .tl-circle {
