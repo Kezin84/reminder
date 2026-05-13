@@ -7305,14 +7305,21 @@ span[style*="color: #334155"] {
   100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); border-color: rgba(255, 255, 255, 0.05); }
 }
 
+@keyframes dropRadiate {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8); outline: 0px solid rgba(16, 185, 129, 0.8); outline-offset: 0px; }
+  50% { transform: scale(1.03); box-shadow: 0 0 0 20px rgba(16, 185, 129, 0); outline: 15px solid rgba(16, 185, 129, 0); outline-offset: 15px; }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); outline: 0px solid rgba(16, 185, 129, 0); outline-offset: 0px; }
+}
+
 .dropped-success {
-  animation: drop-epic-success 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   z-index: 50 !important;
   position: relative;
 }
 
 .dropped-success .tl-rect {
-  animation: drop-glow 0.8s ease-out forwards;
+  animation: dropRadiate 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  border-color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.15) !important;
 }
 
 .empty-add-btn-simple {
