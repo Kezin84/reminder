@@ -6745,7 +6745,9 @@ button {
     width: 100vw !important;
     max-width: 100vw !important;
     height: 100vh !important;
+    height: 100dvh !important;
     max-height: 100vh !important;
+    max-height: 100dvh !important;
     border-radius: 0 !important;
     margin: 0 !important;
     animation: slideRightMobile 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
@@ -6760,6 +6762,7 @@ button {
   }
   .elite-modal-body {
     padding: 0.8rem 1.25rem 1.25rem;
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 40px));
     gap: 0.8rem;
   }
   .elite-form-row {
