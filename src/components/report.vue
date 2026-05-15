@@ -225,13 +225,26 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line></svg>
           <h3>DANH SÁCH BÁO CÁO</h3>
         </div>
-        <div class="toolbar-right" style="margin-left: 1rem;">
+        <div class="toolbar-right" style="margin-left: 1rem; display: flex; align-items: center; gap: 0.75rem;">
           <span class="record-badge">{{ filteredReports.length }} việc</span>
         </div>
       </div>
+      <!-- View Mode Toggle Row -->
+      <div v-if="!isMobile" class="view-mode-row">
+        <div class="view-mode-tabs">
+          <button type="button" :class="{ 'active-green': desktopViewMode === 'detail' }" @click="desktopViewMode = 'detail'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            Chi tiết
+          </button>
+          <button type="button" :class="{ 'active-blue': desktopViewMode === 'daily' }" @click="desktopViewMode = 'daily'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            Theo ngày
+          </button>
+        </div>
+      </div>
 
-      <!-- Kanban Board: chỉ hiện trên desktop -->
-      <div v-if="!isMobile" class="kanban-board">
+      <!-- Kanban Board: chỉ hiện trên desktop khi mode = detail -->
+      <div v-if="!isMobile && desktopViewMode === 'detail'" class="kanban-board">
         <div v-for="col in kanbanColumns" :key="col.status" 
              class="kanban-column"
              :class="[
@@ -323,15 +336,15 @@
 
                       <div class="tl-attachments" v-if="report.link_excel_bao_gia || report.link_excel_mua_hang" style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; padding: 0 0.5rem;">
                         <div v-if="report.link_excel_bao_gia" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
-                          <a v-for="(link, i) in report.link_excel_bao_gia.split('\n').filter(Boolean)" :key="'bg'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))"  class="tl-attach-badge" style="background: rgba(16,185,129,0.1); color: #34d399; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(16,185,129,0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(16,185,129,0.2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(16,185,129,0.1)'; this.style.transform='none'" :title="getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá')">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                            {{ getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá') }}
+                          <a v-for="(link, i) in report.link_excel_bao_gia.split('\n').filter(Boolean)" :key="'bg'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))"  class="file-attach-badge" :title="getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá')">
+                            <span v-html="getFileIconSvg(getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))" style="display:flex;align-items:center;"></span>
+                            <span class="file-attach-text">{{ getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá') }}</span>
                           </a>
                         </div>
                         <div v-if="report.link_excel_mua_hang" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
-                          <a v-for="(link, i) in report.link_excel_mua_hang.split('\n').filter(Boolean)" :key="'mh'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng'))"  class="tl-attach-badge" style="background: rgba(139,92,246,0.1); color: #a78bfa; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(139,92,246,0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(139,92,246,0.1)'; this.style.transform='none'" :title="getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng')">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                            {{ getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng') }}
+                          <a v-for="(link, i) in report.link_excel_mua_hang.split('\n').filter(Boolean)" :key="'mh'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng'))"  class="file-attach-badge" :title="getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng')">
+                            <span v-html="getFileIconSvg(getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng'))" style="display:flex;align-items:center;"></span>
+                            <span class="file-attach-text">{{ getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng') }}</span>
                           </a>
                         </div>
                       </div>
@@ -428,15 +441,15 @@
 
                       <div class="tl-attachments" v-if="report.link_excel_bao_gia || report.link_excel_mua_hang" style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; padding: 0 0.5rem;">
                         <div v-if="report.link_excel_bao_gia" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
-                          <a v-for="(link, i) in report.link_excel_bao_gia.split('\n').filter(Boolean)" :key="'bg'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))"  class="tl-attach-badge" style="background: rgba(16,185,129,0.1); color: #34d399; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(16,185,129,0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(16,185,129,0.2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(16,185,129,0.1)'; this.style.transform='none'" :title="getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá')">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                            {{ getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá') }}
+                          <a v-for="(link, i) in report.link_excel_bao_gia.split('\n').filter(Boolean)" :key="'bg'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))"  class="file-attach-badge" :title="getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá')">
+                            <span v-html="getFileIconSvg(getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))" style="display:flex;align-items:center;"></span>
+                            <span class="file-attach-text">{{ getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá') }}</span>
                           </a>
                         </div>
                         <div v-if="report.link_excel_mua_hang" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
-                          <a v-for="(link, i) in report.link_excel_mua_hang.split('\n').filter(Boolean)" :key="'mh'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng'))"  class="tl-attach-badge" style="background: rgba(139,92,246,0.1); color: #a78bfa; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(139,92,246,0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(139,92,246,0.1)'; this.style.transform='none'" :title="getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng')">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                            {{ getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng') }}
+                          <a v-for="(link, i) in report.link_excel_mua_hang.split('\n').filter(Boolean)" :key="'mh'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng'))"  class="file-attach-badge" :title="getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng')">
+                            <span v-html="getFileIconSvg(getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng'))" style="display:flex;align-items:center;"></span>
+                            <span class="file-attach-text">{{ getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng') }}</span>
                           </a>
                         </div>
                       </div>
@@ -459,8 +472,219 @@
         </div>
       </div>
 
+      <!-- Daily View: 1 cột theo từng ngày -->
+      <div v-if="!isMobile && desktopViewMode === 'daily'" class="daily-view-container">
+        <div v-if="loading" class="loading-state" style="padding: 3rem;"><div class="spinner"></div></div>
+        <div v-else-if="dailyColumns.length === 0" class="empty-state" style="padding: 4rem 2rem; text-align: center;">
+          <p style="opacity: 0.5; font-size: 0.9rem;">Không có dữ liệu trong khoảng thời gian này.</p>
+        </div>
+        <div v-else v-for="day in dailyColumns" :key="day.dateKey" class="daily-day-block">
+          <!-- Day Header Badge -->
+          <div class="daily-day-header">
+            <div class="daily-day-badge">
+              <span class="daily-badge-thu">{{ day.thuLabel }}</span>
+              <span class="daily-badge-date">{{ day.dateLabel }}</span>
+            </div>
+            <span class="daily-count-badge">{{ day.morning.length + day.afternoon.length }} việc</span>
+          </div>
+          <!-- Two Period Sections -->
+          <div class="daily-periods">
+            <!-- Buổi Sáng -->
+            <div class="daily-period-section daily-period-morning"
+                 :class="{ 'kb-col-drag-over': dragOverColumn === 'daily-' + day.dateKey + '-Sáng' }"
+                 @dragover.prevent
+                 @dragenter.prevent="onDragEnterColumn('daily-' + day.dateKey, 'Sáng')"
+                 @dragleave="onDragLeaveColumn($event, $el)"
+                 @drop="onDropReport($event, null, 'Sáng')">
+              <div class="daily-period-label-v2">BUỔI SÁNG</div>
+              <div v-if="day.morning.length === 0" class="daily-empty-slot">
+                <div class="empty-add-btn-simple" @click="openAddModalForPeriod('Sáng')" title="Thêm công việc buổi sáng">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </div>
+              </div>
+              <div v-else class="daily-task-list">
+                <div v-for="(report, index) in day.morning" :key="'dm-'+report.id"
+                     class="report-card-timeline" :class="{ 'highlight-card': report.id === highlightedReportId, 'deleting-row': deletingIds.includes(report.id), 'dropped-success': report.id === droppedReportId }"
+                     :style="{ animationDelay: (index * 0.07) + 's' }"
+                     draggable="true"
+                     @dragstart="onDragStartReport($event, report)"
+                     @dragend="onDragEndReport"
+                     @click="openEditModal(report)">
+                  <div class="tl-orb-wrap">
+                    <div class="tl-orb-ring tl-ring--morning"></div>
+                    <div class="tl-circle tl-circle--morning">
+                      <div class="tl-circle-inner">
+                        <span class="tl-thu-period">{{ formatDisplayTime(report.thoi_gian).thu }} <span class="tl-period is-morning">{{ formatDisplayTime(report.thoi_gian).period }}</span></span>
+                        <span class="tl-date">{{ formatDisplayTime(report.thoi_gian).date }}</span>
+                        <span class="tl-time">{{ formatDisplayTime(report.thoi_gian).time }}</span>
+                        <span class="tl-stt">#{{ index + 1 }}</span>
+                      </div>
+                    </div>
+                    <div class="tl-orbit-trail"></div>
+                  </div>
+                  <div class="tl-connector tl-conn--morning">
+                    <div class="tl-conn-dot"></div>
+                    <div class="tl-beam-particle tl-beam--morning"></div>
+                  </div>
+                  <div class="tl-rect" :class="[report.trang_thai === 'Hoàn thành' ? 'tl-rect--done' : 'tl-rect--pending', 'tl-border--morning']">
+                    <div class="tl-shimmer-border" :class="report.trang_thai === 'Hoàn thành' ? 'tl-shimmer--done' : 'tl-shimmer--pending'"></div>
+                    <div class="tl-rect-header">
+                      <div class="tl-rect-tags">
+                        <span class="tl-badge-cat" :class="getCategoryClass(report.phan_loai)">{{ report.phan_loai }}</span>
+                        <div class="tl-status-chip" :class="getStatusPillClass(report.trang_thai)">
+                          <svg v-if="report.trang_thai === 'Hoàn thành'" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          <svg v-else xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                          {{ report.trang_thai }}
+                        </div>
+                        <span v-if="report.tag" v-for="t in splitTags(report.tag)" :key="t" v-show="t !== 'BÌNH THƯỜNG'" class="tl-badge-tag" :class="getTagClass(t)">{{ t }}</span>
+                      </div>
+                    </div>
+                    <div v-if="report.img_save" style="display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0.5rem 0.5rem 0 0.5rem;">
+                      <a v-for="(link, i) in report.img_save.split('\n').filter(Boolean)" :key="'img'+i" href="#" @click.prevent.stop="selectedImage = link" style="width: 45px; height: 45px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: block; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                         <img :src="link" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" />
+                      </a>
+                    </div>
+                    <div class="tl-rect-body">
+                      <div class="tl-body-text">{{ report.noi_dung }}</div>
+                    </div>
+                    <div class="tl-rect-note" v-if="report.ghi_chu">
+                      <div class="tl-note-accent"></div>
+                      <div class="tl-note-content">
+                        <div class="tl-note-icon">NOTE</div>
+                        <span>{{ report.ghi_chu }}</span>
+                      </div>
+                    </div>
+                    
+                    <div class="tl-attachments" v-if="report.link_excel_bao_gia || report.link_excel_mua_hang" style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; padding: 0 0.5rem;">
+                      <div v-if="report.link_excel_bao_gia" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
+                        <a v-for="(link, i) in report.link_excel_bao_gia.split('\n').filter(Boolean)" :key="'bg'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))"  class="file-attach-badge" :title="getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá')">
+                          <span v-html="getFileIconSvg(getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))" style="display:flex;align-items:center;"></span>
+                          <span class="file-attach-text">{{ getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá') }}</span>
+                        </a>
+                      </div>
+                      <div v-if="report.link_excel_mua_hang" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
+                        <a v-for="(link, i) in report.link_excel_mua_hang.split('\n').filter(Boolean)" :key="'mh'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng'))"  class="file-attach-badge" :title="getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng')">
+                          <span v-html="getFileIconSvg(getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng'))" style="display:flex;align-items:center;"></span>
+                          <span class="file-attach-text">{{ getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng') }}</span>
+                        </a>
+                      </div>
+                    </div>
+
+                    <div class="tl-rect-actions">
+                      <button class="tl-action-btn tl-action-delete" @click.stop="confirmDelete(report.id)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        Xoá
+                      </button>
+                      <button v-if="report.trang_thai !== 'Hoàn thành'" class="tl-action-btn tl-action-done" @click.stop="markAsCompleted(report)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Xong
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Buổi Chiều -->
+            <div class="daily-period-section daily-period-afternoon"
+                 :class="{ 'kb-col-drag-over': dragOverColumn === 'daily-' + day.dateKey + '-Chiều' }"
+                 @dragover.prevent
+                 @dragenter.prevent="onDragEnterColumn('daily-' + day.dateKey, 'Chiều')"
+                 @dragleave="onDragLeaveColumn($event, $el)"
+                 @drop="onDropReport($event, null, 'Chiều')">
+              <div class="daily-period-label-v2">BUỔI CHIỀU</div>
+              <div v-if="day.afternoon.length === 0" class="daily-empty-slot">
+                <div class="empty-add-btn-simple" @click="openAddModalForPeriod('Chiều')" title="Thêm công việc buổi chiều">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </div>
+              </div>
+              <div v-else class="daily-task-list">
+                <div v-for="(report, index) in day.afternoon" :key="'da-'+report.id"
+                     class="report-card-timeline" :class="{ 'highlight-card': report.id === highlightedReportId, 'deleting-row': deletingIds.includes(report.id), 'dropped-success': report.id === droppedReportId }"
+                     :style="{ animationDelay: (index * 0.07) + 's' }"
+                     draggable="true"
+                     @dragstart="onDragStartReport($event, report)"
+                     @dragend="onDragEndReport"
+                     @click="openEditModal(report)">
+                  <div class="tl-orb-wrap">
+                    <div class="tl-orb-ring tl-ring--afternoon"></div>
+                    <div class="tl-circle tl-circle--afternoon">
+                      <div class="tl-circle-inner">
+                        <span class="tl-thu-period">{{ formatDisplayTime(report.thoi_gian).thu }} <span class="tl-period is-afternoon">{{ formatDisplayTime(report.thoi_gian).period }}</span></span>
+                        <span class="tl-date">{{ formatDisplayTime(report.thoi_gian).date }}</span>
+                        <span class="tl-time">{{ formatDisplayTime(report.thoi_gian).time }}</span>
+                        <span class="tl-stt">#{{ index + 1 }}</span>
+                      </div>
+                    </div>
+                    <div class="tl-orbit-trail"></div>
+                  </div>
+                  <div class="tl-connector tl-conn--afternoon">
+                    <div class="tl-conn-dot"></div>
+                    <div class="tl-beam-particle tl-beam--afternoon"></div>
+                  </div>
+                  <div class="tl-rect" :class="[report.trang_thai === 'Hoàn thành' ? 'tl-rect--done' : 'tl-rect--pending', 'tl-border--afternoon']">
+                    <div class="tl-shimmer-border" :class="report.trang_thai === 'Hoàn thành' ? 'tl-shimmer--done' : 'tl-shimmer--pending'"></div>
+                    <div class="tl-rect-header">
+                      <div class="tl-rect-tags">
+                        <span class="tl-badge-cat" :class="getCategoryClass(report.phan_loai)">{{ report.phan_loai }}</span>
+                        <div class="tl-status-chip" :class="getStatusPillClass(report.trang_thai)">
+                          <svg v-if="report.trang_thai === 'Hoàn thành'" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          <svg v-else xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                          {{ report.trang_thai }}
+                        </div>
+                        <span v-if="report.tag" v-for="t in splitTags(report.tag)" :key="t" v-show="t !== 'BÌNH THƯỜNG'" class="tl-badge-tag" :class="getTagClass(t)">{{ t }}</span>
+                      </div>
+                    </div>
+                    <div v-if="report.img_save" style="display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0.5rem 0.5rem 0 0.5rem;">
+                      <a v-for="(link, i) in report.img_save.split('\n').filter(Boolean)" :key="'img'+i" href="#" @click.prevent.stop="selectedImage = link" style="width: 45px; height: 45px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); display: block; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                         <img :src="link" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" />
+                      </a>
+                    </div>
+                    <div class="tl-rect-body">
+                      <div class="tl-body-text">{{ report.noi_dung }}</div>
+                    </div>
+                    <div class="tl-rect-note" v-if="report.ghi_chu">
+                      <div class="tl-note-accent"></div>
+                      <div class="tl-note-content">
+                        <div class="tl-note-icon">NOTE</div>
+                        <span>{{ report.ghi_chu }}</span>
+                      </div>
+                    </div>
+                    
+                    <div class="tl-attachments" v-if="report.link_excel_bao_gia || report.link_excel_mua_hang" style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; padding: 0 0.5rem;">
+                      <div v-if="report.link_excel_bao_gia" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
+                        <a v-for="(link, i) in report.link_excel_bao_gia.split('\n').filter(Boolean)" :key="'bg'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))"  class="file-attach-badge" :title="getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá')">
+                          <span v-html="getFileIconSvg(getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))" style="display:flex;align-items:center;"></span>
+                          <span class="file-attach-text">{{ getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá') }}</span>
+                        </a>
+                      </div>
+                      <div v-if="report.link_excel_mua_hang" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
+                        <a v-for="(link, i) in report.link_excel_mua_hang.split('\n').filter(Boolean)" :key="'mh'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng'))"  class="file-attach-badge" :title="getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng')">
+                          <span v-html="getFileIconSvg(getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng'))" style="display:flex;align-items:center;"></span>
+                          <span class="file-attach-text">{{ getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng') }}</span>
+                        </a>
+                      </div>
+                    </div>
+
+                    <div class="tl-rect-actions">
+                      <button class="tl-action-btn tl-action-delete" @click.stop="confirmDelete(report.id)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        Xoá
+                      </button>
+                      <button v-if="report.trang_thai !== 'Hoàn thành'" class="tl-action-btn tl-action-done" @click.stop="markAsCompleted(report)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Xong
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Mobile: danh sách đơn, không phân cột -->
-      <div v-else class="mobile-card-list">
+      <div v-if="isMobile" class="mobile-card-list">
         <div v-if="loading" class="loading-state">
           <div class="spinner"></div>
           <p>Đang tải dữ liệu báo cáo...</p>
@@ -529,15 +753,15 @@
 
             <div class="tl-attachments" v-if="report.link_excel_bao_gia || report.link_excel_mua_hang" style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; padding: 0 0.5rem;">
               <div v-if="report.link_excel_bao_gia" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
-                <a v-for="(link, i) in report.link_excel_bao_gia.split('\n').filter(Boolean)" :key="'bg'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))"  class="tl-attach-badge" style="background: rgba(16,185,129,0.1); color: #34d399; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(16,185,129,0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(16,185,129,0.2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(16,185,129,0.1)'; this.style.transform='none'" :title="getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá')">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                  {{ getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá') }}
+                <a v-for="(link, i) in report.link_excel_bao_gia.split('\n').filter(Boolean)" :key="'bg'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))"  class="file-attach-badge" :title="getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá')">
+                  <span v-html="getFileIconSvg(getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá'))" style="display:flex;align-items:center;"></span>
+                  <span class="file-attach-text">{{ getExcelFileName(report, 'link_excel_bao_gia', i, 'Báo giá') }}</span>
                 </a>
               </div>
               <div v-if="report.link_excel_mua_hang" style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
-                <a v-for="(link, i) in report.link_excel_mua_hang.split('\n').filter(Boolean)" :key="'mh'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng'))"  class="tl-attach-badge" style="background: rgba(139,92,246,0.1); color: #a78bfa; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(139,92,246,0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.2)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(139,92,246,0.1)'; this.style.transform='none'" :title="getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng')">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                  {{ getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng') }}
+                <a v-for="(link, i) in report.link_excel_mua_hang.split('\n').filter(Boolean)" :key="'mh'+i" href="#" @click.prevent.stop="downloadExcelFile(link, getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng'))"  class="file-attach-badge" :title="getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng')">
+                  <span v-html="getFileIconSvg(getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng'))" style="display:flex;align-items:center;"></span>
+                  <span class="file-attach-text">{{ getExcelFileName(report, 'link_excel_mua_hang', i, 'Mua hàng') }}</span>
                 </a>
               </div>
             </div>
@@ -1800,6 +2024,35 @@ const kanbanColumns = computed(() => [
   }
 ]);
 
+// View mode: 'detail' (kanban) or 'daily' (single column by day)
+const desktopViewMode = ref('detail');
+
+const dailyColumns = computed(() => {
+  const grouped = {};
+  filteredReports.value.forEach(r => {
+    const parsed = parseDateFromReport(r.thoi_gian);
+    if (!parsed) return;
+    const dateKey = `${parsed.getFullYear()}-${String(parsed.getMonth()+1).padStart(2,'0')}-${String(parsed.getDate()).padStart(2,'0')}`;
+    if (!grouped[dateKey]) {
+      const display = formatDisplayTime(r.thoi_gian);
+      grouped[dateKey] = {
+        dateKey,
+        dateObj: new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate()),
+        dateLabel: display.date,
+        thuLabel: display.thu,
+        morning: [],
+        afternoon: []
+      };
+    }
+    const ft = formatDisplayTime(r.thoi_gian);
+    if (ft.period === 'Sáng') grouped[dateKey].morning.push(r);
+    else grouped[dateKey].afternoon.push(r);
+  });
+  const arr = Object.values(grouped);
+  arr.sort((a, b) => filters.value.sortOrder === 'desc' ? b.dateObj - a.dateObj : a.dateObj - b.dateObj);
+  return arr;
+});
+
 const draggedReportId = ref(null);
 const droppedReportId = ref(null);
 const dragOverColumn = ref(null); // track cột đang hover khi kéo
@@ -1830,8 +2083,10 @@ const onDropReport = async (e, newStatus, newPeriod) => {
   if (!id) return;
   const report = reports.value.find(r => r.id === id);
   if (report) {
+    // Nếu newStatus null (daily view), giữ nguyên trạng thái hiện tại
+    const effectiveStatus = newStatus !== null && newStatus !== undefined ? newStatus : report.trang_thai;
     const currentPeriod = formatDisplayTime(report.thoi_gian).period;
-    if (report.trang_thai !== newStatus || currentPeriod !== newPeriod) {
+    if (report.trang_thai !== effectiveStatus || currentPeriod !== newPeriod) {
       if (API_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
          alert("Tính năng này cần cấu hình API_URL");
          return;
@@ -1839,7 +2094,7 @@ const onDropReport = async (e, newStatus, newPeriod) => {
       const originalStatus = report.trang_thai;
       const originalTime = report.thoi_gian;
       
-      report.trang_thai = newStatus;
+      report.trang_thai = effectiveStatus;
 
       droppedReportId.value = report.id;
       setTimeout(() => {
@@ -2618,6 +2873,28 @@ const getExcelFileName = (dataObj, field, index, prefix) => {
     if (names[index]) return names[index];
   }
   return `${prefix} ${index + 1}`;
+}
+
+const getFileIconSvg = (fileName) => {
+  const ext = fileName ? fileName.split('.').pop().toLowerCase() : '';
+  const isExcel = ['xls', 'xlsx', 'csv'].includes(ext) || (fileName || '').toLowerCase().includes('excel') || (fileName || '').toLowerCase().includes('báo giá') || (fileName || '').toLowerCase().includes('mua hàng');
+  const isWord = ['doc', 'docx'].includes(ext) || (fileName || '').toLowerCase().includes('word');
+  const isPdf = ['pdf'].includes(ext);
+  const isImage = ['png', 'jpg', 'jpeg', 'gif'].includes(ext);
+  const isArchive = ['zip', 'rar', '7z'].includes(ext);
+
+  if (isExcel) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#10b981"/><path d="M14 2v6h6" fill="#047857" opacity="0.3"/><path d="M9 12l2 3-2 3h2l1-1.5 1 1.5h2l-2-3 2-3h-2l-1 1.5-1-1.5H9z" fill="#ffffff"/></svg>`;
+  } else if (isWord) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#3b82f6"/><path d="M14 2v6h6" fill="#1d4ed8" opacity="0.3"/><path d="M8 12l1 6 1.5-4 1.5 4 1-6h-1.5l-.5 4-.5-4h-1.5l-.5 4-.5-4H8z" fill="#ffffff"/></svg>`;
+  } else if (isPdf) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#ef4444"/><path d="M14 2v6h6" fill="#b91c1c" opacity="0.3"/><path d="M8.5 16v-4h2a1.5 1.5 0 0 1 0 3h-1v1h-1zm1-2h1a.5.5 0 0 0 0-1h-1v1zm3 2v-4h2a1.5 1.5 0 0 1 0 3h-1v1h-1zm1-1.5h1a.5.5 0 0 0 0-1h-1v1zm2 1.5v-4h2.5v1h-1.5v.5h1v1h-1v1.5h-1z" fill="#ffffff"/></svg>`;
+  } else if (isImage) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#8b5cf6"/><path d="M14 2v6h6" fill="#6d28d9" opacity="0.3"/><circle cx="10" cy="12" r="1.5" fill="#ffffff"/><path d="M7 18l3.5-4.5 2 2.5 3-4L17 18H7z" fill="#ffffff"/></svg>`;
+  } else if (isArchive) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#f59e0b"/><path d="M14 2v6h6" fill="#d97706" opacity="0.3"/><path d="M10 12h4v1h-4v-1zm0 2h4v1h-4v-1zm0 2h4v1h-4v-1z" fill="#ffffff"/></svg>`;
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#94a3b8"/><path d="M14 2v6h6" fill="#64748b" opacity="0.3"/></svg>`;
 }
 
 const getStatusPillClass = (status) => {
@@ -3536,6 +3813,160 @@ onUnmounted(() => {
    Dựa trên CSS thuần, với Micro-animations
 ========================================= */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+/* ============ VIEW MODE TABS ============ */
+.view-mode-row {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0;
+  margin-bottom: 0.25rem;
+}
+.view-mode-tabs {
+  display: flex;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  padding: 4px;
+  gap: 4px;
+}
+.view-mode-tabs button {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: transparent;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+.view-mode-tabs button:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; }
+.view-mode-tabs button.active-blue {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+}
+.view-mode-tabs button.active-green {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+}
+
+/* ============ DAILY VIEW ============ */
+.daily-view-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.daily-day-block {
+  position: relative;
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 34, 0.4) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px -2px rgba(0,0,0,0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: dailyFadeIn 0.4s ease forwards;
+}
+.daily-day-block:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -4px rgba(0,0,0,0.25);
+}
+.daily-day-block::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  z-index: 2;
+}
+@keyframes dailyFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.daily-day-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 2px dashed rgba(59,130,246,0.15);
+  gap: 0.75rem;
+}
+.daily-day-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.daily-badge-thu {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  padding: 0.3rem 0.75rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.35);
+}
+.daily-badge-date {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #ffffff;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  padding: 0.35rem 1.2rem;
+  border-radius: 10px;
+  border: 1.5px solid rgba(251, 191, 36, 0.4);
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.daily-count-badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+.daily-periods {
+  display: flex;
+  flex-direction: column;
+}
+.daily-period-section {
+  padding: 1rem 1.25rem 1.25rem;
+}
+.daily-period-morning {
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.daily-period-label-v2 {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+.daily-empty-slot {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  font-style: italic;
+  padding: 0.75rem 0;
+  text-align: center;
+}
+.daily-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 
 /* Dragging Effects for Move Tasks Modal */
 .dragging-task {
@@ -5626,6 +6057,35 @@ button {
   animation: tl-traceGlow 2.5s linear infinite;
 }
 
+/* ============ FILE ATTACHMENT BADGE ============ */
+.file-attach-badge {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.file-attach-badge:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.file-attach-text {
+  color: #ffffff;
+  word-break: break-word;
+  white-space: normal;
+  flex: 1;
+}
+
 /* ::before đi lên (clockwise: left → top → right) */
 .tl-spread--morning::before,
 .tl-spread--afternoon::before {
@@ -6457,13 +6917,14 @@ button {
   right: 1.75rem;
 }
 .record-badge {
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-  color: #065f46;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #ffffff;
   padding: 0.4rem 1rem;
   border-radius: 20px;
   font-size: 0.85rem;
-  font-weight: 700;
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  font-weight: 800;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
   letter-spacing: 0.02em;
 }
 .elite-table-scroll { overflow-x: auto; }
@@ -6982,14 +7443,18 @@ button {
 }
 
 .tl-rect--pending .tl-action-done {
-  background: rgba(16, 185, 129, 0.15) !important;
-  color: #10b981 !important;
-  border: 1px solid rgba(16, 185, 129, 0.3) !important;
-  box-shadow: none !important;
+  background: linear-gradient(135deg, #059669, #10b981) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  border: none !important;
+  box-shadow: 0 3px 12px -2px rgba(16, 185, 129, 0.5) !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .tl-rect--pending .tl-action-done:hover {
-  background: rgba(16, 185, 129, 0.25) !important;
+  background: linear-gradient(135deg, #047857, #059669) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px -2px rgba(16, 185, 129, 0.6) !important;
 }
 
 .kanban-column {
@@ -7007,7 +7472,7 @@ button {
   border-color: rgba(16, 185, 129, 0.15) !important;
 }
 
-.kanban-badge, .record-badge {
+.kanban-badge {
   background: rgba(255, 255, 255, 0.1) !important;
   color: #cbd5e1 !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
@@ -7053,10 +7518,20 @@ button {
   color: #ef4444 !important;
 }
 
-/* Nút xong card done: giữ nguyên phong cách */
+/* Nút xong card done: CTA xanh lá */
+.tl-action-done {
+  background: linear-gradient(135deg, #059669, #10b981) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  border: none !important;
+  box-shadow: 0 3px 12px -2px rgba(16, 185, 129, 0.5) !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
 .tl-action-done:hover {
-  background: rgba(16, 185, 129, 0.2) !important;
-  color: #10b981 !important;
+  background: linear-gradient(135deg, #047857, #059669) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px -2px rgba(16, 185, 129, 0.6) !important;
 }
 
 /* Card hoàn thành: viền xanh lá dày, nền trong suốt */
@@ -7340,3 +7815,4 @@ span[style*="color: #334155"] {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 </style>
+
