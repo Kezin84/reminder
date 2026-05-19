@@ -903,7 +903,7 @@
             </div>
           </div>
           
-          <div class="elite-form-row">
+          <div class="elite-form-row" style="flex-direction: column;">
             <div class="elite-form-group">
               <div class="form-group-header">
                 <label>Nội Dung <span class="required">*</span></label>
@@ -928,7 +928,7 @@
                   <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12"></rect></svg>
                 </button>
               </div>
-              <textarea v-model="formData.ghi_chu" placeholder="Các ghi chú bổ sung nếu có..." rows="3" class="elite-input" style="color: #ef4444 !important; font-weight: 700 !important;"></textarea>
+              <textarea v-model="formData.ghi_chu" placeholder="Các ghi chú bổ sung nếu có..." rows="1" class="elite-input" style="color: #ef4444 !important; font-weight: 700 !important;"></textarea>
             </div>
           </div>
 
@@ -6869,6 +6869,13 @@ button {
   outline: none;
   box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.08), 0 2px 8px -2px rgba(16, 185, 129, 0.12);
 }
+
+.elite-select option {
+  background-color: #0f172a; /* Nền xanh đậm */
+  color: #10b981; /* Chữ xanh lá cây */
+  font-weight: 600;
+  padding: 8px;
+}
 .elite-filter-divider {
   height: 1px;
   background: linear-gradient(90deg, transparent 0%, #e2e8f0 30%, #e2e8f0 70%, transparent 100%);
@@ -7257,8 +7264,34 @@ button {
     margin-bottom: 0;
   }
   .elite-time-picker {
-    padding: 0.6rem 0.75rem;
-    gap: 0.6rem;
+    padding: 0.4rem 0.25rem;
+    gap: 0.25rem;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .elite-time-picker::-webkit-scrollbar {
+    display: none;
+  }
+  .elite-time-picker .time-part,
+  .elite-time-picker .date-part {
+    gap: 0.15rem;
+  }
+  .elite-time-picker .elite-select-mini {
+    min-width: unset;
+    padding: 0.2rem 0.1rem;
+    font-size: 0.8rem;
+  }
+  .elite-time-picker .picker-item span {
+    font-size: 0.55rem;
+  }
+  .elite-time-picker .time-sep,
+  .elite-time-picker .date-sep {
+    padding-top: 1rem;
+    margin: 0;
+    font-size: 0.8rem;
   }
   .elite-quick-times {
     margin-bottom: 0.25rem;
